@@ -26,7 +26,7 @@ steps:
 
 This will install and configure LXD and Rockcraft, and then invoke `rockcraft`
 to build a new ROCK, based on a "rockcraft.yaml" file located in the root of
-the workingspace.
+the workspace.
 
 You can also upload the resulting ROCK as a GitHub artifact as follows:
 
@@ -41,7 +41,7 @@ steps:
       path: ${{ steps.rockcraft.outputs.rock }}
 ```
 
-Additionally, the following steps will already have Rockcraft available for
+Additionally, any following steps will already have Rockcraft available for
 direct invocation through the shell.
 
 #### Inputs

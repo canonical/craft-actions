@@ -1,0 +1,47 @@
+name: Test the actions
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  test-action-code:
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
+      with:
+        node-version: 16
+    - name: Install dependencies
+      run: npm install
+    - name: Build .js files
+      run: npm run build
+    - name: Check the formatting
+      run: npm run format-check
+    - name: Lint the code
+      run: npm run lint
+    - name: Run the unit tests
+      run: npm test
+    - name: Try to package code
+      run: npm run pack
+    
+  run-rockcraft-pack-action:
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, ubuntu-20.04, ubuntu-18.04]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build a ROCK
+      uses: ./rockcraft-pack
+      id: rockcraft
+      with:
+        path: tests
+        verbosity: debug
+    - name: Upload ROCK
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-rock_${{ matrix.os }}
+        path: ${{ steps.rockcraft.outputs.rock }}

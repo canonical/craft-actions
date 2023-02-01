@@ -2,13 +2,7 @@
   // Configuration file for RenovateBot: https://docs.renovatebot.com/configuration-options
   extends: ["config:base"],
   labels: ["dependencies"],  // For convenient searching in GitHub
-  pip_requirements: {
-    fileMatch: ["^tox.ini$"]
-  },
-  pip_setup: {
-    fileMatch: ["^pyproject.toml$", "(^|/)setup\\.py$"]
-  },
-   packageRules: [
+  packageRules: [
     {
       // Automerge patches, pin changes and digest changes.
       // Also groups these changes together.
@@ -16,13 +10,6 @@
       matchUpdateTypes: ["patch", "pin", "digest"],
       prPriority: 3, // Patches should go first!
       automerge: true
-    },
-    {
-      // Update all internal packages in one higher-priority PR
-      groupName: "internal packages",
-      matchPackagePrefixes: ["craft-", "snap-"],
-      matchLanguages: ["python"],
-      prPriority: 2
     },
     {
       // GitHub Actions are higher priority to update than most dependencies.
@@ -50,16 +37,6 @@
       matchDepTypes: ["devDependencies"],
       matchUpdateTypes: ["major"],
       prPriority: -3
-    }
-  ],
-  regexManagers: [
-    {
-      // tox.ini can get updates too if we specify for each package.
-      fileMatch: ["tox.ini"],
-      depTypeTemplate: "devDependencies",
-      matchStrings: [
-        "# renovate: datasource=(?<datasource>\S+)\n\s+(?<depName>.*?)(\[[\w]*\])*[=><]=?(?<currentValue>.*?)\n"
-      ]
     }
   ],
   timezone: "Etc/UTC",

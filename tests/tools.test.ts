@@ -166,7 +166,7 @@ test('ensureLXD installs the snap version of LXD if needed', async () => {
     'install',
     'lxd',
     '--channel',
-    '5.9/stable'
+    'latest/stable'
   ])
   expect(execMock).toHaveBeenNthCalledWith(4, 'sudo', ['lxd', 'init', '--auto'])
 })
@@ -249,7 +249,7 @@ test('ensureLXD still calls "lxd init" if LXD is installed', async () => {
     'refresh',
     'lxd',
     '--channel',
-    '5.9/stable'
+    'latest/stable'
   ])
   expect(execMock).toHaveBeenNthCalledWith(4, 'sudo', ['lxd', 'init', '--auto'])
 })

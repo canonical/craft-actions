@@ -86,7 +86,7 @@ export async function ensureLXD(): Promise<void> {
     haveSnapLXD ? 'refresh' : 'install',
     'lxd',
     '--channel',
-    '5.9/stable'
+    'latest/stable'
   ])
 
   core.info('Initialising LXD...')

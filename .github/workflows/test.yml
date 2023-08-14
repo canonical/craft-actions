@@ -30,7 +30,7 @@ jobs:
   run-rockcraft-pack-action:
     strategy:
       matrix:
-        os: [ubuntu-22.04, ubuntu-20.04, ubuntu-18.04]
+        os: [ubuntu-22.04, ubuntu-20.04]
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v3

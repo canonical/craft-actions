@@ -370,7 +370,6 @@ test('ensureLXDNetwork sets up iptables and warns about Docker', async () => {
   )
   expect(execMock).toHaveBeenNthCalledWith(6, 'dpkg', ['-l', 'moby-runc'], {
     ignoreReturnCode: true,
-
     silent: true
   })
   expect(execMock).toHaveBeenNthCalledWith(7, 'sudo', [
@@ -425,7 +424,6 @@ test('ensureLXDNetwork sets up iptables and warns only about installed packages'
   )
   expect(execMock).toHaveBeenNthCalledWith(6, 'dpkg', ['-l', 'moby-runc'], {
     ignoreReturnCode: true,
-
     silent: true
   })
   expect(execMock).toHaveBeenNthCalledWith(7, 'sudo', [

@@ -4133,7 +4133,7 @@ var external_fs_ = __nccwpck_require__(147);
 var external_path_ = __nccwpck_require__(17);
 // EXTERNAL MODULE: external "os"
 var external_os_ = __nccwpck_require__(37);
-;// CONCATENATED MODULE: ./lib/tools.js
+;// CONCATENATED MODULE: ./src/tools.ts
 // -*- mode: javascript; js-indent-level: 2 -*-
 
 
@@ -4178,7 +4178,7 @@ async function ensureLXDNetwork() {
         'moby-runc'
     ];
     const installedPackages = [];
-    const options = { silent: true };
+    const options = { silent: true, ignoreReturnCode: true };
     for (const mobyPackage of mobyPackages) {
         if ((await exec.exec('dpkg', ['-l', mobyPackage], options)) === 0) {
             installedPackages.push(mobyPackage);
@@ -4232,7 +4232,7 @@ async function ensureRockcraft(channel) {
     ]);
 }
 
-;// CONCATENATED MODULE: ./lib/rockcraft-pack.js
+;// CONCATENATED MODULE: ./src/rockcraft-pack.ts
 // -*- mode: javascript; js-indent-level: 2 -*-
 
 
@@ -4286,7 +4286,7 @@ class RockcraftBuilder {
     }
 }
 
-;// CONCATENATED MODULE: ./lib/rockcraft-pack-action.js
+;// CONCATENATED MODULE: ./src/rockcraft-pack-action.ts
 // -*- mode: javascript; js-indent-level: 2 -*-
 
 

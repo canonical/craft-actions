@@ -7,7 +7,7 @@ async function run(): Promise<void> {
   try {
     const projectRoot = core.getInput('path')
     core.info(`Building ROCK in "${projectRoot}"...`)
-    const rockcraftChannel = core.getInput('rockcraft-channel') || 'edge'
+    const rockcraftChannel = core.getInput('rockcraft-channel') || 'stable'
     const rockcraftPackVerbosity = core.getInput('verbosity')
 
     const builder = new RockcraftBuilder({

@@ -14,6 +14,12 @@ inputs:
 
       The default is 'trace'.
     default: 'trace'
+  revision:
+    description: >
+      Pin the snap revision to install.
+
+      If not provided, it defaults to whatever revision is in latest/stable.
+    default: ''
 outputs:
   rock:
     description: 'The file name of the resulting ROCK.'

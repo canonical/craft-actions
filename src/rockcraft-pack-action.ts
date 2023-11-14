@@ -9,11 +9,13 @@ async function run(): Promise<void> {
     core.info(`Building ROCK in "${projectRoot}"...`)
     const rockcraftChannel = core.getInput('rockcraft-channel') || 'stable'
     const rockcraftPackVerbosity = core.getInput('verbosity')
+    const rockcraftRevision = core.getInput('revision')
 
     const builder = new RockcraftBuilder({
       projectRoot,
       rockcraftChannel,
-      rockcraftPackVerbosity
+      rockcraftPackVerbosity,
+      rockcraftRevision
     })
     await builder.pack()
     const rock = await builder.outputRock()

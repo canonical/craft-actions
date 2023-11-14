@@ -94,14 +94,17 @@ export async function ensureLXD(): Promise<void> {
   await ensureLXDNetwork()
 }
 
-export async function ensureRockcraft(channel: string): Promise<void> {
+export async function ensureRockcraft(
+  channel: string,
+  revision: string
+): Promise<void> {
   const haveRockcraft = await haveExecutable('/snap/bin/rockcraft')
   core.info('Installing Rockcraft...')
   await exec.exec('sudo', [
     'snap',
     haveRockcraft ? 'refresh' : 'install',
-    '--channel',
-    channel,
+    revision.length > 0 ? '--revision' : '--channel',
+    revision.length > 0 ? revision : channel,
     '--classic',
     'rockcraft'
   ])

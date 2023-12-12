@@ -4295,9 +4295,12 @@ async function run() {
     try {
         const projectRoot = core.getInput('path');
         core.info(`Building ROCK in "${projectRoot}"...`);
-        const rockcraftChannel = core.getInput('rockcraft-channel') || 'stable';
-        const rockcraftPackVerbosity = core.getInput('verbosity');
         const rockcraftRevision = core.getInput('revision');
+        const rockcraftChannel = core.getInput('rockcraft-channel') || 'stable';
+        if (rockcraftRevision.length < 1) {
+            core.warning(`Rockcraft revision not provided. Installing from ${rockcraftChannel}`);
+        }
+        const rockcraftPackVerbosity = core.getInput('verbosity');
         const builder = new RockcraftBuilder({
             projectRoot,
             rockcraftChannel,

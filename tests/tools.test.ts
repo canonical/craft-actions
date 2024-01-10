@@ -254,8 +254,8 @@ test('ensureLXD still calls "lxd init" if LXD is installed', async () => {
   expect(execMock).toHaveBeenNthCalledWith(4, 'sudo', ['lxd', 'init', '--auto'])
 })
 
-test('ensureSnapcraft installs Snapcraft if needed', async () => {
-  expect.assertions(2)
+test('ensureRockcraft installs Rockcraft if needed', async () => {
+  expect.assertions(4)
 
   const accessMock = jest
     .spyOn(fs.promises, 'access')
@@ -275,7 +275,7 @@ test('ensureSnapcraft installs Snapcraft if needed', async () => {
       }
     )
 
-  await tools.ensureRockcraft('edge')
+  await tools.ensureRockcraft('edge', '')
 
   expect(accessMock).toHaveBeenCalled()
   expect(execMock).toHaveBeenNthCalledWith(1, 'sudo', [
@@ -283,6 +283,18 @@ test('ensureSnapcraft installs Snapcraft if needed', async () => {
     'install',
     '--channel',
     'edge',
+    '--classic',
+    'rockcraft'
+  ])
+
+  await tools.ensureRockcraft('stable', '1234')
+
+  expect(accessMock).toHaveBeenCalled()
+  expect(execMock).toHaveBeenNthCalledWith(2, 'sudo', [
+    'snap',
+    'install',
+    '--revision',
+    '1234',
     '--classic',
     'rockcraft'
   ])
@@ -309,7 +321,7 @@ test('ensureRockcraft refreshes if Rockcraft is installed', async () => {
       }
     )
 
-  await tools.ensureRockcraft('edge')
+  await tools.ensureRockcraft('edge', '')
 
   expect(accessMock).toHaveBeenCalled()
   expect(execMock).toHaveBeenNthCalledWith(1, 'sudo', [

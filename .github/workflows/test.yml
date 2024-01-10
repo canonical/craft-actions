@@ -26,11 +26,12 @@ jobs:
       run: npm test
     - name: Try to package code
       run: npm run pack
-    
+
   run-rockcraft-pack-action:
     strategy:
       matrix:
         os: [ubuntu-22.04, ubuntu-20.04]
+        revision: ['1206', '']
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v4
@@ -40,6 +41,13 @@ jobs:
       with:
         path: tests
         verbosity: debug
+        revision: ${{ matrix.revision }}
+    - name: Assert revision number
+      if: matrix.revision != ''
+      run: |
+        set -ex
+        installed_rev="$(snap info rockcraft | tail -1 | awk '{print $(NF-2)}')"
+        [ "$installed_rev" == "(${{ matrix.revision }})" ]
     - name: Upload ROCK
       uses: actions/upload-artifact@v3
       with:

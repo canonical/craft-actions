@@ -4133,7 +4133,7 @@ var external_fs_ = __nccwpck_require__(147);
 var external_path_ = __nccwpck_require__(17);
 // EXTERNAL MODULE: external "os"
 var external_os_ = __nccwpck_require__(37);
-;// CONCATENATED MODULE: ./src/tools.ts
+;// CONCATENATED MODULE: ./lib/tools.js
 // -*- mode: javascript; js-indent-level: 2 -*-
 
 
@@ -4219,20 +4219,20 @@ async function ensureLXD() {
     await exec.exec('sudo', ['lxd', 'init', '--auto']);
     await ensureLXDNetwork();
 }
-async function ensureRockcraft(channel) {
+async function ensureRockcraft(channel, revision) {
     const haveRockcraft = await haveExecutable('/snap/bin/rockcraft');
     core.info('Installing Rockcraft...');
     await exec.exec('sudo', [
         'snap',
         haveRockcraft ? 'refresh' : 'install',
-        '--channel',
-        channel,
+        revision.length > 0 ? '--revision' : '--channel',
+        revision.length > 0 ? revision : channel,
         '--classic',
         'rockcraft'
     ]);
 }
 
-;// CONCATENATED MODULE: ./src/rockcraft-pack.ts
+;// CONCATENATED MODULE: ./lib/rockcraft-pack.js
 // -*- mode: javascript; js-indent-level: 2 -*-
 
 
@@ -4244,6 +4244,7 @@ class RockcraftBuilder {
     constructor(options) {
         this.projectRoot = expandHome(options.projectRoot);
         this.rockcraftChannel = options.rockcraftChannel;
+        this.rockcraftRevision = options.rockcraftRevision;
         if (allowedVerbosity.includes(options.rockcraftPackVerbosity)) {
             this.rockcraftPackVerbosity = options.rockcraftPackVerbosity;
         }
@@ -4256,7 +4257,7 @@ class RockcraftBuilder {
         core.startGroup('Installing Rockcraft plus dependencies');
         await ensureSnapd();
         await ensureLXD();
-        await ensureRockcraft(this.rockcraftChannel);
+        await ensureRockcraft(this.rockcraftChannel, this.rockcraftRevision);
         core.endGroup();
         let rockcraft = 'rockcraft pack';
         let rockcraftPackArgs = '';
@@ -4286,7 +4287,7 @@ class RockcraftBuilder {
     }
 }
 
-;// CONCATENATED MODULE: ./src/rockcraft-pack-action.ts
+;// CONCATENATED MODULE: ./lib/rockcraft-pack-action.js
 // -*- mode: javascript; js-indent-level: 2 -*-
 
 
@@ -4294,12 +4295,17 @@ async function run() {
     try {
         const projectRoot = core.getInput('path');
         core.info(`Building ROCK in "${projectRoot}"...`);
-        const rockcraftChannel = core.getInput('rockcraft-channel') || 'edge';
+        const rockcraftRevision = core.getInput('revision');
+        const rockcraftChannel = core.getInput('rockcraft-channel') || 'stable';
+        if (rockcraftRevision.length < 1) {
+            core.warning(`Rockcraft revision not provided. Installing from ${rockcraftChannel}`);
+        }
         const rockcraftPackVerbosity = core.getInput('verbosity');
         const builder = new RockcraftBuilder({
             projectRoot,
             rockcraftChannel,
-            rockcraftPackVerbosity
+            rockcraftPackVerbosity,
+            rockcraftRevision
         });
         await builder.pack();
         const rock = await builder.outputRock();

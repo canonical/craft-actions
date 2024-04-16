@@ -19,7 +19,7 @@ inputs:
       Install the snap from a specific channel
 
       If not provided, it defaults to stable.
-    default: ''
+    default: 'stable'
   revision:
     description: >
       Pin the snap revision to install.

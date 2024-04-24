@@ -56,12 +56,12 @@ export class RockcraftBuilder {
 
   // This wrapper is for the benefit of the tests, due to the crazy
   // typing of fs.promises.readdir()
-  async _readdir(dir: string): Promise<string[]> {
+  async #readdir(dir: string): Promise<string[]> {
     return await fs.promises.readdir(dir)
   }
 
   async outputRock(): Promise<string> {
-    const files = await this._readdir(this.projectRoot)
+    const files = await this.#readdir(this.projectRoot)
     const rocks = files.filter(name => name.endsWith('.rock'))
 
     if (rocks.length === 0) {

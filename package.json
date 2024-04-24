@@ -13,7 +13,7 @@
     "format-check": "prettier --check **/*.ts",
     "lint": "eslint src/**/*.ts",
     "lint-fix": "eslint src/**/*.ts --fix",
-    "pack": "for action in `ls lib/*action.js`; do ncc build $action -o dist/$(echo ${action#lib/} | tr -d '.js'); done",
+    "pack": "for action in src/*action.ts; do esbuild --platform=node --target=node18 --bundle \"$action\" --outfile=dist/\"$(basename -s '.ts' $action)\"/index.js; done",
     "all": "npm install && npm run build && npm run format-check && npm run lint && npm test && npm run pack"
   },
   "repository": {
@@ -25,6 +25,9 @@
     "url": "https://github.com/canonical/craft-actions/issues"
   },
   "homepage": "https://github.com/canonical/craft-actions#readme",
+  "engines": {
+    "node": ">=18"
+  },
   "dependencies": {
     "@actions/core": "^1.10.1",
     "@actions/exec": "^1.1.1"
@@ -33,7 +36,7 @@
     "@tsconfig/node18": "^18.2.4",
     "@types/jest": "^29.5.12",
     "@types/node": "^18.11.9",
-    "@vercel/ncc": "^0.38.1",
+    "esbuild": "^0.20.2",
     "eslint": "^8.57.0",
     "eslint-plugin-github": "^4.10.2",
     "eslint-plugin-jest": "^28.2.0",

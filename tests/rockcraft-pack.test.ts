@@ -5,6 +5,7 @@ import * as path from 'path'
 import * as exec from '@actions/exec'
 import * as build from '../src/rockcraft-pack'
 import * as tools from '../src/tools'
+import * as fs from 'fs'
 
 afterEach(() => {
   jest.restoreAllMocks()
@@ -173,7 +174,7 @@ test('RockcraftBuilder.build can pass known verbosity', async () => {
       rockcraftRevision: '1'
     })
   }
-  expect(badBuilder).toThrowError()
+  expect(badBuilder).toThrow()
 })
 
 test('RockcraftBuilder.outputRock fails if there are no ROCKs', async () => {
@@ -188,10 +189,8 @@ test('RockcraftBuilder.outputRock fails if there are no ROCKs', async () => {
   })
 
   const readdir = jest
-    .spyOn(builder, '_readdir')
-    .mockImplementation(
-      async (path: string): Promise<string[]> => ['not-a-rock']
-    )
+    .spyOn(fs.promises, 'readdir')
+    .mockResolvedValue(['not-a-rock' as unknown as fs.Dirent])
 
   await expect(builder.outputRock()).rejects.toThrow(
     'No .rock files produced by build'
@@ -211,10 +210,8 @@ test('RockcraftBuilder.outputRock returns the first ROCK', async () => {
   })
 
   const readdir = jest
-    .spyOn(builder, '_readdir')
-    .mockImplementation(
-      async (path: string): Promise<string[]> => ['one.rock', 'two.rock']
-    )
+    .spyOn(fs.promises, 'readdir')
+    .mockResolvedValue(['one.rock', 'two.rock'] as unknown as fs.Dirent[])
 
   await expect(builder.outputRock()).resolves.toEqual('project-root/one.rock')
   expect(readdir).toHaveBeenCalled()

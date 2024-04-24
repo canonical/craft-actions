@@ -1,5 +1,6 @@
 name: "Build a ROCK"
 description: "Pack an OCI image with Rockcraft"
+author: "Canonical"
 inputs:
   path:
     description: >
@@ -24,7 +25,7 @@ outputs:
   rock:
     description: 'The file name of the resulting ROCK.'
 runs:
-  using: 'node16'
+  using: 'node20'
   main: '../dist/rockcraft-pack-action/index.js'
 branding:
   icon: layers

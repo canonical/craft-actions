@@ -15,6 +15,12 @@ inputs:
 
       The default is 'trace'.
     default: 'trace'
+  rockcraft-channel:
+    description: >
+      Install the snap from a specific channel
+
+      If not provided, it defaults to stable.
+    default: 'stable'
   revision:
     description: >
       Pin the snap revision to install.

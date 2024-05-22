@@ -29,7 +29,7 @@ test('RockcraftBuilder expands tilde in project root', () => {
   expect(builder.projectRoot).toBe(path.join(os.homedir(), 'foo/bar'))
 })
 
-test('RockcraftBuilder.pack runs a ROCK build', async () => {
+test('RockcraftBuilder.pack runs a rock build', async () => {
   expect.assertions(4)
 
   const ensureSnapd = jest
@@ -177,7 +177,7 @@ test('RockcraftBuilder.build can pass known verbosity', async () => {
   expect(badBuilder).toThrow()
 })
 
-test('RockcraftBuilder.outputRock fails if there are no ROCKs', async () => {
+test('RockcraftBuilder.outputRock fails if there are no rocks', async () => {
   expect.assertions(2)
 
   const projectDir = 'project-root'
@@ -198,7 +198,7 @@ test('RockcraftBuilder.outputRock fails if there are no ROCKs', async () => {
   expect(readdir).toHaveBeenCalled()
 })
 
-test('RockcraftBuilder.outputRock returns the first ROCK', async () => {
+test('RockcraftBuilder.outputRock returns the first rock', async () => {
   expect.assertions(2)
 
   const projectDir = 'project-root'

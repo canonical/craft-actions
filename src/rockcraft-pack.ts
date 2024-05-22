@@ -68,7 +68,7 @@ export class RockcraftBuilder {
       throw new Error('No .rock files produced by build')
     }
     if (rocks.length > 1) {
-      core.warning(`Multiple ROCKs found in ${this.projectRoot}`)
+      core.warning(`Multiple rocks found in ${this.projectRoot}`)
     }
     return path.join(this.projectRoot, rocks[0])
   }

@@ -6,7 +6,7 @@ import {RockcraftBuilder} from './rockcraft-pack'
 async function run(): Promise<void> {
   try {
     const projectRoot = core.getInput('path')
-    core.info(`Building ROCK in "${projectRoot}"...`)
+    core.info(`Building rock in "${projectRoot}"...`)
     const rockcraftRevision = core.getInput('revision')
     const rockcraftChannel = core.getInput('rockcraft-channel') || 'stable'
     if (rockcraftRevision.length < 1) {

@@ -13,7 +13,7 @@ repository and how to use them.
 
 ## rockcraft-pack
 
-Can be used to build a ROCK (with Rockcraft). It expects a "rockcraft.yaml" file
+Can be used to build a rock (with Rockcraft). It expects a "rockcraft.yaml" file
 to exist in its execution path.
 
 ### Usage
@@ -25,10 +25,10 @@ steps:
 ```
 
 This will install and configure LXD and Rockcraft, and then invoke `rockcraft`
-to build a new ROCK, based on a "rockcraft.yaml" file located in the root of
+to build a new rock, based on a "rockcraft.yaml" file located in the root of
 the workspace.
 
-You can also upload the resulting ROCK as a GitHub artifact as follows:
+You can also upload the resulting rock as a GitHub artifact as follows:
 
 ```yaml
 steps:

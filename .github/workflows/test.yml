@@ -35,7 +35,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v4
-    - name: Build a ROCK
+    - name: Build a rock
       uses: ./rockcraft-pack
       id: rockcraft
       with:
@@ -48,7 +48,7 @@ jobs:
         set -ex
         installed_rev="$(snap info rockcraft | tail -1 | awk '{print $(NF-2)}')"
         [ "$installed_rev" == "(${{ matrix.revision }})" ]
-    - name: Upload ROCK
+    - name: Upload rock
       uses: actions/upload-artifact@v3
       with:
         name: test-rock_${{ matrix.os }}

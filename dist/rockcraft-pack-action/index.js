@@ -4281,7 +4281,7 @@ class RockcraftBuilder {
             throw new Error('No .rock files produced by build');
         }
         if (rocks.length > 1) {
-            core.warning(`Multiple ROCKs found in ${this.projectRoot}`);
+            core.warning(`Multiple rocks found in ${this.projectRoot}`);
         }
         return external_path_.join(this.projectRoot, rocks[0]);
     }
@@ -4294,7 +4294,7 @@ class RockcraftBuilder {
 async function run() {
     try {
         const projectRoot = core.getInput('path');
-        core.info(`Building ROCK in "${projectRoot}"...`);
+        core.info(`Building rock in "${projectRoot}"...`);
         const rockcraftRevision = core.getInput('revision');
         const rockcraftChannel = core.getInput('rockcraft-channel') || 'stable';
         if (rockcraftRevision.length < 1) {

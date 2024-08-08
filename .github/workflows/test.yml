@@ -26,6 +26,8 @@ jobs:
       run: npm test
     - name: Try to package code
       run: npm run pack
+    - name: Ensure packaged code is committed
+      run: git diff --exit-code
 
   run-rockcraft-pack-action:
     strategy:

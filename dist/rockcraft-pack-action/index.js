@@ -20062,7 +20062,7 @@ async function ensureLXD() {
     haveSnapLXD ? "refresh" : "install",
     "lxd",
     "--channel",
-    "latest/stable"
+    "5.21/stable"
   ]);
   core.info("Initialising LXD...");
   await exec.exec("sudo", ["lxd", "init", "--auto"]);

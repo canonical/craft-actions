@@ -20040,7 +20040,7 @@ async function ensureLXDNetwork() {
   );
   await exec.exec("sudo", ["iptables", "-P", "FORWARD", "ACCEPT"]);
 }
-async function ensureLXD() {
+async function ensureLXD(channel) {
   const haveDebLXD = await haveExecutable("/usr/bin/lxd");
   if (haveDebLXD) {
     core.info("Removing legacy .deb packaged LXD...");
@@ -20062,7 +20062,7 @@ async function ensureLXD() {
     haveSnapLXD ? "refresh" : "install",
     "lxd",
     "--channel",
-    "5.21/stable"
+    channel
   ]);
   core.info("Initialising LXD...");
   await exec.exec("sudo", ["lxd", "init", "--auto"]);
@@ -20088,10 +20088,12 @@ var RockcraftBuilder = class {
   rockcraftChannel;
   rockcraftPackVerbosity;
   rockcraftRevision;
+  lxdChannel;
   constructor(options) {
     this.projectRoot = expandHome(options.projectRoot);
     this.rockcraftChannel = options.rockcraftChannel;
     this.rockcraftRevision = options.rockcraftRevision;
+    this.lxdChannel = options.lxdChannel;
     if (allowedVerbosity.includes(options.rockcraftPackVerbosity)) {
       this.rockcraftPackVerbosity = options.rockcraftPackVerbosity;
     } else {
@@ -20103,7 +20105,7 @@ var RockcraftBuilder = class {
   async pack() {
     core2.startGroup("Installing Rockcraft plus dependencies");
     await ensureSnapd();
-    await ensureLXD();
+    await ensureLXD(this.lxdChannel);
     await ensureRockcraft(this.rockcraftChannel, this.rockcraftRevision);
     core2.endGroup();
     let rockcraft = "rockcraft pack";
@@ -20147,11 +20149,13 @@ async function run() {
       );
     }
     const rockcraftPackVerbosity = core3.getInput("verbosity");
+    const lxdChannel = core3.getInput("lxd-channel") || "stable";
     const builder = new RockcraftBuilder({
       projectRoot,
       rockcraftChannel,
       rockcraftPackVerbosity,
-      rockcraftRevision
+      rockcraftRevision,
+      lxdChannel
     });
     await builder.pack();
     const rock = await builder.outputRock();

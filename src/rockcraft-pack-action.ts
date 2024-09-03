@@ -15,12 +15,14 @@ async function run(): Promise<void> {
       )
     }
     const rockcraftPackVerbosity = core.getInput('verbosity')
+    const lxdChannel = core.getInput('lxd-channel') || 'stable'
 
     const builder = new RockcraftBuilder({
       projectRoot,
       rockcraftChannel,
       rockcraftPackVerbosity,
-      rockcraftRevision
+      rockcraftRevision,
+      lxdChannel
     })
     await builder.pack()
     const rock = await builder.outputRock()

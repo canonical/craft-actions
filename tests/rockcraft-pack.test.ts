@@ -16,7 +16,8 @@ test('RockcraftBuilder expands tilde in project root', () => {
     projectRoot: '~',
     rockcraftChannel: 'edge',
     rockcraftPackVerbosity: 'trace',
-    rockcraftRevision: '1'
+    rockcraftRevision: '1',
+    lxdChannel: 'edge'
   })
   expect(builder.projectRoot).toBe(os.homedir())
 
@@ -24,7 +25,8 @@ test('RockcraftBuilder expands tilde in project root', () => {
     projectRoot: '~/foo/bar',
     rockcraftChannel: 'stable',
     rockcraftPackVerbosity: 'trace',
-    rockcraftRevision: '1'
+    rockcraftRevision: '1',
+    lxdChannel: 'stable'
   })
   expect(builder.projectRoot).toBe(path.join(os.homedir(), 'foo/bar'))
 })
@@ -54,7 +56,8 @@ test('RockcraftBuilder.pack runs a rock build', async () => {
     projectRoot: projectDir,
     rockcraftChannel: 'stable',
     rockcraftPackVerbosity: 'debug',
-    rockcraftRevision: '1'
+    rockcraftRevision: '1',
+    lxdChannel: 'stable'
   })
   await builder.pack()
 
@@ -78,7 +81,7 @@ test('RockcraftBuilder.build can set the Rockcraft channel', async () => {
     .mockImplementation(async (): Promise<void> => {})
   const ensureLXD = jest
     .spyOn(tools, 'ensureLXD')
-    .mockImplementation(async (): Promise<void> => {})
+    .mockImplementation(async (channel): Promise<void> => {})
   const ensureRockcraft = jest
     .spyOn(tools, 'ensureRockcraft')
     .mockImplementation(async (channel): Promise<void> => {})
@@ -94,7 +97,8 @@ test('RockcraftBuilder.build can set the Rockcraft channel', async () => {
     projectRoot: '.',
     rockcraftChannel: 'test-channel',
     rockcraftPackVerbosity: 'trace',
-    rockcraftRevision: ''
+    rockcraftRevision: '',
+    lxdChannel: 'test-channel'
   })
   await builder.pack()
 
@@ -125,7 +129,8 @@ test('RockcraftBuilder.build can set the Rockcraft revision', async () => {
     projectRoot: '.',
     rockcraftChannel: 'channel',
     rockcraftPackVerbosity: 'trace',
-    rockcraftRevision: '123'
+    rockcraftRevision: '123',
+    lxdChannel: 'channel'
   })
   await builder.pack()
 
@@ -156,7 +161,8 @@ test('RockcraftBuilder.build can pass known verbosity', async () => {
     projectRoot: '.',
     rockcraftChannel: 'stable',
     rockcraftPackVerbosity: 'trace',
-    rockcraftRevision: '1'
+    rockcraftRevision: '1',
+    lxdChannel: 'stable'
   })
   await builder.pack()
 
@@ -171,10 +177,44 @@ test('RockcraftBuilder.build can pass known verbosity', async () => {
       projectRoot: '.',
       rockcraftChannel: 'stable',
       rockcraftPackVerbosity: 'fake-verbosity',
-      rockcraftRevision: '1'
+      rockcraftRevision: '1',
+      lxdChannel: 'stable'
     })
   }
   expect(badBuilder).toThrow()
+})
+
+test('RockcraftBuilder.build can set the LXD channel', async () => {
+  expect.assertions(2)
+
+  const ensureSnapd = jest
+    .spyOn(tools, 'ensureSnapd')
+    .mockImplementation(async (): Promise<void> => {})
+  const ensureLXD = jest
+    .spyOn(tools, 'ensureLXD')
+    .mockImplementation(async (channel): Promise<void> => {})
+  const ensureRockcraft = jest
+    .spyOn(tools, 'ensureRockcraft')
+    .mockImplementation(async (channel): Promise<void> => {})
+  const execMock = jest
+    .spyOn(exec, 'exec')
+    .mockImplementation(
+      async (program: string, args?: string[]): Promise<number> => {
+        return 0
+      }
+    )
+
+  const builder = new build.RockcraftBuilder({
+    projectRoot: '.',
+    rockcraftChannel: 'test-channel',
+    rockcraftPackVerbosity: 'trace',
+    rockcraftRevision: '',
+    lxdChannel: 'test-lxd-channel'
+  })
+  await builder.pack()
+
+  expect(ensureLXD).toHaveBeenCalledWith('test-lxd-channel')
+  expect(ensureRockcraft).toHaveBeenCalledWith('test-channel', '')
 })
 
 test('RockcraftBuilder.outputRock fails if there are no rocks', async () => {
@@ -185,7 +225,8 @@ test('RockcraftBuilder.outputRock fails if there are no rocks', async () => {
     projectRoot: projectDir,
     rockcraftChannel: 'stable',
     rockcraftPackVerbosity: 'trace',
-    rockcraftRevision: '1'
+    rockcraftRevision: '1',
+    lxdChannel: 'stable'
   })
 
   const readdir = jest
@@ -206,7 +247,8 @@ test('RockcraftBuilder.outputRock returns the first rock', async () => {
     projectRoot: projectDir,
     rockcraftChannel: 'stable',
     rockcraftPackVerbosity: 'trace',
-    rockcraftRevision: '1'
+    rockcraftRevision: '1',
+    lxdChannel: 'stable'
   })
 
   const readdir = jest

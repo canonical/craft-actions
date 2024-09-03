@@ -13,6 +13,7 @@ interface RockcraftBuilderOptions {
   rockcraftChannel: string
   rockcraftPackVerbosity: string
   rockcraftRevision: string
+  lxdChannel: string
 }
 
 export class RockcraftBuilder {
@@ -20,11 +21,13 @@ export class RockcraftBuilder {
   rockcraftChannel: string
   rockcraftPackVerbosity: string
   rockcraftRevision: string
+  lxdChannel: string
 
   constructor(options: RockcraftBuilderOptions) {
     this.projectRoot = tools.expandHome(options.projectRoot)
     this.rockcraftChannel = options.rockcraftChannel
     this.rockcraftRevision = options.rockcraftRevision
+    this.lxdChannel = options.lxdChannel
     if (allowedVerbosity.includes(options.rockcraftPackVerbosity)) {
       this.rockcraftPackVerbosity = options.rockcraftPackVerbosity
     } else {
@@ -38,7 +41,7 @@ export class RockcraftBuilder {
   async pack(): Promise<void> {
     core.startGroup('Installing Rockcraft plus dependencies')
     await tools.ensureSnapd()
-    await tools.ensureLXD()
+    await tools.ensureLXD(this.lxdChannel)
     await tools.ensureRockcraft(this.rockcraftChannel, this.rockcraftRevision)
     core.endGroup()
 

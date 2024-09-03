@@ -145,7 +145,7 @@ test('ensureLXD installs the snap version of LXD if needed', async () => {
       }
     )
 
-  await tools.ensureLXD()
+  await tools.ensureLXD('5.21/stable')
 
   expect(execMock).toHaveBeenNthCalledWith(1, 'sudo', [
     'groupadd',
@@ -192,7 +192,7 @@ test('ensureLXD removes the apt version of LXD', async () => {
       }
     )
 
-  await tools.ensureLXD()
+  await tools.ensureLXD('5.21/stable')
 
   expect(accessMock).toHaveBeenCalled()
   expect(execMock).toHaveBeenNthCalledWith(1, 'sudo', [
@@ -228,7 +228,7 @@ test('ensureLXD still calls "lxd init" if LXD is installed', async () => {
       }
     )
 
-  await tools.ensureLXD()
+  await tools.ensureLXD('5.21/stable')
 
   expect(accessMock).toHaveBeenCalled()
   expect(execMock).toHaveBeenNthCalledWith(1, 'sudo', [

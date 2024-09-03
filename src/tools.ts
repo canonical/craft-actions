@@ -61,7 +61,7 @@ export async function ensureLXDNetwork(): Promise<void> {
   await exec.exec('sudo', ['iptables', '-P', 'FORWARD', 'ACCEPT'])
 }
 
-export async function ensureLXD(): Promise<void> {
+export async function ensureLXD(channel: string): Promise<void> {
   const haveDebLXD = await haveExecutable('/usr/bin/lxd')
   if (haveDebLXD) {
     core.info('Removing legacy .deb packaged LXD...')
@@ -87,7 +87,7 @@ export async function ensureLXD(): Promise<void> {
     haveSnapLXD ? 'refresh' : 'install',
     'lxd',
     '--channel',
-    '5.21/stable'
+    channel
   ])
 
   core.info('Initialising LXD...')

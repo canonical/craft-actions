@@ -81,14 +81,16 @@ export async function ensureLXD(): Promise<void> {
   // Install a specific version of LXD that we know works well with Rockcraft
   // (latest LTS release, tracked in 5.21/stable)
   const haveSnapLXD = await haveExecutable('/snap/bin/lxd')
-  core.info('Installing LXD...')
-  await exec.exec('sudo', [
-    'snap',
-    haveSnapLXD ? 'refresh' : 'install',
-    'lxd',
-    '--channel',
-    '5.21/stable'
-  ])
+  if (!haveSnapLXD) {
+    core.info('Installing LXD...')
+    await exec.exec('sudo', [
+      'snap',
+      'install',
+      'lxd',
+      '--channel',
+      '5.21/stable'
+    ])
+  }
 
   core.info('Initialising LXD...')
   await exec.exec('sudo', ['lxd', 'init', '--auto'])

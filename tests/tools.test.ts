@@ -204,8 +204,44 @@ test('ensureLXD removes the apt version of LXD', async () => {
   ])
 })
 
+test('ensureLXD is not refreshed if LXD is installed', async () => {
+  expect.assertions(2)
+
+  const accessMock = jest
+    .spyOn(fs.promises, 'access')
+    .mockImplementation(
+      async (
+        filename: fs.PathLike,
+        mode?: number | undefined
+      ): Promise<void> => {
+        if (filename === '/snap/bin/lxd') {
+          return
+        }
+        throw new Error('not found')
+      }
+    )
+  const execMock = jest
+    .spyOn(exec, 'exec')
+    .mockImplementation(
+      async (program: string, args?: string[]): Promise<number> => {
+        return 0
+      }
+    )
+
+  await tools.ensureLXD()
+
+  expect(accessMock).toHaveBeenCalled()
+  expect(execMock).not.toHaveBeenNthCalledWith(3, 'sudo', [
+    'snap',
+    'install',
+    'lxd',
+    '--channel',
+    '5.21/stable'
+  ])
+})
+
 test('ensureLXD still calls "lxd init" if LXD is installed', async () => {
-  expect.assertions(5)
+  expect.assertions(4)
 
   const accessMock = jest
     .spyOn(fs.promises, 'access')
@@ -244,14 +280,7 @@ test('ensureLXD still calls "lxd init" if LXD is installed', async () => {
     'lxd',
     os.userInfo().username
   ])
-  expect(execMock).toHaveBeenNthCalledWith(3, 'sudo', [
-    'snap',
-    'refresh',
-    'lxd',
-    '--channel',
-    '5.21/stable'
-  ])
-  expect(execMock).toHaveBeenNthCalledWith(4, 'sudo', ['lxd', 'init', '--auto'])
+  expect(execMock).toHaveBeenNthCalledWith(3, 'sudo', ['lxd', 'init', '--auto'])
 })
 
 test('ensureRockcraft installs Rockcraft if needed', async () => {

@@ -74,6 +74,92 @@ steps:
 
 ---
 
+## charmcraft/setup
+
+Set up Charmcraft on the runner.
+
+### Usage
+
+```yaml
+steps:
+  - uses: canonical/craft-actions/charmcraft/setup@main
+  - run: |
+    charmcraft --version
+```
+
+This will install and configure LXD and Charmcraft.
+
+#### Inputs
+
+##### `channel`
+
+Select a channel for the Charmcraft snap to be installed from. Defaults to `latest/stable`
+
+##### `revision`
+
+Pin Charmcraft to a specific revision. Overrides the `channel` option.
+
+##### `lxd-channel`
+
+Select a channel for LXD to be installed from. Defaults to the current recommended channel for Charmcraft.
+
+---
+
+## charmcraft/pack
+
+Set up Charmcraft and pack a charm, caching intermediate Python wheels to speed up builds.
+
+### Usage
+
+```yaml
+steps:
+  - uses: actions/checkout@v4
+  - uses: canonical/craft-actions/charmcraft/pack@main
+```
+
+This will install and configure LXD and Charmcraft, then pack a charm in the given directory.
+
+#### Inputs
+
+##### `path`
+
+If your Charmcraft project ("charmcraft.yaml") is not located in the root of the
+workspace, you can specify an alternative location via the `path` input
+parameter.
+
+```yaml
+steps:
+  - uses: actions/checkout@v3
+  - uses: canonical/craft-actions/charmcraft/pack@main
+    with:
+      path: path/to/project/
+```
+
+##### `verbosity`
+
+This `verbosity` input parameter can be used to set the build verbosity level to one of 'quiet', 'brief', 'verbose', 'debug' or 'trace' (the default).
+
+```yaml
+steps:
+  - uses: actions/checkout@v3
+  - uses: canonical/craft-actions/charmcraft/pack@main
+    with:
+      verbosity: debug
+```
+
+##### `channel`
+
+Select a channel for the Charmcraft snap to be installed from. Defaults to `latest/stable`
+
+##### `revision`
+
+Pin Charmcraft to a specific revision. Overrides the `channel` option.
+
+##### `lxd-channel`
+
+Select a channel for LXD to be installed from. Defaults to the current recommended channel for Charmcraft.
+
+---
 ## Committing code
 
 Please follow these guidelines when committing code for this project:

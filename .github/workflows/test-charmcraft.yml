@@ -1,0 +1,68 @@
+name: Test Charmcraft
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/*charmcraft*"
+      - "charmcraft**"
+  push:
+    branches:
+      - main
+
+jobs:
+  install:
+    strategy:
+      matrix:
+        channel: [latest/stable, latest/edge, 2.x/stable]
+        include:
+          - channel: ''
+            revision: 5303
+          - channel: latest/stable
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./charmcraft/setup
+        id: setup
+        with:
+          channel: ${{ matrix.channel }}
+          revision: ${{ matrix.revision }}
+      - name: Check revision number if set with a revision
+        if: matrix.revision != ''
+        run: |
+          [[ ${{ matrix.revision }} == ${{ steps.setup.outputs.charmcraft-revision }} ]]
+      - name: Check that revisions are set
+        run: |
+          test ${{ steps.setup.outputs.charmcraft-revision }} -ge 0
+          test ${{ steps.setup.outputs.lxd-revision }} -ge 0
+      - name: Check that install works even if Charmcraft is already installed
+        uses: ./charmcraft/setup
+  pack:
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, ubuntu-24.04]
+        channel: [latest/stable]
+        include:
+          - os: ubuntu-24.04
+            channel: ''
+            revision: 5303
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: juju/juju
+          path: juju
+          ref: main
+      - name: Pack charm
+        id: charmcraft
+        uses: ./charmcraft/pack
+        with:
+          path: juju/testcharms/charms/lxd-profile/
+          channel: ${{ matrix.channel }}
+          revision: ${{ matrix.revision }}
+      - name: Upload charm
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-charm-${{ matrix.os }}-${{ steps.charmcraft.outputs.charmcraft-revision }}
+          path: juju/testcharms/charms/lxd-profile/*.charm
+

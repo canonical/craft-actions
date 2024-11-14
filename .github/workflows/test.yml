@@ -10,24 +10,24 @@ jobs:
   test-action-code:
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-node@v4
-      with:
-        node-version: 20
-    - name: Install dependencies
-      run: npm install
-    - name: Build .js files
-      run: npm run build
-    - name: Check the formatting
-      run: npm run format-check
-    - name: Lint the code
-      run: npm run lint
-    - name: Run the unit tests
-      run: npm test
-    - name: Try to package code
-      run: npm run pack
-    - name: Ensure packaged code is committed
-      run: git diff --exit-code
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: npm install
+      - name: Build .js files
+        run: npm run build
+      - name: Check the formatting
+        run: npm run format-check
+      - name: Lint the code
+        run: npm run lint
+      - name: Run the unit tests
+        run: npm test
+      - name: Try to package code
+        run: npm run pack
+      - name: Ensure packaged code is committed
+        run: git diff --exit-code
 
   run-rockcraft-pack-action:
     strategy:
@@ -36,22 +36,22 @@ jobs:
         revision: ['1206', '']
     runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v4
-    - name: Build a rock
-      uses: ./rockcraft-pack
-      id: rockcraft
-      with:
-        path: tests
-        verbosity: debug
-        revision: ${{ matrix.revision }}
-    - name: Assert revision number
-      if: matrix.revision != ''
-      run: |
-        set -ex
-        installed_rev="$(snap info rockcraft | tail -1 | awk '{print $(NF-2)}')"
-        [ "$installed_rev" == "(${{ matrix.revision }})" ]
-    - name: Upload rock
-      uses: actions/upload-artifact@v3
-      with:
-        name: test-rock_${{ matrix.os }}
-        path: ${{ steps.rockcraft.outputs.rock }}
+      - uses: actions/checkout@v4
+      - name: Build a rock
+        uses: ./rockcraft-pack
+        id: rockcraft
+        with:
+          path: tests
+          verbosity: debug
+          revision: ${{ matrix.revision }}
+      - name: Assert revision number
+        if: matrix.revision != ''
+        run: |
+          set -ex
+          installed_rev="$(snap info rockcraft | tail -1 | awk '{print $(NF-2)}')"
+          [ "$installed_rev" == "(${{ matrix.revision }})" ]
+      - name: Upload rock
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-rock_${{ matrix.os }}
+          path: ${{ steps.rockcraft.outputs.rock }}

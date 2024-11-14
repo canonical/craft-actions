@@ -43,11 +43,9 @@ test('RockcraftBuilder.pack runs a rock build', async () => {
     .mockImplementation(async (channel): Promise<void> => {})
   const execMock = jest
     .spyOn(exec, 'exec')
-    .mockImplementation(
-      async (program: string, args?: string[]): Promise<number> => {
-        return 0
-      }
-    )
+    .mockImplementation(async (program: string, args?: string[]): Promise<number> => {
+      return 0
+    })
 
   const projectDir = 'project-root'
   const builder = new build.RockcraftBuilder({
@@ -61,13 +59,9 @@ test('RockcraftBuilder.pack runs a rock build', async () => {
   expect(ensureSnapd).toHaveBeenCalled()
   expect(ensureLXD).toHaveBeenCalled()
   expect(ensureRockcraft).toHaveBeenCalled()
-  expect(execMock).toHaveBeenCalledWith(
-    'sg',
-    ['lxd', '-c', 'rockcraft pack --verbosity debug'],
-    {
-      cwd: projectDir
-    }
-  )
+  expect(execMock).toHaveBeenCalledWith('sg', ['lxd', '-c', 'rockcraft pack --verbosity debug'], {
+    cwd: projectDir
+  })
 })
 
 test('RockcraftBuilder.build can set the Rockcraft channel', async () => {
@@ -84,11 +78,9 @@ test('RockcraftBuilder.build can set the Rockcraft channel', async () => {
     .mockImplementation(async (channel): Promise<void> => {})
   const execMock = jest
     .spyOn(exec, 'exec')
-    .mockImplementation(
-      async (program: string, args?: string[]): Promise<number> => {
-        return 0
-      }
-    )
+    .mockImplementation(async (program: string, args?: string[]): Promise<number> => {
+      return 0
+    })
 
   const builder = new build.RockcraftBuilder({
     projectRoot: '.',
@@ -115,11 +107,9 @@ test('RockcraftBuilder.build can set the Rockcraft revision', async () => {
     .mockImplementation(async (channel): Promise<void> => {})
   const execMock = jest
     .spyOn(exec, 'exec')
-    .mockImplementation(
-      async (program: string, args?: string[]): Promise<number> => {
-        return 0
-      }
-    )
+    .mockImplementation(async (program: string, args?: string[]): Promise<number> => {
+      return 0
+    })
 
   const builder = new build.RockcraftBuilder({
     projectRoot: '.',
@@ -146,11 +136,9 @@ test('RockcraftBuilder.build can pass known verbosity', async () => {
     .mockImplementation(async (channel): Promise<void> => {})
   const execMock = jest
     .spyOn(exec, 'exec')
-    .mockImplementation(
-      async (program: string, args?: string[]): Promise<number> => {
-        return 0
-      }
-    )
+    .mockImplementation(async (program: string, args?: string[]): Promise<number> => {
+      return 0
+    })
 
   const builder = new build.RockcraftBuilder({
     projectRoot: '.',
@@ -192,9 +180,7 @@ test('RockcraftBuilder.outputRock fails if there are no rocks', async () => {
     .spyOn(fs.promises, 'readdir')
     .mockResolvedValue(['not-a-rock' as unknown as fs.Dirent])
 
-  await expect(builder.outputRock()).rejects.toThrow(
-    'No .rock files produced by build'
-  )
+  await expect(builder.outputRock()).rejects.toThrow('No .rock files produced by build')
   expect(readdir).toHaveBeenCalled()
 })
 

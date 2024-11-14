@@ -16,10 +16,7 @@ test('ensureSnapd installs snapd if needed', async () => {
   const accessMock = jest
     .spyOn(fs.promises, 'access')
     .mockImplementation(
-      async (
-        filename: fs.PathLike,
-        mode?: number | undefined
-      ): Promise<void> => {
+      async (filename: fs.PathLike, mode?: number | undefined): Promise<void> => {
         throw new Error('not found')
       }
     )
@@ -33,27 +30,16 @@ test('ensureSnapd installs snapd if needed', async () => {
     })
   const execMock = jest
     .spyOn(exec, 'exec')
-    .mockImplementation(
-      async (program: string, args?: string[]): Promise<number> => {
-        return 0
-      }
-    )
+    .mockImplementation(async (program: string, args?: string[]): Promise<number> => {
+      return 0
+    })
 
   await tools.ensureSnapd()
 
   expect(accessMock).toHaveBeenCalled()
   expect(statMock).toHaveBeenCalled()
-  expect(execMock).toHaveBeenNthCalledWith(1, 'sudo', [
-    'apt-get',
-    'update',
-    '-q'
-  ])
-  expect(execMock).toHaveBeenNthCalledWith(2, 'sudo', [
-    'apt-get',
-    'install',
-    '-qy',
-    'snapd'
-  ])
+  expect(execMock).toHaveBeenNthCalledWith(1, 'sudo', ['apt-get', 'update', '-q'])
+  expect(execMock).toHaveBeenNthCalledWith(2, 'sudo', ['apt-get', 'install', '-qy', 'snapd'])
 })
 
 test('ensureSnapd is a no-op if snapd is installed', async () => {
@@ -62,10 +48,7 @@ test('ensureSnapd is a no-op if snapd is installed', async () => {
   const accessMock = jest
     .spyOn(fs.promises, 'access')
     .mockImplementation(
-      async (
-        filename: fs.PathLike,
-        mode?: number | undefined
-      ): Promise<void> => {}
+      async (filename: fs.PathLike, mode?: number | undefined): Promise<void> => {}
     )
   const statMock = jest
     .spyOn(fs.promises, 'stat')
@@ -77,11 +60,9 @@ test('ensureSnapd is a no-op if snapd is installed', async () => {
     })
   const execMock = jest
     .spyOn(exec, 'exec')
-    .mockImplementation(
-      async (program: string, args?: string[]): Promise<number> => {
-        return 0
-      }
-    )
+    .mockImplementation(async (program: string, args?: string[]): Promise<number> => {
+      return 0
+    })
 
   await tools.ensureSnapd()
 
@@ -96,10 +77,7 @@ test('ensureSnapd fixes permissions on the root directory', async () => {
   const accessMock = jest
     .spyOn(fs.promises, 'access')
     .mockImplementation(
-      async (
-        filename: fs.PathLike,
-        mode?: number | undefined
-      ): Promise<void> => {}
+      async (filename: fs.PathLike, mode?: number | undefined): Promise<void> => {}
     )
   const statMock = jest
     .spyOn(fs.promises, 'stat')
@@ -111,11 +89,9 @@ test('ensureSnapd fixes permissions on the root directory', async () => {
     })
   const execMock = jest
     .spyOn(exec, 'exec')
-    .mockImplementation(
-      async (program: string, args?: string[]): Promise<number> => {
-        return 0
-      }
-    )
+    .mockImplementation(async (program: string, args?: string[]): Promise<number> => {
+      return 0
+    })
 
   await tools.ensureSnapd()
 
@@ -130,29 +106,19 @@ test('ensureLXD installs the snap version of LXD if needed', async () => {
   const accessMock = jest
     .spyOn(fs.promises, 'access')
     .mockImplementation(
-      async (
-        filename: fs.PathLike,
-        mode?: number | undefined
-      ): Promise<void> => {
+      async (filename: fs.PathLike, mode?: number | undefined): Promise<void> => {
         throw new Error('not found')
       }
     )
   const execMock = jest
     .spyOn(exec, 'exec')
-    .mockImplementation(
-      async (program: string, args?: string[]): Promise<number> => {
-        return 0
-      }
-    )
+    .mockImplementation(async (program: string, args?: string[]): Promise<number> => {
+      return 0
+    })
 
   await tools.ensureLXD()
 
-  expect(execMock).toHaveBeenNthCalledWith(1, 'sudo', [
-    'groupadd',
-    '--force',
-    '--system',
-    'lxd'
-  ])
+  expect(execMock).toHaveBeenNthCalledWith(1, 'sudo', ['groupadd', '--force', '--system', 'lxd'])
   expect(execMock).toHaveBeenNthCalledWith(2, 'sudo', [
     'usermod',
     '--append',
@@ -177,20 +143,15 @@ test('ensureLXD removes the apt version of LXD', async () => {
   const accessMock = jest
     .spyOn(fs.promises, 'access')
     .mockImplementation(
-      async (
-        filename: fs.PathLike,
-        mode?: number | undefined
-      ): Promise<void> => {
+      async (filename: fs.PathLike, mode?: number | undefined): Promise<void> => {
         return
       }
     )
   const execMock = jest
     .spyOn(exec, 'exec')
-    .mockImplementation(
-      async (program: string, args?: string[]): Promise<number> => {
-        return 0
-      }
-    )
+    .mockImplementation(async (program: string, args?: string[]): Promise<number> => {
+      return 0
+    })
 
   await tools.ensureLXD()
 
@@ -210,10 +171,7 @@ test('ensureLXD is not refreshed if LXD is installed', async () => {
   const accessMock = jest
     .spyOn(fs.promises, 'access')
     .mockImplementation(
-      async (
-        filename: fs.PathLike,
-        mode?: number | undefined
-      ): Promise<void> => {
+      async (filename: fs.PathLike, mode?: number | undefined): Promise<void> => {
         if (filename === '/snap/bin/lxd') {
           return
         }
@@ -222,11 +180,9 @@ test('ensureLXD is not refreshed if LXD is installed', async () => {
     )
   const execMock = jest
     .spyOn(exec, 'exec')
-    .mockImplementation(
-      async (program: string, args?: string[]): Promise<number> => {
-        return 0
-      }
-    )
+    .mockImplementation(async (program: string, args?: string[]): Promise<number> => {
+      return 0
+    })
 
   await tools.ensureLXD()
 
@@ -246,10 +202,7 @@ test('ensureLXD still calls "lxd init" if LXD is installed', async () => {
   const accessMock = jest
     .spyOn(fs.promises, 'access')
     .mockImplementation(
-      async (
-        filename: fs.PathLike,
-        mode?: number | undefined
-      ): Promise<void> => {
+      async (filename: fs.PathLike, mode?: number | undefined): Promise<void> => {
         if (filename === '/snap/bin/lxd') {
           return
         }
@@ -258,21 +211,14 @@ test('ensureLXD still calls "lxd init" if LXD is installed', async () => {
     )
   const execMock = jest
     .spyOn(exec, 'exec')
-    .mockImplementation(
-      async (program: string, args?: string[]): Promise<number> => {
-        return 0
-      }
-    )
+    .mockImplementation(async (program: string, args?: string[]): Promise<number> => {
+      return 0
+    })
 
   await tools.ensureLXD()
 
   expect(accessMock).toHaveBeenCalled()
-  expect(execMock).toHaveBeenNthCalledWith(1, 'sudo', [
-    'groupadd',
-    '--force',
-    '--system',
-    'lxd'
-  ])
+  expect(execMock).toHaveBeenNthCalledWith(1, 'sudo', ['groupadd', '--force', '--system', 'lxd'])
   expect(execMock).toHaveBeenNthCalledWith(2, 'sudo', [
     'usermod',
     '--append',
@@ -289,20 +235,15 @@ test('ensureRockcraft installs Rockcraft if needed', async () => {
   const accessMock = jest
     .spyOn(fs.promises, 'access')
     .mockImplementation(
-      async (
-        filename: fs.PathLike,
-        mode?: number | undefined
-      ): Promise<void> => {
+      async (filename: fs.PathLike, mode?: number | undefined): Promise<void> => {
         throw new Error('not found')
       }
     )
   const execMock = jest
     .spyOn(exec, 'exec')
-    .mockImplementation(
-      async (program: string, args?: string[]): Promise<number> => {
-        return 0
-      }
-    )
+    .mockImplementation(async (program: string, args?: string[]): Promise<number> => {
+      return 0
+    })
 
   await tools.ensureRockcraft('edge', '')
 
@@ -335,20 +276,15 @@ test('ensureRockcraft refreshes if Rockcraft is installed', async () => {
   const accessMock = jest
     .spyOn(fs.promises, 'access')
     .mockImplementation(
-      async (
-        filename: fs.PathLike,
-        mode?: number | undefined
-      ): Promise<void> => {
+      async (filename: fs.PathLike, mode?: number | undefined): Promise<void> => {
         return
       }
     )
   const execMock = jest
     .spyOn(exec, 'exec')
-    .mockImplementation(
-      async (program: string, args?: string[]): Promise<number> => {
-        return 0
-      }
-    )
+    .mockImplementation(async (program: string, args?: string[]): Promise<number> => {
+      return 0
+    })
 
   await tools.ensureRockcraft('edge', '')
 
@@ -366,21 +302,17 @@ test('ensureRockcraft refreshes if Rockcraft is installed', async () => {
 test('ensureLXDNetwork sets up iptables and warns about Docker', async () => {
   expect.assertions(8)
 
-  const infoMock = jest
-    .spyOn(core, 'info')
-    .mockImplementation((info: string) => {})
+  const infoMock = jest.spyOn(core, 'info').mockImplementation((info: string) => {})
 
   const execMock = jest
     .spyOn(exec, 'exec')
-    .mockImplementation(
-      async (program: string, args?: string[]): Promise<number> => {
-        if (args != undefined && args[1] == 'moby-runc') {
-          return 0
-        } else {
-          return 1
-        }
+    .mockImplementation(async (program: string, args?: string[]): Promise<number> => {
+      if (args != undefined && args[1] == 'moby-runc') {
+        return 0
+      } else {
+        return 1
       }
-    )
+    })
 
   await tools.ensureLXDNetwork()
 
@@ -403,37 +335,26 @@ test('ensureLXDNetwork sets up iptables and warns about Docker', async () => {
     ignoreReturnCode: true,
     silent: true
   })
-  expect(execMock).toHaveBeenNthCalledWith(
-    5,
-    'dpkg',
-    ['-l', 'moby-containerd'],
-    {ignoreReturnCode: true, silent: true}
-  )
+  expect(execMock).toHaveBeenNthCalledWith(5, 'dpkg', ['-l', 'moby-containerd'], {
+    ignoreReturnCode: true,
+    silent: true
+  })
   expect(execMock).toHaveBeenNthCalledWith(6, 'dpkg', ['-l', 'moby-runc'], {
     ignoreReturnCode: true,
     silent: true
   })
-  expect(execMock).toHaveBeenNthCalledWith(7, 'sudo', [
-    'iptables',
-    '-P',
-    'FORWARD',
-    'ACCEPT'
-  ])
+  expect(execMock).toHaveBeenNthCalledWith(7, 'sudo', ['iptables', '-P', 'FORWARD', 'ACCEPT'])
 })
 
 test('ensureLXDNetwork sets up iptables and warns only about installed packages', async () => {
   expect.assertions(8)
 
-  const infoMock = jest
-    .spyOn(core, 'info')
-    .mockImplementation((info: string) => {})
+  const infoMock = jest.spyOn(core, 'info').mockImplementation((info: string) => {})
   const execMock = jest
     .spyOn(exec, 'exec')
-    .mockImplementation(
-      async (program: string, args?: string[]): Promise<number> => {
-        return 0
-      }
-    )
+    .mockImplementation(async (program: string, args?: string[]): Promise<number> => {
+      return 0
+    })
 
   await tools.ensureLXDNetwork()
 
@@ -457,20 +378,13 @@ test('ensureLXDNetwork sets up iptables and warns only about installed packages'
     ignoreReturnCode: true,
     silent: true
   })
-  expect(execMock).toHaveBeenNthCalledWith(
-    5,
-    'dpkg',
-    ['-l', 'moby-containerd'],
-    {ignoreReturnCode: true, silent: true}
-  )
+  expect(execMock).toHaveBeenNthCalledWith(5, 'dpkg', ['-l', 'moby-containerd'], {
+    ignoreReturnCode: true,
+    silent: true
+  })
   expect(execMock).toHaveBeenNthCalledWith(6, 'dpkg', ['-l', 'moby-runc'], {
     ignoreReturnCode: true,
     silent: true
   })
-  expect(execMock).toHaveBeenNthCalledWith(7, 'sudo', [
-    'iptables',
-    '-P',
-    'FORWARD',
-    'ACCEPT'
-  ])
+  expect(execMock).toHaveBeenNthCalledWith(7, 'sudo', ['iptables', '-P', 'FORWARD', 'ACCEPT'])
 })

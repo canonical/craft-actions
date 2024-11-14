@@ -70,26 +70,14 @@ export async function ensureLXD(): Promise<void> {
 
   core.info(`Ensuring ${os.userInfo().username} is in the lxd group...`)
   await exec.exec('sudo', ['groupadd', '--force', '--system', 'lxd'])
-  await exec.exec('sudo', [
-    'usermod',
-    '--append',
-    '--groups',
-    'lxd',
-    os.userInfo().username
-  ])
+  await exec.exec('sudo', ['usermod', '--append', '--groups', 'lxd', os.userInfo().username])
 
   // Install a specific version of LXD that we know works well with Rockcraft
   // (latest LTS release, tracked in 5.21/stable)
   const haveSnapLXD = await haveExecutable('/snap/bin/lxd')
   if (!haveSnapLXD) {
     core.info('Installing LXD...')
-    await exec.exec('sudo', [
-      'snap',
-      'install',
-      'lxd',
-      '--channel',
-      '5.21/stable'
-    ])
+    await exec.exec('sudo', ['snap', 'install', 'lxd', '--channel', '5.21/stable'])
   }
 
   core.info('Initialising LXD...')
@@ -97,10 +85,7 @@ export async function ensureLXD(): Promise<void> {
   await ensureLXDNetwork()
 }
 
-export async function ensureRockcraft(
-  channel: string,
-  revision: string
-): Promise<void> {
+export async function ensureRockcraft(channel: string, revision: string): Promise<void> {
   const haveRockcraft = await haveExecutable('/snap/bin/rockcraft')
   core.info('Installing Rockcraft...')
   await exec.exec('sudo', [

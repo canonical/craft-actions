@@ -1,6 +1,6 @@
-name: "Build a charm"
-description: "Pack a charm with Charmcraft"
-author: "Canonical"
+name: 'Build a charm'
+description: 'Pack a charm with Charmcraft'
+author: 'Canonical'
 inputs:
   path:
     description: >

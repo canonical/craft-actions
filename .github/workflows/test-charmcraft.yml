@@ -3,8 +3,8 @@ name: Test Charmcraft
 on:
   pull_request:
     paths:
-      - ".github/workflows/*charmcraft*"
-      - "charmcraft**"
+      - '.github/workflows/*charmcraft*'
+      - 'charmcraft**'
   push:
     branches:
       - main
@@ -65,4 +65,3 @@ jobs:
         with:
           name: test-charm-${{ matrix.os }}-${{ steps.charmcraft.outputs.charmcraft-revision }}
           path: juju/testcharms/charms/lxd-profile/*.charm
-

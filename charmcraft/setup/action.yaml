@@ -1,6 +1,6 @@
-name: "Setup Charmcraft"
-description: "Install Charmcraft"
-author: "Canonical"
+name: 'Setup Charmcraft'
+description: 'Install Charmcraft'
+author: 'Canonical'
 inputs:
   channel:
     description: >

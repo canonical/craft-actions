@@ -160,6 +160,7 @@ Pin Charmcraft to a specific revision. Overrides the `channel` option.
 Select a channel for LXD to be installed from. Defaults to the current recommended channel for Charmcraft.
 
 ---
+
 ## Committing code
 
 Please follow these guidelines when committing code for this project:

@@ -1,0 +1,73 @@
+name: "Build a charm"
+description: "Pack a charm with Charmcraft"
+author: "Canonical"
+inputs:
+  path:
+    description: >
+      The location of the Charmcraft project.
+
+      Defaults to the base of the repository.
+    default: '.'
+  verbosity:
+    description: >
+      Set the build verbosity level to 'quiet', 'brief', 'verbose', 'debug' or
+      'trace'.
+
+      The default is 'trace'.
+    default: 'trace'
+  channel:
+    description: >
+      Install the snap from a specific channel
+
+      If not provided, it defaults to stable.
+    default: 'stable'
+  revision:
+    description: >
+      Pin the snap revision to install.
+
+      If not provided, it defaults to whatever revision is in latest/stable.
+    default: ''
+  lxd-channel:
+    description: >
+      The LXD channel to use.
+
+      Defaults to the recommended channel for Charmcraft.
+    default: 5.21/stable
+outputs:
+  charms:
+    description: The names of any charm files created.
+    value: ${{ steps.pack-charm.outputs.charms }}
+  charmcraft-revision:
+    description: The revision of Charmcraft used for the pack.
+    value: ${{ steps.setup.outputs.charmcraft-revision }}
+  lxd-revision:
+    description: The revision of lxd used for the pack.
+    value: ${{ steps.setup.outputs.lxd-revision }}
+runs:
+  using: 'composite'
+  steps:
+    - uses: canonical/craft-actions/charmcraft/setup@main
+      id: setup
+      with:
+        channel: ${{ inputs.channel }}
+        revision: ${{ inputs.revision }}
+        lxd-channel: ${{ inputs.lxd-channel }}
+    - uses: actions/cache@v4
+      with:
+        path: ${{ runner.temp }}/charmcraft_cache
+        key: charmcraft-cache-${{ hashfiles('**/requirements.txt', '**/*.lock', '**/charmcraft.yaml') }}
+        restore-keys: |
+          charmcraft-cache-
+    - id: pack-charm
+      shell: bash
+      env:
+        CRAFT_VERBOSITY_LEVEL: ${{ inputs.verbosity }}
+        CRAFT_SHARED_CACHE: ${{ runner.temp }}/charmcraft_cache
+      working-directory: ${{ inputs.path }}
+      run: |
+        mkdir -p "${CRAFT_SHARED_CACHE}"
+        charmcraft pack
+        echo "charms=$(ls -1 *.charm | tr '\n' ' ')" >> "$GITHUB_OUTPUT"
+branding:
+  icon: layers
+  color: orange

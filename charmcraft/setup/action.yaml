@@ -1,0 +1,69 @@
+name: "Setup Charmcraft"
+description: "Install Charmcraft"
+author: "Canonical"
+inputs:
+  channel:
+    description: >
+      Install the snap from a specific channel
+
+      If not provided, it defaults to stable.
+    default: 'latest/stable'
+  revision:
+    description: >
+      Pin the snap revision to install.
+
+      If not provided, it defaults to whatever revision is in latest/stable.
+    default: ''
+  lxd-channel:
+    description: >
+      The LXD channel to use.
+
+      Defaults to the recommended channel for Charmcraft.
+    default: 5.21/stable
+outputs:
+  lxd-revision:
+    description: The LXD revision used.
+    value: ${{ steps.install.outputs.lxd }}
+  charmcraft-revision:
+    description: The Charmcraft revision used.
+    value: ${{ steps.install.outputs.charmcraft }}
+runs:
+  using: 'composite'
+  steps:
+    - shell: bash
+      name: Check system compatibility
+      run: |
+        if [[ $(uname -s) != Linux ]]; then
+          echo "::error::This action only works on Linux runners."
+          exit 1
+        fi
+        if ! which snap; then
+          echo "::error::This action requires snapd"
+        fi
+    - uses: canonical/setup-lxd@main
+      with:
+        channel: ${{ inputs.lxd-channel }}
+    - shell: bash
+      working-directory: ${{ inputs.path }}
+      name: Install Charmcraft
+      id: install
+      run: |
+        if [ -x /snap/bin/charmcraft ]; then
+          action=refresh
+        else
+          action=install
+        fi
+        if [ -n "${{ inputs.revision }}" ]; then
+          echo "::notice::Using Charmcraft revision ${{ inputs.revision }}"
+          sudo snap $action --revision=${{ inputs.revision }} --classic charmcraft
+        else
+          echo "::notice::Using Charmcraft from channel ${{ inputs.channel }}"
+          sudo snap $action --channel=${{ inputs.channel }} --classic charmcraft
+        fi
+
+
+        echo "lxd=$(curl -sS --unix-socket /run/snapd.socket http://localhost/v2/snaps/lxd -X GET | jq -r .result.revision)" >> "$GITHUB_OUTPUT"
+        echo "charmcraft=$(curl -sS --unix-socket /run/snapd.socket http://localhost/v2/snaps/charmcraft -X GET | jq -r .result.revision)" >> "$GITHUB_OUTPUT"
+branding:
+  icon: package
+  color: orange

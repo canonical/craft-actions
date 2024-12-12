@@ -4,8 +4,8 @@ author: "Canonical"
 inputs:
   path:
     description: >
-      The location of the Rockcraft project. 
-      
+      The location of the Rockcraft project.
+
       Defaults to the base of the repository.
     default: '.'
   verbosity:

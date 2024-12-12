@@ -46,7 +46,7 @@ outputs:
 runs:
   using: 'composite'
   steps:
-    - uses: ./charmcraft/setup
+    - uses: canonical/craft-actions/charmcraft/setup@main
       id: setup
       with:
         channel: ${{ inputs.channel }}

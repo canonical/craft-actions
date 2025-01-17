@@ -30,7 +30,9 @@ test('RockcraftBuilder expands tilde in project root', () => {
 })
 
 test('RockcraftBuilder.pack runs a rock build', async () => {
-  expect.assertions(4)
+  expect.assertions(5)
+
+  const user = 'ubuntu'
 
   const ensureSnapd = jest
     .spyOn(tools, 'ensureSnapd')
@@ -41,6 +43,9 @@ test('RockcraftBuilder.pack runs a rock build', async () => {
   const ensureRockcraft = jest
     .spyOn(tools, 'ensureRockcraft')
     .mockImplementation(async (channel): Promise<void> => {})
+  const shellUser = jest
+    .spyOn(tools, 'shellUser')
+    .mockImplementation((): string => user)
   const execMock = jest
     .spyOn(exec, 'exec')
     .mockImplementation(
@@ -61,9 +66,18 @@ test('RockcraftBuilder.pack runs a rock build', async () => {
   expect(ensureSnapd).toHaveBeenCalled()
   expect(ensureLXD).toHaveBeenCalled()
   expect(ensureRockcraft).toHaveBeenCalled()
+  expect(shellUser).toHaveBeenCalled()
   expect(execMock).toHaveBeenCalledWith(
-    'sg',
-    ['lxd', '-c', 'rockcraft pack --verbosity debug'],
+    'sudo',
+    [
+      '--preserve-env',
+      '--user',
+      user,
+      'rockcraft',
+      'pack',
+      '--verbosity',
+      'debug'
+    ],
     {
       cwd: projectDir
     }
@@ -135,6 +149,8 @@ test('RockcraftBuilder.build can set the Rockcraft revision', async () => {
 test('RockcraftBuilder.build can pass known verbosity', async () => {
   expect.assertions(2)
 
+  const user = 'ubuntu'
+
   const ensureSnapd = jest
     .spyOn(tools, 'ensureSnapd')
     .mockImplementation(async (): Promise<void> => {})
@@ -144,6 +160,9 @@ test('RockcraftBuilder.build can pass known verbosity', async () => {
   const ensureRockcraft = jest
     .spyOn(tools, 'ensureRockcraft')
     .mockImplementation(async (channel): Promise<void> => {})
+  const shellUser = jest
+    .spyOn(tools, 'shellUser')
+    .mockImplementation((): string => user)
   const execMock = jest
     .spyOn(exec, 'exec')
     .mockImplementation(
@@ -161,8 +180,16 @@ test('RockcraftBuilder.build can pass known verbosity', async () => {
   await builder.pack()
 
   expect(execMock).toHaveBeenCalledWith(
-    'sg',
-    ['lxd', '-c', 'rockcraft pack --verbosity trace'],
+    'sudo',
+    [
+      '--preserve-env',
+      '--user',
+      user,
+      'rockcraft',
+      'pack',
+      '--verbosity',
+      'trace'
+    ],
     expect.anything()
   )
 

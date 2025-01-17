@@ -12,6 +12,10 @@ export function expandHome(p: string): string {
   return p
 }
 
+export function shellUser(): string {
+  return os.userInfo().username
+}
+
 async function haveExecutable(path: string): Promise<boolean> {
   try {
     await fs.promises.access(path, fs.constants.X_OK)
@@ -68,14 +72,14 @@ export async function ensureLXD(): Promise<void> {
     await exec.exec('sudo', ['apt-get', 'remove', '-qy', 'lxd', 'lxd-client'])
   }
 
-  core.info(`Ensuring ${os.userInfo().username} is in the lxd group...`)
+  core.info(`Ensuring ${shellUser()} is in the lxd group...`)
   await exec.exec('sudo', ['groupadd', '--force', '--system', 'lxd'])
   await exec.exec('sudo', [
     'usermod',
     '--append',
     '--groups',
     'lxd',
-    os.userInfo().username
+    shellUser()
   ])
 
   // Install a specific version of LXD that we know works well with Rockcraft

@@ -51,7 +51,7 @@ jobs:
         installed_rev="$(snap info rockcraft | tail -1 | awk '{print $(NF-2)}')"
         [ "$installed_rev" == "(${{ matrix.revision }})" ]
     - name: Upload rock
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: test-rock_${{ matrix.os }}
+        name: test-rock-${{ matrix.os }}-${{ matrix.revision }}
         path: ${{ steps.rockcraft.outputs.rock }}

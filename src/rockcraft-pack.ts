@@ -49,9 +49,13 @@ export class RockcraftBuilder {
     }
 
     rockcraft = `${rockcraft} ${rockcraftPackArgs.trim()}`
-    await exec.exec('sg', ['lxd', '-c', rockcraft], {
-      cwd: this.projectRoot
-    })
+    await exec.exec(
+      'sudo',
+      ['--preserve-env', '--user', tools.shellUser(), ...rockcraft.split(' ')],
+      {
+        cwd: this.projectRoot
+      }
+    )
   }
 
   // This wrapper is for the benefit of the tests, due to the crazy

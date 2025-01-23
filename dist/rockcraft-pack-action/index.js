@@ -19999,6 +19999,9 @@ function expandHome(p) {
   }
   return p;
 }
+function shellUser() {
+  return os.userInfo().username;
+}
 async function haveExecutable(path2) {
   try {
     await fs.promises.access(path2, fs.constants.X_OK);
@@ -20046,14 +20049,14 @@ async function ensureLXD() {
     core.info("Removing legacy .deb packaged LXD...");
     await exec.exec("sudo", ["apt-get", "remove", "-qy", "lxd", "lxd-client"]);
   }
-  core.info(`Ensuring ${os.userInfo().username} is in the lxd group...`);
+  core.info(`Ensuring ${shellUser()} is in the lxd group...`);
   await exec.exec("sudo", ["groupadd", "--force", "--system", "lxd"]);
   await exec.exec("sudo", [
     "usermod",
     "--append",
     "--groups",
     "lxd",
-    os.userInfo().username
+    shellUser()
   ]);
   const haveSnapLXD = await haveExecutable("/snap/bin/lxd");
   if (!haveSnapLXD) {
@@ -20114,9 +20117,13 @@ var RockcraftBuilder = class {
       rockcraftPackArgs = `${rockcraftPackArgs} --verbosity ${this.rockcraftPackVerbosity}`;
     }
     rockcraft = `${rockcraft} ${rockcraftPackArgs.trim()}`;
-    await exec3.exec("sg", ["lxd", "-c", rockcraft], {
-      cwd: this.projectRoot
-    });
+    await exec3.exec(
+      "sudo",
+      ["--preserve-env", "--user", shellUser(), ...rockcraft.split(" ")],
+      {
+        cwd: this.projectRoot
+      }
+    );
   }
   // This wrapper is for the benefit of the tests, due to the crazy
   // typing of fs.promises.readdir()

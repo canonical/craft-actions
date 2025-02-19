@@ -160,6 +160,55 @@ Pin Charmcraft to a specific revision. Overrides the `channel` option.
 Select a channel for LXD to be installed from. Defaults to the current recommended channel for Charmcraft.
 
 ---
+
+## charmcraft/check-libraries
+
+Check if - in the current pull request - charm libraries are updated, and add the relevant label to the PR.
+
+### Usage
+
+```yaml
+steps:
+  - uses: actions/checkout@v4
+  - uses: canonical/craft-actions/charmcraft/check-libraries@main
+    with:
+      github_token: ${{ secrets.GITHUB_TOKEN }}
+```
+
+You should provide the GitHub token to the action via a secret.
+
+#### Inputs
+
+##### `path`
+
+If your Charmcraft project ("charmcraft.yaml") is not located in the root of the
+workspace, you can specify an alternative location via the `path` input
+parameter.
+
+```yaml
+steps:
+  - uses: actions/checkout@v3
+  - uses: canonical/craft-actions/charmcraft/check-libraries@main
+    with:
+      github_token: ${{ secrets.GITHUB_TOKEN }}
+      path: path/to/project/
+```
+
+##### `okay_label`
+
+Customize the label added to a PR when `charmcraft fetch-lib` says everything is up-to-date.
+Defaults to `Charm Libraries: OK`.
+
+##### `outdated_label`
+
+Customize the label added to a PR when `charmcraft fetch-lib` says something is outdated or
+out-of-sync. Defaults to `Charm Libraries: Out of sync`.
+
+##### `charmcraft-channel`
+
+Select a channel for the Charmcraft sanp to be installed from. Defaults to `latest/stable`.
+
+---
 ## Committing code
 
 Please follow these guidelines when committing code for this project:

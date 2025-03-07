@@ -181,7 +181,7 @@ You should provide the GitHub token to the action via a secret.
 
 ##### `path`
 
-If your Charmcraft project ("charmcraft.yaml") is not located in the root of the
+If your Charmcraft project file ("charmcraft.yaml") is not located in the root of the
 workspace, you can specify an alternative location via the `path` input
 parameter.
 

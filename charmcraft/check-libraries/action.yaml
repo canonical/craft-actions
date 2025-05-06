@@ -21,7 +21,7 @@ inputs:
     default: "Charm Libraries: OK"
   outdated_label:
     description: >
-      PR label to indicate thta charm libraries are outdated, and new
+      PR label to indicate that charm libraries are outdated, and new
       versions can be fetched.
     default: "Charm Libraries: Out of sync"
   charmcraft_channel:

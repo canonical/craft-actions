@@ -13,6 +13,7 @@ interface RockcraftBuilderOptions {
   rockcraftChannel: string
   rockcraftPackVerbosity: string
   rockcraftRevision: string
+  envFile: string
 }
 
 export class RockcraftBuilder {
@@ -20,11 +21,13 @@ export class RockcraftBuilder {
   rockcraftChannel: string
   rockcraftPackVerbosity: string
   rockcraftRevision: string
+  envFile: string
 
   constructor(options: RockcraftBuilderOptions) {
     this.projectRoot = tools.expandHome(options.projectRoot)
     this.rockcraftChannel = options.rockcraftChannel
     this.rockcraftRevision = options.rockcraftRevision
+    this.envFile = options.envFile
     if (allowedVerbosity.includes(options.rockcraftPackVerbosity)) {
       this.rockcraftPackVerbosity = options.rockcraftPackVerbosity
     } else {
@@ -49,13 +52,17 @@ export class RockcraftBuilder {
     }
 
     rockcraft = `${rockcraft} ${rockcraftPackArgs.trim()}`
-    await exec.exec(
-      'sudo',
-      ['--preserve-env', '--user', tools.shellUser(), ...rockcraft.split(' ')],
-      {
-        cwd: this.projectRoot
-      }
-    )
+
+    // Source environment and run the command
+    let sourceCmd = ''
+    if (this.envFile) {
+      sourceCmd = `source ${this.envFile} && `
+    }
+    const bashCommand = `${sourceCmd}sudo --preserve-env --user ${tools.shellUser()} ${rockcraft}`
+
+    await exec.exec('bash', ['-c', bashCommand], {
+      cwd: this.projectRoot
+    })
   }
 
   // This wrapper is for the benefit of the tests, due to the crazy

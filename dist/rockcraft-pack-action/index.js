@@ -20093,10 +20093,12 @@ var RockcraftBuilder = class {
   rockcraftChannel;
   rockcraftPackVerbosity;
   rockcraftRevision;
+  envFile;
   constructor(options) {
     this.projectRoot = expandHome(options.projectRoot);
     this.rockcraftChannel = options.rockcraftChannel;
     this.rockcraftRevision = options.rockcraftRevision;
+    this.envFile = options.envFile;
     if (allowedVerbosity.includes(options.rockcraftPackVerbosity)) {
       this.rockcraftPackVerbosity = options.rockcraftPackVerbosity;
     } else {
@@ -20117,13 +20119,14 @@ var RockcraftBuilder = class {
       rockcraftPackArgs = `${rockcraftPackArgs} --verbosity ${this.rockcraftPackVerbosity}`;
     }
     rockcraft = `${rockcraft} ${rockcraftPackArgs.trim()}`;
-    await exec3.exec(
-      "sudo",
-      ["--preserve-env", "--user", shellUser(), ...rockcraft.split(" ")],
-      {
-        cwd: this.projectRoot
-      }
-    );
+    let sourceCmd = "";
+    if (this.envFile) {
+      sourceCmd = `source ${this.envFile} && `;
+    }
+    const bashCommand = `${sourceCmd}sudo --preserve-env --user ${shellUser()} ${rockcraft}`;
+    await exec3.exec("bash", ["-c", bashCommand], {
+      cwd: this.projectRoot
+    });
   }
   // This wrapper is for the benefit of the tests, due to the crazy
   // typing of fs.promises.readdir()
@@ -20150,6 +20153,7 @@ async function run() {
     core3.info(`Building rock in "${projectRoot}"...`);
     const rockcraftRevision = core3.getInput("revision");
     const rockcraftChannel = core3.getInput("rockcraft-channel") || "stable";
+    const envFile = core3.getInput("env-file") || "";
     if (rockcraftRevision.length < 1) {
       core3.warning(
         `Rockcraft revision not provided. Installing from ${rockcraftChannel}`
@@ -20160,7 +20164,8 @@ async function run() {
       projectRoot,
       rockcraftChannel,
       rockcraftPackVerbosity,
-      rockcraftRevision
+      rockcraftRevision,
+      envFile
     });
     await builder.pack();
     const rock = await builder.outputRock();

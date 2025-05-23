@@ -29,7 +29,7 @@ inputs:
     default: ''
   env-file:
     description: >
-      The path to the file containing environment for execution.
+      The path to the file containing the environment for execution.
 
     default: ''
 outputs:

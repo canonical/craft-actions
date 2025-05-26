@@ -20002,6 +20002,9 @@ function expandHome(p) {
 function shellUser() {
   return os.userInfo().username;
 }
+function fileExists(path2) {
+  return fs.existsSync(path2);
+}
 async function haveExecutable(path2) {
   try {
     await fs.promises.access(path2, fs.constants.X_OK);
@@ -20009,6 +20012,9 @@ async function haveExecutable(path2) {
     return false;
   }
   return true;
+}
+async function haveRockcraftTest() {
+  return await exec.exec("sudo", ["rockcraft", "test", "-h"]) === 0;
 }
 async function ensureSnapd() {
   const haveSnapd = await haveExecutable("/usr/bin/snap");
@@ -20113,6 +20119,13 @@ var RockcraftBuilder = class {
     core2.endGroup();
     let rockcraft = "rockcraft pack";
     let rockcraftPackArgs = "";
+    if (fileExists(`${this.projectRoot}/spread.yaml`)) {
+      if (await haveRockcraftTest()) {
+        rockcraft = "rockcraft test";
+      } else {
+        core2.warning("rockcraft test not found. Tests will be ignored.");
+      }
+    }
     if (this.rockcraftPackVerbosity) {
       rockcraftPackArgs = `${rockcraftPackArgs} --verbosity ${this.rockcraftPackVerbosity}`;
     }

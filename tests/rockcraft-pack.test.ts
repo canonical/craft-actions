@@ -293,7 +293,7 @@ test('RockcraftBuilder.pack runs a rock build and shows a warning if not testing
     .mockImplementation((path: string) => true)
   const warningMock = jest
     .spyOn(core, 'warning')
-    .mockImplementation( (message: any) => {} )
+    .mockImplementation((message: any) => {})
   const execMock = jest
     .spyOn(exec, 'exec')
     .mockImplementation(
@@ -317,7 +317,9 @@ test('RockcraftBuilder.pack runs a rock build and shows a warning if not testing
   expect(shellUser).toHaveBeenCalled()
   expect(haveRockcraftTest).toHaveBeenCalled()
   expect(fileExists).toHaveBeenCalledWith('project-root/spread.yaml')
-  expect(warningMock).toHaveBeenCalledWith("rockcraft test not found. Tests will be ignored.")
+  expect(warningMock).toHaveBeenCalledWith(
+    'rockcraft test not found. Tests will be ignored.'
+  )
   expect(execMock).toHaveBeenCalledWith(
     'sudo',
     [

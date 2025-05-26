@@ -17,7 +17,7 @@ export function shellUser(): string {
 }
 
 export function fileExists(path: string): boolean {
-  return fs.existsSync(path);
+  return fs.existsSync(path)
 }
 
 async function haveExecutable(path: string): Promise<boolean> {
@@ -30,7 +30,7 @@ async function haveExecutable(path: string): Promise<boolean> {
 }
 
 export async function haveRockcraftTest(): Promise<boolean> {
-  return (await exec.exec('sudo', ['rockcraft', 'test', '-h'])) === 0;
+  return (await exec.exec('sudo', ['rockcraft', 'test', '-h'])) === 0
 }
 
 export async function ensureSnapd(): Promise<void> {

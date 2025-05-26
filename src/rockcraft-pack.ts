@@ -56,7 +56,7 @@ export class RockcraftBuilder {
     // Source environment and run the command
     let sourceCmd = ''
     if (this.envFile) {
-      sourceCmd = `source ${this.envFile} && `
+      sourceCmd = `source "${this.envFile}" && `
     }
     const bashCommand = `${sourceCmd}sudo --preserve-env --user ${tools.shellUser()} ${rockcraft}`
 

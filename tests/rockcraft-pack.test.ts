@@ -74,7 +74,7 @@ test('RockcraftBuilder.pack runs a rock build', async () => {
     'bash',
     [
       '-c',
-      'source my-env-file && sudo --preserve-env --user ' +
+      'source "my-env-file" && sudo --preserve-env --user ' +
         user +
         ' rockcraft pack --verbosity debug'
     ],

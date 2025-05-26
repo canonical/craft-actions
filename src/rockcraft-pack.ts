@@ -44,6 +44,13 @@ export class RockcraftBuilder {
 
     let rockcraft = 'rockcraft pack'
     let rockcraftPackArgs = ''
+
+    if (tools.fileExists(`${this.projectRoot}/spread.yaml`)) {
+      if (await tools.haveRockcraftTest()) 
+        rockcraft = 'rockcraft test'
+      else
+        core.warning("rockcraft test not found. Tests will be ignored.")
+    }
     if (this.rockcraftPackVerbosity) {
       rockcraftPackArgs = `${rockcraftPackArgs} --verbosity ${this.rockcraftPackVerbosity}`
     }

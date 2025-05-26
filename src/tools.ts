@@ -16,6 +16,10 @@ export function shellUser(): string {
   return os.userInfo().username
 }
 
+export function fileExists(path: string): boolean {
+  return fs.existsSync(path);
+}
+
 async function haveExecutable(path: string): Promise<boolean> {
   try {
     await fs.promises.access(path, fs.constants.X_OK)
@@ -23,6 +27,10 @@ async function haveExecutable(path: string): Promise<boolean> {
     return false
   }
   return true
+}
+
+export async function haveRockcraftTest(): Promise<boolean> {
+  return (await exec.exec('sudo', ['rockcraft', 'test', '-h'])) === 0;
 }
 
 export async function ensureSnapd(): Promise<void> {

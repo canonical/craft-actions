@@ -3,6 +3,7 @@
 import * as os from 'os'
 import * as path from 'path'
 import * as exec from '@actions/exec'
+import * as core from '@actions/core'
 import * as build from '../src/rockcraft-pack'
 import * as tools from '../src/tools'
 import * as fs from 'fs'
@@ -202,6 +203,136 @@ test('RockcraftBuilder.build can pass known verbosity', async () => {
     })
   }
   expect(badBuilder).toThrow()
+})
+
+test('RockcraftBuilder.pack runs a rock build and test', async () => {
+  expect.assertions(7)
+
+  const user = 'ubuntu'
+
+  const ensureSnapd = jest
+    .spyOn(tools, 'ensureSnapd')
+    .mockImplementation(async (): Promise<void> => {})
+  const ensureLXD = jest
+    .spyOn(tools, 'ensureLXD')
+    .mockImplementation(async (): Promise<void> => {})
+  const ensureRockcraft = jest
+    .spyOn(tools, 'ensureRockcraft')
+    .mockImplementation(async (channel): Promise<void> => {})
+  const shellUser = jest
+    .spyOn(tools, 'shellUser')
+    .mockImplementation((): string => user)
+  const haveRockcraftTest = jest
+    .spyOn(tools, 'haveRockcraftTest')
+    .mockImplementation(async (): Promise<boolean> => true)
+  const fileExists = jest
+    .spyOn(tools, 'fileExists')
+    .mockImplementation((path: string) => true)
+  const execMock = jest
+    .spyOn(exec, 'exec')
+    .mockImplementation(
+      async (program: string, args?: string[]): Promise<number> => {
+        return 0
+      }
+    )
+
+  const projectDir = 'project-root'
+  const builder = new build.RockcraftBuilder({
+    projectRoot: projectDir,
+    rockcraftChannel: 'stable',
+    rockcraftPackVerbosity: 'debug',
+    rockcraftRevision: '1'
+  })
+  await builder.pack()
+
+  expect(ensureSnapd).toHaveBeenCalled()
+  expect(ensureLXD).toHaveBeenCalled()
+  expect(ensureRockcraft).toHaveBeenCalled()
+  expect(shellUser).toHaveBeenCalled()
+  expect(haveRockcraftTest).toHaveBeenCalled()
+  expect(fileExists).toHaveBeenCalledWith('project-root/spread.yaml')
+  expect(execMock).toHaveBeenCalledWith(
+    'sudo',
+    [
+      '--preserve-env',
+      '--user',
+      user,
+      'rockcraft',
+      'test',
+      '--verbosity',
+      'debug'
+    ],
+    {
+      cwd: projectDir
+    }
+  )
+})
+
+test('RockcraftBuilder.pack runs a rock build and shows a warning if not testing', async () => {
+  expect.assertions(8)
+
+  const user = 'ubuntu'
+
+  const ensureSnapd = jest
+    .spyOn(tools, 'ensureSnapd')
+    .mockImplementation(async (): Promise<void> => {})
+  const ensureLXD = jest
+    .spyOn(tools, 'ensureLXD')
+    .mockImplementation(async (): Promise<void> => {})
+  const ensureRockcraft = jest
+    .spyOn(tools, 'ensureRockcraft')
+    .mockImplementation(async (channel): Promise<void> => {})
+  const shellUser = jest
+    .spyOn(tools, 'shellUser')
+    .mockImplementation((): string => user)
+  const haveRockcraftTest = jest
+    .spyOn(tools, 'haveRockcraftTest')
+    .mockImplementation(async (): Promise<boolean> => false)
+  const fileExists = jest
+    .spyOn(tools, 'fileExists')
+    .mockImplementation((path: string) => true)
+  const warningMock = jest
+    .spyOn(core, 'warning')
+    .mockImplementation( (message: any) => {} )
+  const execMock = jest
+    .spyOn(exec, 'exec')
+    .mockImplementation(
+      async (program: string, args?: string[]): Promise<number> => {
+        return 0
+      }
+    )
+
+  const projectDir = 'project-root'
+  const builder = new build.RockcraftBuilder({
+    projectRoot: projectDir,
+    rockcraftChannel: 'stable',
+    rockcraftPackVerbosity: 'debug',
+    rockcraftRevision: '1'
+  })
+  await builder.pack()
+
+  expect(ensureSnapd).toHaveBeenCalled()
+  expect(ensureLXD).toHaveBeenCalled()
+  expect(ensureRockcraft).toHaveBeenCalled()
+  expect(shellUser).toHaveBeenCalled()
+  expect(haveRockcraftTest).toHaveBeenCalled()
+  expect(fileExists).toHaveBeenCalledWith('project-root/spread.yaml')
+  expect(warningMock).toHaveBeenCalledWith("rockcraft test not found. Tests will be ignored.")
+  expect(execMock).toHaveBeenCalledWith(
+    'sudo',
+    [
+      '--preserve-env',
+      '--user',
+      user,
+      'rockcraft',
+      'pack',
+      '--verbosity',
+      'debug'
+    ],
+    {
+      cwd: projectDir
+    }
+  )
 })
 
 test('RockcraftBuilder.outputRock fails if there are no rocks', async () => {

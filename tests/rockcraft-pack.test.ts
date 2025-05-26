@@ -16,7 +16,8 @@ test('RockcraftBuilder expands tilde in project root', () => {
     projectRoot: '~',
     rockcraftChannel: 'edge',
     rockcraftPackVerbosity: 'trace',
-    rockcraftRevision: '1'
+    rockcraftRevision: '1',
+    envFile: ''
   })
   expect(builder.projectRoot).toBe(os.homedir())
 
@@ -24,7 +25,8 @@ test('RockcraftBuilder expands tilde in project root', () => {
     projectRoot: '~/foo/bar',
     rockcraftChannel: 'stable',
     rockcraftPackVerbosity: 'trace',
-    rockcraftRevision: '1'
+    rockcraftRevision: '1',
+    envFile: ''
   })
   expect(builder.projectRoot).toBe(path.join(os.homedir(), 'foo/bar'))
 })
@@ -59,7 +61,8 @@ test('RockcraftBuilder.pack runs a rock build', async () => {
     projectRoot: projectDir,
     rockcraftChannel: 'stable',
     rockcraftPackVerbosity: 'debug',
-    rockcraftRevision: '1'
+    rockcraftRevision: '1',
+    envFile: 'my-env-file'
   })
   await builder.pack()
 
@@ -68,15 +71,12 @@ test('RockcraftBuilder.pack runs a rock build', async () => {
   expect(ensureRockcraft).toHaveBeenCalled()
   expect(shellUser).toHaveBeenCalled()
   expect(execMock).toHaveBeenCalledWith(
-    'sudo',
+    'bash',
     [
-      '--preserve-env',
-      '--user',
-      user,
-      'rockcraft',
-      'pack',
-      '--verbosity',
-      'debug'
+      '-c',
+      'source "my-env-file" && sudo --preserve-env --user ' +
+        user +
+        ' rockcraft pack --verbosity debug'
     ],
     {
       cwd: projectDir
@@ -108,7 +108,8 @@ test('RockcraftBuilder.build can set the Rockcraft channel', async () => {
     projectRoot: '.',
     rockcraftChannel: 'test-channel',
     rockcraftPackVerbosity: 'trace',
-    rockcraftRevision: ''
+    rockcraftRevision: '',
+    envFile: ''
   })
   await builder.pack()
 
@@ -139,7 +140,8 @@ test('RockcraftBuilder.build can set the Rockcraft revision', async () => {
     projectRoot: '.',
     rockcraftChannel: 'channel',
     rockcraftPackVerbosity: 'trace',
-    rockcraftRevision: '123'
+    rockcraftRevision: '123',
+    envFile: ''
   })
   await builder.pack()
 
@@ -175,20 +177,16 @@ test('RockcraftBuilder.build can pass known verbosity', async () => {
     projectRoot: '.',
     rockcraftChannel: 'stable',
     rockcraftPackVerbosity: 'trace',
-    rockcraftRevision: '1'
+    rockcraftRevision: '1',
+    envFile: ''
   })
   await builder.pack()
 
   expect(execMock).toHaveBeenCalledWith(
-    'sudo',
+    'bash',
     [
-      '--preserve-env',
-      '--user',
-      user,
-      'rockcraft',
-      'pack',
-      '--verbosity',
-      'trace'
+      '-c',
+      'sudo --preserve-env --user ' + user + ' rockcraft pack --verbosity trace'
     ],
     expect.anything()
   )
@@ -198,7 +196,8 @@ test('RockcraftBuilder.build can pass known verbosity', async () => {
       projectRoot: '.',
       rockcraftChannel: 'stable',
       rockcraftPackVerbosity: 'fake-verbosity',
-      rockcraftRevision: '1'
+      rockcraftRevision: '1',
+      envFile: ''
     })
   }
   expect(badBuilder).toThrow()
@@ -212,7 +211,8 @@ test('RockcraftBuilder.outputRock fails if there are no rocks', async () => {
     projectRoot: projectDir,
     rockcraftChannel: 'stable',
     rockcraftPackVerbosity: 'trace',
-    rockcraftRevision: '1'
+    rockcraftRevision: '1',
+    envFile: ''
   })
 
   const readdir = jest
@@ -233,7 +233,8 @@ test('RockcraftBuilder.outputRock returns the first rock', async () => {
     projectRoot: projectDir,
     rockcraftChannel: 'stable',
     rockcraftPackVerbosity: 'trace',
-    rockcraftRevision: '1'
+    rockcraftRevision: '1',
+    envFile: ''
   })
 
   const readdir = jest

@@ -27,6 +27,11 @@ inputs:
 
       If not provided, it defaults to whatever revision is in latest/stable.
     default: ''
+  env-file:
+    description: >
+      The path to the file containing the environment for execution.
+
+    default: ''
 outputs:
   rock:
     description: 'The file name of the resulting rock.'

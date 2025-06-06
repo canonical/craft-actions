@@ -20099,10 +20099,12 @@ var RockcraftBuilder = class {
   rockcraftChannel;
   rockcraftPackVerbosity;
   rockcraftRevision;
+  runRockcraftTest;
   constructor(options) {
     this.projectRoot = expandHome(options.projectRoot);
     this.rockcraftChannel = options.rockcraftChannel;
     this.rockcraftRevision = options.rockcraftRevision;
+    this.runRockcraftTest = options.runRockcraftTest;
     if (allowedVerbosity.includes(options.rockcraftPackVerbosity)) {
       this.rockcraftPackVerbosity = options.rockcraftPackVerbosity;
     } else {
@@ -20119,11 +20121,16 @@ var RockcraftBuilder = class {
     core2.endGroup();
     let rockcraft = "rockcraft pack";
     let rockcraftPackArgs = "";
-    if (fileExists(`${this.projectRoot}/spread.yaml`)) {
-      if (await haveRockcraftTest()) {
-        rockcraft = "rockcraft test";
+    if (this.runRockcraftTest) {
+      const testFile = `${this.projectRoot}/spread.yaml`;
+      if (!fileExists(testFile)) {
+        throw new Error(`Cannot run tests. Missing ${testFile} file.`);
+      } else if (!await haveRockcraftTest()) {
+        throw new Error(
+          "Cannot run tests. rockcraft test is not a valid command."
+        );
       } else {
-        core2.warning("rockcraft test not found. Tests will be ignored.");
+        rockcraft = "rockcraft test";
       }
     }
     if (this.rockcraftPackVerbosity) {
@@ -20163,6 +20170,7 @@ async function run() {
     core3.info(`Building rock in "${projectRoot}"...`);
     const rockcraftRevision = core3.getInput("revision");
     const rockcraftChannel = core3.getInput("rockcraft-channel") || "stable";
+    const runRockcraftTest = core3.getInput("test").toLowerCase() === "true";
     if (rockcraftRevision.length < 1) {
       core3.warning(
         `Rockcraft revision not provided. Installing from ${rockcraftChannel}`
@@ -20173,7 +20181,8 @@ async function run() {
       projectRoot,
       rockcraftChannel,
       rockcraftPackVerbosity,
-      rockcraftRevision
+      rockcraftRevision,
+      runRockcraftTest
     });
     await builder.pack();
     const rock = await builder.outputRock();

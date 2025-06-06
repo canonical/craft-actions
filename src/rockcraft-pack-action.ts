@@ -9,6 +9,7 @@ async function run(): Promise<void> {
     core.info(`Building rock in "${projectRoot}"...`)
     const rockcraftRevision = core.getInput('revision')
     const rockcraftChannel = core.getInput('rockcraft-channel') || 'stable'
+    const runRockcraftTest = core.getInput('test').toLowerCase() === 'true'
     if (rockcraftRevision.length < 1) {
       core.warning(
         `Rockcraft revision not provided. Installing from ${rockcraftChannel}`
@@ -20,7 +21,8 @@ async function run(): Promise<void> {
       projectRoot,
       rockcraftChannel,
       rockcraftPackVerbosity,
-      rockcraftRevision
+      rockcraftRevision,
+      runRockcraftTest
     })
     await builder.pack()
     const rock = await builder.outputRock()

@@ -20002,6 +20002,9 @@ function expandHome(p) {
 function shellUser() {
   return os.userInfo().username;
 }
+function fileExists(path2) {
+  return fs.existsSync(path2);
+}
 async function haveExecutable(path2) {
   try {
     await fs.promises.access(path2, fs.constants.X_OK);
@@ -20009,6 +20012,9 @@ async function haveExecutable(path2) {
     return false;
   }
   return true;
+}
+async function haveRockcraftTest() {
+  return await exec.exec("sudo", ["rockcraft", "test", "-h"]) === 0;
 }
 async function ensureSnapd() {
   const haveSnapd = await haveExecutable("/usr/bin/snap");
@@ -20093,10 +20099,12 @@ var RockcraftBuilder = class {
   rockcraftChannel;
   rockcraftPackVerbosity;
   rockcraftRevision;
+  runRockcraftTest;
   constructor(options) {
     this.projectRoot = expandHome(options.projectRoot);
     this.rockcraftChannel = options.rockcraftChannel;
     this.rockcraftRevision = options.rockcraftRevision;
+    this.runRockcraftTest = options.runRockcraftTest;
     if (allowedVerbosity.includes(options.rockcraftPackVerbosity)) {
       this.rockcraftPackVerbosity = options.rockcraftPackVerbosity;
     } else {
@@ -20113,6 +20121,18 @@ var RockcraftBuilder = class {
     core2.endGroup();
     let rockcraft = "rockcraft pack";
     let rockcraftPackArgs = "";
+    if (this.runRockcraftTest) {
+      const testFile = `${this.projectRoot}/spread.yaml`;
+      if (!fileExists(testFile)) {
+        throw new Error(`Cannot run tests. Missing ${testFile} file.`);
+      } else if (!await haveRockcraftTest()) {
+        throw new Error(
+          "Cannot run tests. rockcraft test is not a valid command."
+        );
+      } else {
+        rockcraft = "rockcraft test";
+      }
+    }
     if (this.rockcraftPackVerbosity) {
       rockcraftPackArgs = `${rockcraftPackArgs} --verbosity ${this.rockcraftPackVerbosity}`;
     }
@@ -20150,6 +20170,7 @@ async function run() {
     core3.info(`Building rock in "${projectRoot}"...`);
     const rockcraftRevision = core3.getInput("revision");
     const rockcraftChannel = core3.getInput("rockcraft-channel") || "stable";
+    const runRockcraftTest = core3.getInput("test").toLowerCase() === "true";
     if (rockcraftRevision.length < 1) {
       core3.warning(
         `Rockcraft revision not provided. Installing from ${rockcraftChannel}`
@@ -20160,7 +20181,8 @@ async function run() {
       projectRoot,
       rockcraftChannel,
       rockcraftPackVerbosity,
-      rockcraftRevision
+      rockcraftRevision,
+      runRockcraftTest
     });
     await builder.pack();
     const rock = await builder.outputRock();

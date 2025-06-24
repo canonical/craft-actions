@@ -27,6 +27,12 @@ inputs:
 
       If not provided, it defaults to whatever revision is in latest/stable.
     default: ''
+  test:
+    description: >
+      Run rockcraft test when packing the rock.
+
+      If not provided, it defaults to false.
+    default: 'false'
 outputs:
   rock:
     description: 'The file name of the resulting rock.'

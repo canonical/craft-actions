@@ -13,6 +13,7 @@ interface RockcraftBuilderOptions {
   rockcraftChannel: string
   rockcraftPackVerbosity: string
   rockcraftRevision: string
+  runRockcraftTest: boolean
 }
 
 export class RockcraftBuilder {
@@ -20,11 +21,13 @@ export class RockcraftBuilder {
   rockcraftChannel: string
   rockcraftPackVerbosity: string
   rockcraftRevision: string
+  runRockcraftTest: boolean
 
   constructor(options: RockcraftBuilderOptions) {
     this.projectRoot = tools.expandHome(options.projectRoot)
     this.rockcraftChannel = options.rockcraftChannel
     this.rockcraftRevision = options.rockcraftRevision
+    this.runRockcraftTest = options.runRockcraftTest
     if (allowedVerbosity.includes(options.rockcraftPackVerbosity)) {
       this.rockcraftPackVerbosity = options.rockcraftPackVerbosity
     } else {
@@ -44,6 +47,21 @@ export class RockcraftBuilder {
 
     let rockcraft = 'rockcraft pack'
     let rockcraftPackArgs = ''
+
+    if (this.runRockcraftTest) {
+      const testFile = `${this.projectRoot}/spread.yaml`
+
+      if (!tools.fileExists(testFile)) {
+        throw new Error(`Cannot run tests. Missing ${testFile} file.`)
+      } else if (!(await tools.haveRockcraftTest())) {
+        throw new Error(
+          'Cannot run tests. rockcraft test is not a valid command.'
+        )
+      } else {
+        rockcraft = 'rockcraft test'
+      }
+    }
+
     if (this.rockcraftPackVerbosity) {
       rockcraftPackArgs = `${rockcraftPackArgs} --verbosity ${this.rockcraftPackVerbosity}`
     }

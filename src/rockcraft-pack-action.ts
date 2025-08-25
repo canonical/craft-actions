@@ -7,7 +7,8 @@ async function run(): Promise<void> {
   try {
     const projectRoot = core.getInput('path')
     core.info(`Building rock in "${projectRoot}"...`)
-    const rockcraftRevision = core.getInput('revision')
+    const rockcraftRevision = core.getInput('revision') || ''
+    const additionalOpts = core.getInput('additional-options') || ''
     const rockcraftChannel = core.getInput('rockcraft-channel') || 'stable'
     const runRockcraftTest = core.getInput('test').toLowerCase() === 'true'
     if (rockcraftRevision.length < 1) {
@@ -22,7 +23,8 @@ async function run(): Promise<void> {
       rockcraftChannel,
       rockcraftPackVerbosity,
       rockcraftRevision,
-      runRockcraftTest
+      runRockcraftTest,
+      additionalOpts
     })
     await builder.pack()
     const rock = await builder.outputRock()

@@ -33,6 +33,12 @@ inputs:
 
       If not provided, it defaults to false.
     default: 'false'
+  additional-options:
+    description: >
+      Additional options to pass to the rockcraft pack command.
+
+      If not provided, no additional options are passed.
+    default: ''
 outputs:
   rock:
     description: 'The file name of the resulting rock.'

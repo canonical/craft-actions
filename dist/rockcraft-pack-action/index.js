@@ -20100,11 +20100,13 @@ var RockcraftBuilder = class {
   rockcraftPackVerbosity;
   rockcraftRevision;
   runRockcraftTest;
+  additionalOpts;
   constructor(options) {
     this.projectRoot = expandHome(options.projectRoot);
     this.rockcraftChannel = options.rockcraftChannel;
     this.rockcraftRevision = options.rockcraftRevision;
     this.runRockcraftTest = options.runRockcraftTest;
+    this.additionalOpts = options.additionalOpts;
     if (allowedVerbosity.includes(options.rockcraftPackVerbosity)) {
       this.rockcraftPackVerbosity = options.rockcraftPackVerbosity;
     } else {
@@ -20120,7 +20122,7 @@ var RockcraftBuilder = class {
     await ensureRockcraft(this.rockcraftChannel, this.rockcraftRevision);
     core2.endGroup();
     let rockcraft = "rockcraft pack";
-    let rockcraftPackArgs = "";
+    let rockcraftPackArgs = this.additionalOpts;
     if (this.runRockcraftTest) {
       const testFile = `${this.projectRoot}/spread.yaml`;
       if (!fileExists(testFile)) {
@@ -20168,7 +20170,8 @@ async function run() {
   try {
     const projectRoot = core3.getInput("path");
     core3.info(`Building rock in "${projectRoot}"...`);
-    const rockcraftRevision = core3.getInput("revision");
+    const rockcraftRevision = core3.getInput("revision") || "";
+    const additionalOpts = core3.getInput("additional-options") || "";
     const rockcraftChannel = core3.getInput("rockcraft-channel") || "stable";
     const runRockcraftTest = core3.getInput("test").toLowerCase() === "true";
     if (rockcraftRevision.length < 1) {
@@ -20182,7 +20185,8 @@ async function run() {
       rockcraftChannel,
       rockcraftPackVerbosity,
       rockcraftRevision,
-      runRockcraftTest
+      runRockcraftTest,
+      additionalOpts
     });
     await builder.pack();
     const rock = await builder.outputRock();

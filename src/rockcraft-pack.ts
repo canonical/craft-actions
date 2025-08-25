@@ -14,6 +14,7 @@ interface RockcraftBuilderOptions {
   rockcraftPackVerbosity: string
   rockcraftRevision: string
   runRockcraftTest: boolean
+  additionalOpts: string
 }
 
 export class RockcraftBuilder {
@@ -22,12 +23,15 @@ export class RockcraftBuilder {
   rockcraftPackVerbosity: string
   rockcraftRevision: string
   runRockcraftTest: boolean
+  additionalOpts: string
 
   constructor(options: RockcraftBuilderOptions) {
     this.projectRoot = tools.expandHome(options.projectRoot)
     this.rockcraftChannel = options.rockcraftChannel
     this.rockcraftRevision = options.rockcraftRevision
     this.runRockcraftTest = options.runRockcraftTest
+    this.additionalOpts = options.additionalOpts
+
     if (allowedVerbosity.includes(options.rockcraftPackVerbosity)) {
       this.rockcraftPackVerbosity = options.rockcraftPackVerbosity
     } else {
@@ -46,7 +50,7 @@ export class RockcraftBuilder {
     core.endGroup()
 
     let rockcraft = 'rockcraft pack'
-    let rockcraftPackArgs = ''
+    let rockcraftPackArgs = this.additionalOpts
 
     if (this.runRockcraftTest) {
       const testFile = `${this.projectRoot}/spread.yaml`

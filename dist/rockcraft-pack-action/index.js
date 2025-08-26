@@ -20145,9 +20145,11 @@ var RockcraftBuilder = class {
     }
     if (this.buildPro) {
       if (!await haveProFlag()) {
-        throw new Error("Cannot build pro rock. This rockcraft version does not support pro.");
+        throw new Error(
+          "Cannot build pro rock. This rockcraft version does not support pro."
+        );
       }
-      if (!/^[a-z,\-]+$/.test(this.buildPro)) {
+      if (!/^[a-z,-]+$/.test(this.buildPro)) {
         throw new Error("Malformed pro string");
       }
       rockcraftPackArgs = `${rockcraftPackArgs} --pro=${this.buildPro}`;

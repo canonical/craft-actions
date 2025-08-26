@@ -496,7 +496,6 @@ test('RockcraftBuilder.build fails if pro option is not available in rockcraft',
   expect(haveProFlag).toHaveBeenCalled()
 })
 
-
 test('RockcraftBuilder.build fails if pro argument is malformed', async () => {
   expect.assertions(2)
 
@@ -527,8 +526,6 @@ test('RockcraftBuilder.build fails if pro argument is malformed', async () => {
     buildPro: 'fips-updates another-command'
   })
 
-  await expect(builder.pack()).rejects.toThrow(
-    'Malformed pro string'
-  )
+  await expect(builder.pack()).rejects.toThrow('Malformed pro string')
   expect(haveProFlag).toHaveBeenCalled()
 })

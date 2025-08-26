@@ -14,7 +14,7 @@ interface RockcraftBuilderOptions {
   rockcraftPackVerbosity: string
   rockcraftRevision: string
   runRockcraftTest: boolean
-  additionalOpts: string
+  buildPro: string
 }
 
 export class RockcraftBuilder {
@@ -23,14 +23,14 @@ export class RockcraftBuilder {
   rockcraftPackVerbosity: string
   rockcraftRevision: string
   runRockcraftTest: boolean
-  additionalOpts: string
+  buildPro: string
 
   constructor(options: RockcraftBuilderOptions) {
     this.projectRoot = tools.expandHome(options.projectRoot)
     this.rockcraftChannel = options.rockcraftChannel
     this.rockcraftRevision = options.rockcraftRevision
     this.runRockcraftTest = options.runRockcraftTest
-    this.additionalOpts = options.additionalOpts
+    this.buildPro = options.buildPro
 
     if (allowedVerbosity.includes(options.rockcraftPackVerbosity)) {
       this.rockcraftPackVerbosity = options.rockcraftPackVerbosity
@@ -50,7 +50,7 @@ export class RockcraftBuilder {
     core.endGroup()
 
     let rockcraft = 'rockcraft pack'
-    let rockcraftPackArgs = this.additionalOpts
+    let rockcraftPackArgs = ''
 
     if (this.runRockcraftTest) {
       const testFile = `${this.projectRoot}/spread.yaml`
@@ -64,6 +64,16 @@ export class RockcraftBuilder {
       } else {
         rockcraft = 'rockcraft test'
       }
+    }
+
+    if (this.buildPro) {
+      if (!(await tools.haveProFlag())) {
+        throw new Error('Cannot build pro rock. This rockcraft version does not support pro.');
+      }
+      if (!/^[a-z,\-]+$/.test(this.buildPro)) {
+        throw new Error("Malformed pro string");
+      }
+      rockcraftPackArgs = `${rockcraftPackArgs} --pro=${this.buildPro}`;
     }
 
     if (this.rockcraftPackVerbosity) {

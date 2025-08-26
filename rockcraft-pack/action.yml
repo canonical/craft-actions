@@ -33,11 +33,11 @@ inputs:
 
       If not provided, it defaults to false.
     default: 'false'
-  additional-options:
+  pro:
     description: >
-      Additional options to pass to the rockcraft pack command.
+      Run rockcraft pack with the --pro argument.
 
-      If not provided, no additional options are passed.
+      If not provided, a standard rock will be packed.
     default: ''
 outputs:
   rock:

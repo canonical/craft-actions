@@ -19,7 +19,7 @@ test('RockcraftBuilder expands tilde in project root', () => {
     rockcraftPackVerbosity: 'trace',
     rockcraftRevision: '1',
     runRockcraftTest: false,
-    additionalOpts: ''
+    buildPro: ''
   })
   expect(builder.projectRoot).toBe(os.homedir())
 
@@ -29,7 +29,7 @@ test('RockcraftBuilder expands tilde in project root', () => {
     rockcraftPackVerbosity: 'trace',
     rockcraftRevision: '1',
     runRockcraftTest: false,
-    additionalOpts: ''
+    buildPro: ''
   })
   expect(builder.projectRoot).toBe(path.join(os.homedir(), 'foo/bar'))
 })
@@ -66,7 +66,7 @@ test('RockcraftBuilder.pack runs a rock build', async () => {
     rockcraftPackVerbosity: 'debug',
     rockcraftRevision: '1',
     runRockcraftTest: false,
-    additionalOpts: ''
+    buildPro: ''
   })
   await builder.pack()
 
@@ -117,7 +117,7 @@ test('RockcraftBuilder.build can set the Rockcraft channel', async () => {
     rockcraftPackVerbosity: 'trace',
     rockcraftRevision: '',
     runRockcraftTest: false,
-    additionalOpts: ''
+    buildPro: ''
   })
   await builder.pack()
 
@@ -150,7 +150,7 @@ test('RockcraftBuilder.build can set the Rockcraft revision', async () => {
     rockcraftPackVerbosity: 'trace',
     rockcraftRevision: '123',
     runRockcraftTest: false,
-    additionalOpts: ''
+    buildPro: ''
   })
   await builder.pack()
 
@@ -188,7 +188,7 @@ test('RockcraftBuilder.build can pass known verbosity', async () => {
     rockcraftPackVerbosity: 'trace',
     rockcraftRevision: '1',
     runRockcraftTest: false,
-    additionalOpts: ''
+    buildPro: ''
   })
   await builder.pack()
 
@@ -213,7 +213,7 @@ test('RockcraftBuilder.build can pass known verbosity', async () => {
       rockcraftPackVerbosity: 'fake-verbosity',
       rockcraftRevision: '1',
       runRockcraftTest: false,
-      additionalOpts: ''
+      buildPro: ''
     })
   }
   expect(badBuilder).toThrow()
@@ -257,7 +257,7 @@ test('RockcraftBuilder.pack runs a rock build and test', async () => {
     rockcraftPackVerbosity: 'debug',
     rockcraftRevision: '1',
     runRockcraftTest: true,
-    additionalOpts: ''
+    buildPro: ''
   })
   await builder.pack()
 
@@ -309,7 +309,7 @@ test('RockcraftBuilder.pack fails if test is set to true and no spread.yaml is f
     rockcraftPackVerbosity: 'debug',
     rockcraftRevision: '1',
     runRockcraftTest: true,
-    additionalOpts: ''
+    buildPro: ''
   })
 
   await expect(builder.pack()).rejects.toThrow(
@@ -349,7 +349,7 @@ test('RockcraftBuilder.pack fails if test is set to true and rockcraft test is i
     rockcraftPackVerbosity: 'debug',
     rockcraftRevision: '1',
     runRockcraftTest: true,
-    additionalOpts: ''
+    buildPro: ''
   })
 
   await expect(builder.pack()).rejects.toThrow(
@@ -372,7 +372,7 @@ test('RockcraftBuilder.outputRock fails if there are no rocks', async () => {
     rockcraftPackVerbosity: 'trace',
     rockcraftRevision: '1',
     runRockcraftTest: false,
-    additionalOpts: ''
+    buildPro: ''
   })
 
   const readdir = jest
@@ -395,7 +395,7 @@ test('RockcraftBuilder.outputRock returns the first rock', async () => {
     rockcraftPackVerbosity: 'trace',
     rockcraftRevision: '1',
     runRockcraftTest: false,
-    additionalOpts: ''
+    buildPro: ''
   })
 
   const readdir = jest
@@ -406,7 +406,61 @@ test('RockcraftBuilder.outputRock returns the first rock', async () => {
   expect(readdir).toHaveBeenCalled()
 })
 
-test('RockcraftBuilder.build can pass additional options', async () => {
+test('RockcraftBuilder.build can pass pro option', async () => {
+  expect.assertions(1)
+
+  const user = 'ubuntu'
+
+  const ensureSnapd = jest
+    .spyOn(tools, 'ensureSnapd')
+    .mockImplementation(async (): Promise<void> => {})
+  const ensureLXD = jest
+    .spyOn(tools, 'ensureLXD')
+    .mockImplementation(async (): Promise<void> => {})
+  const ensureRockcraft = jest
+    .spyOn(tools, 'ensureRockcraft')
+    .mockImplementation(async (channel): Promise<void> => {})
+  const shellUser = jest
+    .spyOn(tools, 'shellUser')
+    .mockImplementation((): string => user)
+  const haveProFlag = jest
+    .spyOn(tools, 'haveProFlag')
+    .mockImplementation(async (): Promise<boolean> => true)
+  const execMock = jest
+    .spyOn(exec, 'exec')
+    .mockImplementation(
+      async (program: string, args?: string[]): Promise<number> => {
+        return 0
+      }
+    )
+
+  const builder = new build.RockcraftBuilder({
+    projectRoot: '.',
+    rockcraftChannel: 'stable',
+    rockcraftPackVerbosity: 'trace',
+    rockcraftRevision: '1',
+    runRockcraftTest: false,
+    buildPro: 'esm-apps,esm-infra'
+  })
+  await builder.pack()
+
+  expect(execMock).toHaveBeenCalledWith(
+    'sudo',
+    [
+      '--preserve-env',
+      '--user',
+      user,
+      'rockcraft',
+      'pack',
+      '--pro=esm-apps,esm-infra',
+      '--verbosity',
+      'trace'
+    ],
+    expect.anything()
+  )
+})
+
+test('RockcraftBuilder.build fails if pro option is not available in rockcraft', async () => {
   expect.assertions(2)
 
   const user = 'ubuntu'
@@ -423,13 +477,9 @@ test('RockcraftBuilder.build can pass additional options', async () => {
   const shellUser = jest
     .spyOn(tools, 'shellUser')
     .mockImplementation((): string => user)
-  const execMock = jest
-    .spyOn(exec, 'exec')
-    .mockImplementation(
-      async (program: string, args?: string[]): Promise<number> => {
-        return 0
-      }
-    )
+  const haveProFlag = jest
+    .spyOn(tools, 'haveProFlag')
+    .mockImplementation(async (): Promise<boolean> => false)
 
   const builder = new build.RockcraftBuilder({
     projectRoot: '.',
@@ -437,37 +487,48 @@ test('RockcraftBuilder.build can pass additional options', async () => {
     rockcraftPackVerbosity: 'trace',
     rockcraftRevision: '1',
     runRockcraftTest: false,
-    additionalOpts: '--pro esm-apps --verbosity quiet'
+    buildPro: 'fips-updates'
   })
-  await builder.pack()
 
-  expect(execMock).toHaveBeenCalledWith(
-    'sudo',
-    [
-      '--preserve-env',
-      '--user',
-      user,
-      'rockcraft',
-      'pack',
-      '--pro',
-      'esm-apps',
-      '--verbosity',
-      'quiet',
-      '--verbosity',
-      'trace'
-    ],
-    expect.anything()
+  await expect(builder.pack()).rejects.toThrow(
+    'Cannot build pro rock. This rockcraft version does not support pro.'
   )
+  expect(haveProFlag).toHaveBeenCalled()
+})
 
-  const badBuilder = () => {
-    new build.RockcraftBuilder({
-      projectRoot: '.',
-      rockcraftChannel: 'stable',
-      rockcraftPackVerbosity: 'fake-verbosity',
-      rockcraftRevision: '1',
-      runRockcraftTest: false,
-      additionalOpts: ''
-    })
-  }
-  expect(badBuilder).toThrow()
+
+test('RockcraftBuilder.build fails if pro argument is malformed', async () => {
+  expect.assertions(2)
+
+  const user = 'ubuntu'
+
+  const ensureSnapd = jest
+    .spyOn(tools, 'ensureSnapd')
+    .mockImplementation(async (): Promise<void> => {})
+  const ensureLXD = jest
+    .spyOn(tools, 'ensureLXD')
+    .mockImplementation(async (): Promise<void> => {})
+  const ensureRockcraft = jest
+    .spyOn(tools, 'ensureRockcraft')
+    .mockImplementation(async (channel): Promise<void> => {})
+  const shellUser = jest
+    .spyOn(tools, 'shellUser')
+    .mockImplementation((): string => user)
+  const haveProFlag = jest
+    .spyOn(tools, 'haveProFlag')
+    .mockImplementation(async (): Promise<boolean> => true)
+
+  const builder = new build.RockcraftBuilder({
+    projectRoot: '.',
+    rockcraftChannel: 'stable',
+    rockcraftPackVerbosity: 'trace',
+    rockcraftRevision: '1',
+    runRockcraftTest: false,
+    buildPro: 'fips-updates another-command'
+  })
+
+  await expect(builder.pack()).rejects.toThrow(
+    'Malformed pro string'
+  )
+  expect(haveProFlag).toHaveBeenCalled()
 })

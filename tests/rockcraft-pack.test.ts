@@ -526,5 +526,7 @@ test('RockcraftBuilder.build fails if pro argument is invalid', async () => {
     buildPro: 'fips-updates another-command'
   })
 
-  await expect(builder.pack()).rejects.toThrow("Invalid argument 'fips-updates another-command' in field 'pro'")
+  await expect(builder.pack()).rejects.toThrow(
+    "Invalid argument 'fips-updates another-command' in field 'pro'"
+  )
 })

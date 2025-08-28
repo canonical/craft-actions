@@ -29,7 +29,7 @@ async function haveExecutable(path: string): Promise<boolean> {
   return true
 }
 
-export function validateArgument(value : string, field : string): void {
+export function validateArgument(value: string, field: string): void {
   if (!/^[a-z,-]+$/.test(value)) {
     throw new Error(`Invalid argument '${value}' in field '${field}'`)
   }

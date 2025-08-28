@@ -67,7 +67,7 @@ export class RockcraftBuilder {
     }
 
     if (this.buildPro) {
-      tools.validateArgument(this.buildPro, "pro")
+      tools.validateArgument(this.buildPro, 'pro')
       if (!(await tools.haveProFlag())) {
         throw new Error(
           'Cannot build pro rock. This rockcraft version does not support pro.'
@@ -77,7 +77,7 @@ export class RockcraftBuilder {
     }
 
     if (this.rockcraftPackVerbosity) {
-      tools.validateArgument(this.rockcraftPackVerbosity, "verbosity")
+      tools.validateArgument(this.rockcraftPackVerbosity, 'verbosity')
       rockcraftPackArgs = `${rockcraftPackArgs} --verbosity ${this.rockcraftPackVerbosity}`
     }
 

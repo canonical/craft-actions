@@ -67,18 +67,17 @@ export class RockcraftBuilder {
     }
 
     if (this.buildPro) {
+      tools.validateArgument(this.buildPro, "pro")
       if (!(await tools.haveProFlag())) {
         throw new Error(
           'Cannot build pro rock. This rockcraft version does not support pro.'
         )
       }
-      if (!/^[a-z,-]+$/.test(this.buildPro)) {
-        throw new Error('Malformed pro string')
-      }
       rockcraftPackArgs = `${rockcraftPackArgs} --pro=${this.buildPro}`
     }
 
     if (this.rockcraftPackVerbosity) {
+      tools.validateArgument(this.rockcraftPackVerbosity, "verbosity")
       rockcraftPackArgs = `${rockcraftPackArgs} --verbosity ${this.rockcraftPackVerbosity}`
     }
 

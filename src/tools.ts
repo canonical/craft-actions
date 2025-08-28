@@ -29,6 +29,12 @@ async function haveExecutable(path: string): Promise<boolean> {
   return true
 }
 
+export function validateArgument(value : string, field : string): void {
+  if (!/^[a-z,-]+$/.test(value)) {
+    throw new Error(`Invalid argument '${value}' in field '${field}'`)
+  }
+}
+
 export async function haveRockcraftTest(): Promise<boolean> {
   return (await exec.exec('sudo', ['rockcraft', 'test', '-h'])) === 0
 }

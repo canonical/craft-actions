@@ -20013,6 +20013,11 @@ async function haveExecutable(path2) {
   }
   return true;
 }
+function validateArgument(value, field) {
+  if (!/^[a-z,-]+$/.test(value)) {
+    throw new Error(`Invalid argument '${value}' in field '${field}'`);
+  }
+}
 async function haveRockcraftTest() {
   return await exec.exec("sudo", ["rockcraft", "test", "-h"]) === 0;
 }
@@ -20144,17 +20149,16 @@ var RockcraftBuilder = class {
       }
     }
     if (this.buildPro) {
+      validateArgument(this.buildPro, "pro");
       if (!await haveProFlag()) {
         throw new Error(
           "Cannot build pro rock. This rockcraft version does not support pro."
         );
       }
-      if (!/^[a-z,-]+$/.test(this.buildPro)) {
-        throw new Error("Malformed pro string");
-      }
       rockcraftPackArgs = `${rockcraftPackArgs} --pro=${this.buildPro}`;
     }
     if (this.rockcraftPackVerbosity) {
+      validateArgument(this.rockcraftPackVerbosity, "verbosity");
       rockcraftPackArgs = `${rockcraftPackArgs} --verbosity ${this.rockcraftPackVerbosity}`;
     }
     rockcraft = `${rockcraft} ${rockcraftPackArgs.trim()}`;

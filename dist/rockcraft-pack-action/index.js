@@ -20013,8 +20013,21 @@ async function haveExecutable(path2) {
   }
   return true;
 }
+function validateArgument(value, field) {
+  if (value.includes(" ")) {
+    throw new Error(`Invalid argument '${value}' in field '${field}'`);
+  }
+}
 async function haveRockcraftTest() {
   return await exec.exec("sudo", ["rockcraft", "test", "-h"]) === 0;
+}
+async function haveProFlag() {
+  let output = "";
+  await exec.exec("script", ["-q", "-c", "rockcraft pack -h"], {
+    silent: true,
+    listeners: { stdout: (data) => output += data.toString() }
+  });
+  return output.includes("--pro");
 }
 async function ensureSnapd() {
   const haveSnapd = await haveExecutable("/usr/bin/snap");
@@ -20100,11 +20113,13 @@ var RockcraftBuilder = class {
   rockcraftPackVerbosity;
   rockcraftRevision;
   runRockcraftTest;
+  buildPro;
   constructor(options) {
     this.projectRoot = expandHome(options.projectRoot);
     this.rockcraftChannel = options.rockcraftChannel;
     this.rockcraftRevision = options.rockcraftRevision;
     this.runRockcraftTest = options.runRockcraftTest;
+    this.buildPro = options.buildPro;
     if (allowedVerbosity.includes(options.rockcraftPackVerbosity)) {
       this.rockcraftPackVerbosity = options.rockcraftPackVerbosity;
     } else {
@@ -20133,7 +20148,17 @@ var RockcraftBuilder = class {
         rockcraft = "rockcraft test";
       }
     }
+    if (this.buildPro) {
+      validateArgument(this.buildPro, "pro");
+      if (!await haveProFlag()) {
+        throw new Error(
+          "Cannot build pro rock. This rockcraft version does not support pro."
+        );
+      }
+      rockcraftPackArgs = `${rockcraftPackArgs} --pro=${this.buildPro}`;
+    }
     if (this.rockcraftPackVerbosity) {
+      validateArgument(this.rockcraftPackVerbosity, "verbosity");
       rockcraftPackArgs = `${rockcraftPackArgs} --verbosity ${this.rockcraftPackVerbosity}`;
     }
     rockcraft = `${rockcraft} ${rockcraftPackArgs.trim()}`;
@@ -20168,7 +20193,8 @@ async function run() {
   try {
     const projectRoot = core3.getInput("path");
     core3.info(`Building rock in "${projectRoot}"...`);
-    const rockcraftRevision = core3.getInput("revision");
+    const buildPro = core3.getInput("pro") || "";
+    const rockcraftRevision = core3.getInput("revision") || "";
     const rockcraftChannel = core3.getInput("rockcraft-channel") || "stable";
     const runRockcraftTest = core3.getInput("test").toLowerCase() === "true";
     if (rockcraftRevision.length < 1) {
@@ -20182,7 +20208,8 @@ async function run() {
       rockcraftChannel,
       rockcraftPackVerbosity,
       rockcraftRevision,
-      runRockcraftTest
+      runRockcraftTest,
+      buildPro
     });
     await builder.pack();
     const rock = await builder.outputRock();

@@ -14,6 +14,7 @@ interface RockcraftBuilderOptions {
   rockcraftPackVerbosity: string
   rockcraftRevision: string
   runRockcraftTest: boolean
+  buildPro: string
 }
 
 export class RockcraftBuilder {
@@ -22,12 +23,15 @@ export class RockcraftBuilder {
   rockcraftPackVerbosity: string
   rockcraftRevision: string
   runRockcraftTest: boolean
+  buildPro: string
 
   constructor(options: RockcraftBuilderOptions) {
     this.projectRoot = tools.expandHome(options.projectRoot)
     this.rockcraftChannel = options.rockcraftChannel
     this.rockcraftRevision = options.rockcraftRevision
     this.runRockcraftTest = options.runRockcraftTest
+    this.buildPro = options.buildPro
+
     if (allowedVerbosity.includes(options.rockcraftPackVerbosity)) {
       this.rockcraftPackVerbosity = options.rockcraftPackVerbosity
     } else {
@@ -62,7 +66,18 @@ export class RockcraftBuilder {
       }
     }
 
+    if (this.buildPro) {
+      tools.validateArgument(this.buildPro, 'pro')
+      if (!(await tools.haveProFlag())) {
+        throw new Error(
+          'Cannot build pro rock. This rockcraft version does not support pro.'
+        )
+      }
+      rockcraftPackArgs = `${rockcraftPackArgs} --pro=${this.buildPro}`
+    }
+
     if (this.rockcraftPackVerbosity) {
+      tools.validateArgument(this.rockcraftPackVerbosity, 'verbosity')
       rockcraftPackArgs = `${rockcraftPackArgs} --verbosity ${this.rockcraftPackVerbosity}`
     }
 

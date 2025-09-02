@@ -33,6 +33,12 @@ inputs:
 
       If not provided, it defaults to false.
     default: 'false'
+  pro:
+    description: >
+      The Ubuntu Pro services to enable when packing the rock.
+
+      If not provided, no Ubuntu Pro services will be enabled.
+    default: ''
 outputs:
   rock:
     description: 'The file name of the resulting rock.'

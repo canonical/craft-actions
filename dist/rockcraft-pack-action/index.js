@@ -20014,7 +20014,7 @@ async function haveExecutable(path2) {
   return true;
 }
 function validateArgument(value, field) {
-  if (!/^[a-z,-]+$/.test(value)) {
+  if (value.includes(" ")) {
     throw new Error(`Invalid argument '${value}' in field '${field}'`);
   }
 }

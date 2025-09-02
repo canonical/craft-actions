@@ -35,9 +35,9 @@ inputs:
     default: 'false'
   pro:
     description: >
-      Run rockcraft pack with the --pro argument.
+      The Ubuntu Pro services to enable when packing the rock.
 
-      If not provided, a standard rock will be packed.
+      If not provided, a standard non-pro rock will be produced.
     default: ''
 outputs:
   rock:

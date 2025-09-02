@@ -37,7 +37,7 @@ inputs:
     description: >
       The Ubuntu Pro services to enable when packing the rock.
 
-      If not provided, a standard non-pro rock will be produced.
+      If not provided, no Ubuntu Pro services will be enabled.
     default: ''
 outputs:
   rock:

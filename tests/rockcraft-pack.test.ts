@@ -448,8 +448,6 @@ test('RockcraftBuilder.build can pass pro option', async () => {
     'sudo',
     [
       '--preserve-env',
-      '--user',
-      user,
       'rockcraft',
       'pack',
       '--pro=esm-apps,esm-infra',

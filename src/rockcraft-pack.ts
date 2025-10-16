@@ -49,6 +49,7 @@ export class RockcraftBuilder {
     await tools.ensureRockcraft(this.rockcraftChannel, this.rockcraftRevision)
     core.endGroup()
 
+    let sudoArgs = ['--user', tools.shellUser()]
     let rockcraft = 'rockcraft pack'
     let rockcraftPackArgs = ''
 
@@ -73,6 +74,7 @@ export class RockcraftBuilder {
           'Cannot build pro rock. This rockcraft version does not support pro.'
         )
       }
+      sudoArgs = []
       rockcraftPackArgs = `${rockcraftPackArgs} --pro=${this.buildPro}`
     }
 
@@ -84,7 +86,7 @@ export class RockcraftBuilder {
     rockcraft = `${rockcraft} ${rockcraftPackArgs.trim()}`
     await exec.exec(
       'sudo',
-      ['--preserve-env', '--user', tools.shellUser(), ...rockcraft.split(' ')],
+      ['--preserve-env', ...sudoArgs, ...rockcraft.split(' ')],
       {
         cwd: this.projectRoot
       }

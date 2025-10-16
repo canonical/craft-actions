@@ -20150,6 +20150,7 @@ var RockcraftBuilder = class {
     await ensureLXD();
     await ensureRockcraft(this.rockcraftChannel, this.rockcraftRevision);
     core2.endGroup();
+    let sudoArgs = ["--user", shellUser()];
     let rockcraft = "rockcraft pack";
     let rockcraftPackArgs = "";
     if (this.runRockcraftTest) {
@@ -20171,6 +20172,7 @@ var RockcraftBuilder = class {
           "Cannot build pro rock. This rockcraft version does not support pro."
         );
       }
+      sudoArgs = [];
       rockcraftPackArgs = `${rockcraftPackArgs} --pro=${this.buildPro}`;
     }
     if (this.rockcraftPackVerbosity) {
@@ -20180,7 +20182,7 @@ var RockcraftBuilder = class {
     rockcraft = `${rockcraft} ${rockcraftPackArgs.trim()}`;
     await exec3.exec(
       "sudo",
-      ["--preserve-env", "--user", shellUser(), ...rockcraft.split(" ")],
+      ["--preserve-env", ...sudoArgs, ...rockcraft.split(" ")],
       {
         cwd: this.projectRoot
       }

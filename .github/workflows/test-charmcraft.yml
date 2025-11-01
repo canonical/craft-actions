@@ -61,7 +61,7 @@ jobs:
           channel: ${{ matrix.channel }}
           revision: ${{ matrix.revision }}
       - name: Upload charm
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: test-charm-${{ matrix.os }}-${{ steps.charmcraft.outputs.charmcraft-revision }}
           path: juju/testcharms/charms/lxd-profile/*.charm

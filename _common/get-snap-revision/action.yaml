@@ -1,0 +1,22 @@
+name: 'Get snap revision'
+description: 'Get the revision of an installed snap'
+author: 'Canonical'
+inputs:
+  snap:
+    description: The snap to inspect.
+    required: true
+
+outputs:
+  revision:
+    description: The discovered revision.
+    value: ${{ steps.inspect.outputs.revision }}
+
+runs:
+  using: 'composite'
+  steps:
+    - shell: bash
+      name: Get snap revision
+      id: inspect
+      run: |
+        REVISION=$(curl -sS --unix-socket /run/snapd.socket http://localhost/v2/snaps/${{ inputs.revision }} -X GET | jq -r .result.revision)
+        echo "revision=$REVISION" >> "$GITHUB_OUTPUT"

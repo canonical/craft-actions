@@ -1,0 +1,84 @@
+name: 'Set up Snapcraft'
+description: 'Install Snapcraft'
+author: 'Canonical'
+inputs:
+  channel:
+    description: >
+      Install Snapcraft from a specific snap channel.
+
+      Defaults to the latest stable release.
+    default: 'latest/stable'
+  revision:
+    description: >
+      Install Snapcraft from a specific snap revision.
+
+      Defaults to the latest stable revision.
+    default: ''
+  lxd-channel:
+    description: >
+      Install LXD from a specific snap revision.
+
+      Defaults to the recommended channel for Snapcraft.
+    default: '5.21/stable'
+
+outputs:
+  lxd-revision:
+    description: The LXD revision used.
+    value: ${{ steps.lxd-revision.outputs.revision }}
+  snapcraft-revision:
+    description: The Snapcraft revision used.
+    value: ${{ steps.snapcraft-revision.outputs.revision }}
+
+runs:
+  using: 'composite'
+  steps:
+    - shell: bash
+      name: Check system compatibility
+      run: |
+        if [[ $(uname -s) != Linux ]]; then
+          echo "::error::This action only works on Linux-based runners."
+          exit 1
+        fi
+
+        if ! which snap; then
+          echo "::error::This action requires snapd"
+          exit 1
+        fi
+
+    - uses: canonical/setup-lxd@main
+      with:
+        channel: ${{ inputs.lxd-channel }}
+
+    - shell: bash
+      name: Install Snapcraft
+      id: install
+      run: |
+        if [ -x /snap/bin/snapcraft ]; then
+          ACTION=refresh
+        else
+          ACTION=install
+        fi
+
+        if [ -n "${{ inputs.revision }}" ]; then
+          echo "::notice::Installing Snapcraft revision \"${{ inputs.revision }}\""
+          sudo snap $ACTION --revision=${{ inputs.revision }} --classic snapcraft
+        else
+          echo "::notice::Installing Snapcraft from channel \"${{inputs.channel}}\""
+          sudo snap $ACTION --channel=${{ inputs.channel }} --classic snapcraft
+        fi
+
+    - uses: ./_common/get-snap-revision
+      name: Get Snapcraft revision
+      id: snapcraft-revision
+      with:
+        snap: 'snapcraft'
+
+    - uses: ./_common/get-snap-revision
+      name: Get Snapcraft revision
+      id: snapcraft-revision
+      with:
+        snap: 'lxd'
+
+branding:
+  icon: package
+  color: orange

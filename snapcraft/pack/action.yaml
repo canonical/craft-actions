@@ -1,0 +1,79 @@
+name: 'Build a snap'
+description: 'Pack a snap with Snapcraft'
+author: Canonical
+
+inputs:
+  path:
+    description: >
+      The location of the Snapcraft project.
+
+      Defaults to the base of the repository.
+    default: '.'
+  verbosity:
+    description: >
+      Set the build verbosity level to "quiet", "brief", "verbose", "debug", or
+      "trace".
+
+      The default is "trace".
+    default: 'trace'
+  channel:
+    description: >
+      Install Snapcraft from a specific snap channel.
+
+      Defaults to the latest stable release.
+    default: 'latest/stable'
+  revision:
+    description: >
+      Install Snapcraft from a specific snap revision.
+
+      Defaults to the latest stable revision.
+    default: ''
+  lxd-channel:
+    description: >
+      Install LXD from a specific snap revision.
+
+      Defaults to the recommended channel for Snapcraft.
+    default: '5.21/stable'
+
+outputs:
+  lxd-revision:
+    description: The LXD revision used.
+    value: ${{ steps.setup.outputs.lxd-revision }}
+  snapcraft-revision:
+    description: The Snapcraft revision used.
+    value: ${{ steps.setup.outputs.snapcraft-revision }}
+  snap:
+    description: The packed snap artifact.
+    value: ${{ steps.pack.outputs.snap }}
+
+runs:
+  using: 'composite'
+  steps:
+    - uses: canonical/craft-actions/snapcraft/setup@main
+      id: setup
+      with:
+        channel: ${{ inputs.channel }}
+        revision: ${{ inputs.revision }}
+        lxd-channel: ${{ inputs.lxd-channel }}
+
+    - uses: actions/cache@v4
+      with:
+        path: ${{ runner.temp }}/snapcraft_cache
+        key: snapcraft-cache-${{ hashfiles('**/requirements.txt', '**/*.lock', '**/snapcraft.yaml', snap) }}
+        restore-keys: |
+          snapcraft-cache-
+
+    - shell: bash
+      id: pack
+      env:
+        CRAFT_VERBOSITY_LEVEL: ${{ inputs.verbosity }}
+        CRAFT_SHARED_CACHE: ${{ runner.temp }}/snapcraft_cache
+      working-directory: ${{ inputs.path }}
+      run: |
+        mkdir -p "${CRAFT_SHARED_CACHE}"
+        snapcraft pack
+        echo "snap=$(ls *.snap)" >> "$GITHUB_OUTPUT"
+
+branding:
+  icon: package
+  color: orange

@@ -6,10 +6,101 @@ This project contains custom GitHub actions for Craft Applications, such as:
 
 - [Charmcraft](https://juju.is/)
 - [Snapcraft](https://snapcraft.io/)
-- [Rockcraft](https://canonical-rockcraft.readthedocs-hosted.com/en/latest/)
+- [Rockcraft](https://documentation.ubuntu.com/rockcraft/stable)
 
 The following sections will break down the different actions available in this
 repository and how to use them.
+
+## snapcraft/setup
+
+Set up Snapcraft on the runner.
+
+### Usage
+
+```yaml
+steps:
+  - uses: canonical/craft-actions/snapcraft/setup@main
+  - run: |
+    snapcraft --version
+```
+
+This will install and configure LXD and Snapcraft.
+
+#### Inputs
+
+##### `channel`
+
+Select a channel for the Snapcraft snap to be installed from. Defaults to `latest/stable`.
+
+##### `revision`
+
+Select a revision for the Snapcraft snap to be installed from. Overrides the `channel` option.
+
+##### `lxd-channel`
+
+Select a channel for the LXD snap to be installed from. Defaults to the current recommended channel for Snapcraft.
+
+---
+
+## snapcraft/pack
+
+Set up Snapcraft and pack a snap.
+
+### Usage
+
+```yaml
+steps:
+  - uses: actions/checkout@v6
+  - uses: canonical/craft-actions/snapcraft/pack@main
+```
+
+This will install and configure LXD and Snapcraft, then pack a snap in the given directory.
+
+#### Inputs
+
+##### `path`
+
+The location in your repository to run Snapcraft when packing. Defaults to the repository root.
+
+In the simplest cases, `snapcraft.yaml` is often stored in the `snap/` directory at the repository root.
+
+In repositories with more complex file hierarchies, the path would be elsewhere. For example, if your project
+has multiple build tool manifests stored in a `dist/` directory, and `snapcraft.yaml` is stored in `dist/snap/`,
+you would want to run Snapcraft at `dist/`, rather than the repository root.
+
+```yaml
+steps:
+  - uses: actions/checkout@v6
+  - uses: canonical/craft-actions/snapcraft/pack@main
+    with:
+      path: dist/
+```
+
+##### `verbosity`
+
+Used to set the build verbosity level for Snapcraft. Must be one of "quiet", "brief", "verbose", "debug", or "trace" (the default).
+
+```yaml
+steps:
+  - uses: actions/checkout@v3
+  - uses: canonical/craft-actions/charmcraft/pack@main
+    with:
+      verbosity: debug
+```
+
+##### `channel`
+
+Select a channel for the Snapcraft snap to be installed from. Defaults to `latest/stable`.
+
+##### `revision`
+
+Select a revision for the Snapcraft snap to be installed from. Overrides the `channel` option.
+
+##### `lxd-channel`
+
+Select a channel for the LXD snap to be installed from. Defaults to the current recommended channel for Snapcraft.
+
+---
 
 ## rockcraft-pack
 

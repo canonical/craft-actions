@@ -27,6 +27,8 @@ inputs:
       Install Snapcraft from a specific snap revision.
 
       Defaults to the latest stable revision.
+
+      Overrides the `channel` option.
     default: ''
   lxd-channel:
     description: >
@@ -49,17 +51,31 @@ outputs:
 runs:
   using: 'composite'
   steps:
-    - uses: canonical/craft-actions/snapcraft/setup@main
+    - uses: actions/checkout@v6
+      env:
+        GITHUB_REF: ${{ github.action_ref }}
+      with:
+        repository: 'canonical/craft-actions'
+        ref: ${{ env.GITHUB_REF }}
+        path: _tmp_craft-actions
+        sparse-checkout: |
+          snapcraft/
+
+    - uses: ./_tmp_craft-actions/snapcraft/setup
       id: setup
       with:
         channel: ${{ inputs.channel }}
         revision: ${{ inputs.revision }}
         lxd-channel: ${{ inputs.lxd-channel }}
 
+    - shell: bash
+      run: |
+        rm -rf ./_tmp_craft-actions
+
     - uses: actions/cache@v4
       with:
         path: ${{ runner.temp }}/snapcraft_cache
-        key: snapcraft-cache-${{ hashfiles('**/requirements.txt', '**/*.lock', '**/snapcraft.yaml', '/snap/') }}
+        key: snapcraft-cache-${{ hashFiles('**/requirements.txt', '**/*.lock', '**/snapcraft.yaml', 'snap/**') }}
         restore-keys: |
           snapcraft-cache-
 

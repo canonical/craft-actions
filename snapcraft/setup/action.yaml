@@ -13,6 +13,8 @@ inputs:
       Install Snapcraft from a specific snap revision.
 
       Defaults to the latest stable revision.
+
+      Overrides the `channel` option.
     default: ''
   lxd-channel:
     description: >
@@ -45,6 +47,16 @@ runs:
           exit 1
         fi
 
+    - uses: actions/checkout@v6
+      env:
+        GITHUB_REF: ${{ github.action_ref }}
+      with:
+        repository: 'canonical/craft-actions'
+        ref: ${{ env.GITHUB_REF }}
+        path: _tmp_craft-actions
+        sparse-checkout: |
+          _common/
+
     - uses: canonical/setup-lxd@main
       with:
         channel: ${{ inputs.lxd-channel }}
@@ -67,17 +79,21 @@ runs:
           sudo snap $ACTION --channel=${{ inputs.channel }} --classic snapcraft
         fi
 
-    - uses: ./_common/get-snap-revision
+    - uses: ./_tmp_craft-actions/_common/get-snap-revision
       name: Get Snapcraft revision
       id: snapcraft-revision
       with:
         snap: 'snapcraft'
 
-    - uses: ./_common/get-snap-revision
-      name: Get Snapcraft revision
-      id: snapcraft-revision
+    - uses: ./_tmp_craft-actions/_common/get-snap-revision
+      name: Get LXD revision
+      id: lxd-revision
       with:
         snap: 'lxd'
+
+    - shell: bash
+      run: |
+        rm -rf ./_tmp_craft-actions
 
 branding:
   icon: package

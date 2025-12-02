@@ -18,5 +18,9 @@ runs:
       name: Get snap revision
       id: inspect
       run: |
+        if ! command -v curl; then
+          sudo apt-get --yes install curl
+        fi
+
         REVISION=$(curl -sS --unix-socket /run/snapd.socket http://localhost/v2/snaps/${{ inputs.revision }} -X GET | jq -r .result.revision)
         echo "revision=$REVISION" >> "$GITHUB_OUTPUT"

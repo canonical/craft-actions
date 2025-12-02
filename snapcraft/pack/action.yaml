@@ -30,7 +30,7 @@ inputs:
     default: ''
   lxd-channel:
     description: >
-      Install LXD from a specific snap revision.
+      Install LXD from a specific snap channel.
 
       Defaults to the recommended channel for Snapcraft.
     default: '5.21/stable'

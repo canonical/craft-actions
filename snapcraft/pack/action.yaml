@@ -59,7 +59,7 @@ runs:
     - uses: actions/cache@v4
       with:
         path: ${{ runner.temp }}/snapcraft_cache
-        key: snapcraft-cache-${{ hashfiles('**/requirements.txt', '**/*.lock', '**/snapcraft.yaml', snap) }}
+        key: snapcraft-cache-${{ hashfiles('**/requirements.txt', '**/*.lock', '**/snapcraft.yaml', '/snap/') }}
         restore-keys: |
           snapcraft-cache-
 

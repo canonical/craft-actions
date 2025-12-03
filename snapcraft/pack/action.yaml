@@ -12,9 +12,9 @@ inputs:
   verbosity:
     description: >
       The build verbosity level, which can be set to "quiet", "brief", "verbose", "debug",
-      or "trace."
+      or "trace".
 
-      The default is "trace."
+      The default is "trace".
     default: 'trace'
   channel:
     description: >
@@ -47,6 +47,9 @@ outputs:
   snap:
     description: The packed snap artifact.
     value: ${{ steps.pack.outputs.snap }}
+  components:
+    description: The packed components.
+    value: ${{ steps.pack.outputs.components }}
 
 runs:
   using: 'composite'
@@ -80,6 +83,7 @@ runs:
       run: |
         snapcraft pack
         echo "snap=$(ls *.snap)" >> "$GITHUB_OUTPUT"
+        echo "components=$(ls -1 *.comp | tr '\n' ' ')" >> "$GITHUB_OUTPUT"
 
 branding:
   icon: package

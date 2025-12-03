@@ -22,5 +22,9 @@ runs:
           sudo apt-get --yes install curl
         fi
 
+        if ! command -v jq; then
+          sudo apt-get --yes install jq
+        fi
+
         REVISION=$(curl -sS --unix-socket /run/snapd.socket http://localhost/v2/snaps/${{ inputs.revision }} -X GET | jq -r .result.revision)
         echo "revision=$REVISION" >> "$GITHUB_OUTPUT"

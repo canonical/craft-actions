@@ -24,21 +24,21 @@ steps:
     snapcraft --version
 ```
 
-This will install and configure LXD and Snapcraft.
+This installs and configures LXD and Snapcraft.
 
 #### Inputs
 
 ##### `channel`
 
-Select a channel for the Snapcraft snap to be installed from. Defaults to `latest/stable`.
+The channel to install the Snapcraft snap from. Defaults to `latest/stable`.
 
 ##### `revision`
 
-Select a revision for the Snapcraft snap to be installed from. Overrides the `channel` option.
+The revision of the Snapcraft snap to install. Overrides the `channel` option.
 
 ##### `lxd-channel`
 
-Select a channel for the LXD snap to be installed from. Defaults to the current recommended channel for Snapcraft.
+The channel to install the LXD snap from. Defaults to the current recommended channel for Snapcraft.
 
 ---
 
@@ -62,11 +62,11 @@ This will install and configure LXD and Snapcraft, then pack a snap in the given
 
 The location in your repository to run Snapcraft when packing. Defaults to the repository root.
 
-In the simplest cases, `snapcraft.yaml` is often stored in the `snap/` directory at the repository root.
+In most simple cases, `snapcraft.yaml` is stored in the `snap/` directory at the repository root.
 
-In repositories with more complex file hierarchies, the path would be elsewhere. For example, if your project
-has multiple build tool manifests stored in a `dist/` directory, and `snapcraft.yaml` is stored in `dist/snap/`,
-you would want to run Snapcraft at `dist/`, rather than the repository root.
+In repositories with more complex file hierarchies, the path could be elsewhere. For example, if your project
+stores multiple build tool manifests in a `dist/` directory, and `snapcraft.yaml` is stored in `dist/snap/`,
+you would want to run Snapcraft at `dist/` instead of the repository root.
 
 ```yaml
 steps:
@@ -78,7 +78,7 @@ steps:
 
 ##### `verbosity`
 
-Used to set the build verbosity level for Snapcraft. Must be one of "quiet", "brief", "verbose", "debug", or "trace" (the default).
+Sets the build verbosity level for Snapcraft. Must be one of: "quiet", "brief", "verbose", "debug", or "trace" (the default).
 
 ```yaml
 steps:
@@ -90,15 +90,15 @@ steps:
 
 ##### `channel`
 
-Select a channel for the Snapcraft snap to be installed from. Defaults to `latest/stable`.
+The channel to install the Snapcraft snap from. Defaults to `latest/stable`.
 
 ##### `revision`
 
-Select a revision for the Snapcraft snap to be installed from. Overrides the `channel` option.
+The revision of the Snapcraft snap to install. Overrides the `channel` option.
 
 ##### `lxd-channel`
 
-Select a channel for the LXD snap to be installed from. Defaults to the current recommended channel for Snapcraft.
+The channel to install the LXD snap from. Defaults to the current recommended channel for Snapcraft.
 
 ---
 

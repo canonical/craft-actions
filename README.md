@@ -54,7 +54,7 @@ steps:
   - uses: canonical/craft-actions/snapcraft/pack@main
 ```
 
-This will install and configure LXD and Snapcraft, then pack a snap in the given directory.
+This will install and configure LXD and Snapcraft before packing the snap in the given directory.
 
 #### Inputs
 

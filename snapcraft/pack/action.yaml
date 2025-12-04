@@ -54,6 +54,11 @@ outputs:
 runs:
   using: 'composite'
   steps:
+    # This action is necessary as a workaround for https://github.com/actions/runner/issues/895.
+    # Since contexts cannot be used in the `uses:` key, we can't guarantee that this action will
+    # use the same branch of craft-actions to call other craft-actions workflows without just
+    # making our own local copy of the repository. See https://github.com/canonical/craft-actions/pull/45#discussion_r2586507869
+    # for a full explanation.
     - uses: actions/checkout@v6
       env:
         GITHUB_REF: ${{ github.action_ref }}

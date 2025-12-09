@@ -1,0 +1,37 @@
+# charmcraft/setup
+
+Set up Charmcraft on a runner.
+
+## Usage
+
+```yaml
+- name: Set up Charmcraft
+  uses: canonical/craft-actions/charmcraft/setup@main
+```
+
+This installs and configures LXD and Charmcraft.
+
+### Inputs
+
+All inputs and their defaults.
+
+```yaml
+- name: Set up Charmcraft
+  uses: canonical/craft-actions/charmcraft/setup@main
+  with:
+    # The channel to install the Charmcraft snap from.
+    channel: 'latest/stable'
+    
+    # The revision of the Charmcraft snap to install.
+    # Overrides the `channel` option.
+    revision: ''
+
+    # The channel to install the LXD snap from.
+    # If left blank, defaults to the current recommended channel for Charmcraft.
+    lxd-channel: ''
+```
+
+### Outputs
+
+- `charmcraft-revision`: The revision of Charmcraft that was installed.
+- `lxd-revision`: The revision of LXD that was installed.

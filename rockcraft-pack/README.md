@@ -1,0 +1,53 @@
+# rockcraft-pack
+
+Set up Rockcraft and pack a rock.
+
+## Usage
+
+```yaml
+- name: Package rock with Rockcraft
+  uses: canonical/craft-actions/rockcraft-pack@main
+```
+
+This installs and configures LXD and Rockcraft, then packs the rock
+at the root of the repository.
+
+### Inputs
+
+All inputs and their defaults.
+
+```yaml
+- name: Package rock with Rockcraft
+  uses: canonical/craft-actions/rockcraft-pack@main
+  with:
+    # The channel to install the Rockcraft snap from.
+    rockcraft-channel: 'latest/stable'
+    
+    # The revision of the Rockcraft snap to install.
+    # Overrides the `rockcraft-channel` option.
+    revision: ''
+    
+    # The location in your repository to run Rockcraft when packing. Defaults to the repository root.
+    # 
+    # In repositories with more complex file hierarchies, the path could be elsewhere. For example, if your project
+    # stores multiple build tool manifests in a `dist/` directory, and `rockcraft.yaml` is stored in `dist/rock/`,
+    # you would want to run Rockcraft at `dist/rock/` instead of the repository root.
+    path: '.'
+    
+    # Sets the build verbosity level for Rockcraft. Must be one of: "quest", "brief", "verbose', "debug", or "trace" (the default).
+    verbosity: 'trace'
+    
+    # Whether or not to run `rockcraft test` when packing the rock.
+    # Defaults to false.
+    test: false
+    
+    # Any Ubuntu Pro services to enable when packing the rock, as comma-separated values.
+    # 
+    # Usage of Ubuntu Pro services is currently experimental and only available when installing Rockcraft
+    # from the 'latest/edge/pro-sources' channel.
+    pro: ''
+```
+
+### Outputs
+
+- `rock`: The name of the packed rock artifact.

@@ -1,6 +1,6 @@
 # charmcraft/pack
 
-Set up Cnapcraft and pack a charm.
+Set up Charmcraft and pack a charm.
 
 ## Usage
 

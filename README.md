@@ -2,29 +2,23 @@
 
 # Craft Actions
 
-This project contains custom GitHub actions for Craft Applications, such as:
-
-- [Charmcraft](https://juju.is/)
-- [Snapcraft](https://snapcraft.io/)
-- [Rockcraft](https://documentation.ubuntu.com/rockcraft/stable)
+This project contains custom GitHub actions for the Craft tools.
 
 ## Contents
 
-### Snapcraft
+### [Snapcraft](https://snapcraft.io/)
 
 - [Package a snap](snapcraft/pack/README.md)
 - [Set up Snapcraft](snapcraft/setup/README.md)
 
-### Rockcraft
+### [Rockcraft](https://documentation.ubuntu.com/rockcraft/stable)
 
 - [Package a rock](rockcraft-pack/README.md)
 
-### Charmcraft
+### [Charmcraft](https://juju.is/)
 
 - [Package a charm](charmcraft/pack/README.md)
 - [Set up Charmcraft](charmcraft/setup/README.md)
-
----
 
 ## Committing code
 

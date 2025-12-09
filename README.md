@@ -1,8 +1,8 @@
-[![Test the action](https://github.com/canonical/craft-actions/actions/workflows/test.yml/badge.svg)](https://github.com/canonical/craft-actions/actions/workflows/test.yml)
+[![Tests](https://github.com/canonical/craft-actions/actions/workflows/test.yml/badge.svg)](https://github.com/canonical/craft-actions/actions/workflows/test.yml)
 
 # Craft Actions
 
-This project contains custom GitHub actions for the Craft tools.
+This monorepo contains multiple custom GitHub actions for the Craft tools.
 
 ## Contents
 

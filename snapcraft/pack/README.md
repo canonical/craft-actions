@@ -40,7 +40,7 @@ All inputs and their defaults.
     # you would want to run Snapcraft at `dist/` instead of the repository root.
     path: '.'
     
-    # Sets the build verbosity level for Snapcraft. Must be one of: "quiet", "brief", "verbose', "debug", or "trace" (the default).
+    # Sets the build verbosity level for Snapcraft. Must be one of: "quiet", "brief", "verbose", "debug", or "trace" (the default).
     verbosity: 'trace'
 ```
 

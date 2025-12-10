@@ -34,7 +34,7 @@ All inputs and their defaults.
     # you would want to run Rockcraft at `dist/rock/` instead of the repository root.
     path: '.'
     
-    # Sets the build verbosity level for Rockcraft. Must be one of: "quiet", "brief", "verbose', "debug", or "trace" (the default).
+    # Sets the build verbosity level for Rockcraft. Must be one of: "quiet", "brief", "verbose", "debug", or "trace" (the default).
     verbosity: 'trace'
     
     # Whether or not to run `rockcraft test` when packing the rock.

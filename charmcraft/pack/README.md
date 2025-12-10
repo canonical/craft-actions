@@ -38,7 +38,7 @@ All inputs and their defaults.
     # you would want to run Charmcraft at `dist/charm/` instead of the repository root.
     path: '.'
     
-    # Sets the build verbosity level for Charmcraft. Must be one of: "quiet", "brief", "verbose', "debug", or "trace" (the default).
+    # Sets the build verbosity level for Charmcraft. Must be one of: "quiet", "brief", "verbose", "debug", or "trace" (the default).
     verbosity: 'trace'
 ```
 

@@ -1,13 +1,13 @@
 # get-snap-revision
 
-Retrieve the revision of any currently installed snap in your workflow.
+Get the revision number of an installed snap in your workflow.
 
 ## Usage
 
 ### Get the revision of a snap
 
 ```yaml
-# See details below for an explanation of this workaround
+# See the 'Details' section below for an explanation of this workaround
 - name: Set up workaround
   uses: actions/checkout@v6
   env: 
@@ -36,17 +36,18 @@ Retrieve the revision of any currently installed snap in your workflow.
 - name: canonical/craft-actions/_common/get-snap-revision@main
   with:
     # The snap to inspect.
-    # Required.
+    # This input is required.
     snap:
 ```
 
 ### Outputs
-- `revision`: The numeric revision of the inspected snap.
+- `revision`: The revision number of the inspected snap.
 
 ## Details
 
-Some actions in Craft Actions reference others in this repository. In order to make sure that action
-`craft-actions/A@work/fix-bug` calls `craft-actions/B@work/fix-bug` instead of `craft-actions/B@main`,
-the current repository reference needs to be reused. Due to [limitations of GitHub Actions](https://github.com/actions/runner/issues/895), this is not possible using contexts such as `${{ github.action_ref }}` directly.
+Some Craft Actions reference one another. To make sure that `craft-actions/A@work/fix-bug` calls
+`craft-actions/B@work/fix-bug` instead of `craft-actions/B@main`, the current repository reference
+needs to be reused. Due to certain [limitations of GitHub Actions](https://github.com/actions/runner/issues/895),
+this is not possible using contexts such as `${{ github.action_ref }}`.
 
-For more details on this workaround, see [this comment](https://github.com/canonical/craft-actions/pull/45#discussion_r2586507869).
+For additional context, refer to [this comment](https://github.com/canonical/craft-actions/pull/45#discussion_r2586507869).

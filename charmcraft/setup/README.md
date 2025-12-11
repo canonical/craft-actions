@@ -1,6 +1,6 @@
 # charmcraft/setup
 
-Set up Charmcraft on a runner.
+When invoked, this action installs and configures LXD and Charmcraft.
 
 ## Usage
 
@@ -20,6 +20,7 @@ All inputs and their defaults.
   uses: canonical/craft-actions/charmcraft/setup@main
   with:
     # The channel to install the Charmcraft snap from.
+    # Defaults to 'latest/stable'.
     channel: 'latest/stable'
     
     # The revision of the Charmcraft snap to install.

@@ -1,6 +1,6 @@
 # snapcraft/setup
 
-Set up Snapcraft on a runner.
+When invoked, this action installs and configures LXD and Snapcraft.
 
 ## Usage
 
@@ -20,6 +20,7 @@ All inputs and their defaults.
   uses: canonical/craft-actions/snapcraft/setup@main
   with:
     # The channel to install the Snapcraft snap from.
+    # Defaults to 'latest/stable'.
     channel: 'latest/stable'
     
     # The revision of the Snapcraft snap to install.

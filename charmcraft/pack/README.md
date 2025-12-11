@@ -1,6 +1,7 @@
 # charmcraft/pack
 
-Set up Charmcraft and pack a charm.
+When invoked, this action installs and configures LXD and Charmcraft before packing the charm
+at the root of the repository.
 
 ## Usage
 
@@ -21,6 +22,7 @@ All inputs and their defaults.
   uses: canonical/craft-actions/charmcraft/pack@main
   with:
     # The channel to install the Charmcraft snap from.
+    # Defaults to 'latest/stable'
     channel: 'latest/stable'
     
     # The revision of the Charmcraft snap to install.
@@ -28,17 +30,20 @@ All inputs and their defaults.
     revision: ''
 
     # The channel to install the LXD snap from.
-    # If left blank, defaults to the current recommended channel for Charmcraft.
+    # If unset or set to an empty string, the current recommended channel for Charmcraft is installed.
     lxd-channel: ''
     
-    # The location in your repository to run Charmcraft when packing. Defaults to the repository root.
+    # The location in your repository to run Charmcraft when packing.
     # 
     # In repositories with more complex file hierarchies, the path could be elsewhere. For example, if your project
     # stores multiple build tool manifests in a `dist/` directory, and `charmcraft.yaml` is stored in `dist/charm/`,
-    # you would want to run Charmcraft at `dist/charm/` instead of the repository root.
+    # you'd run Charmcraft at `dist/charm/` instead of the repository root.
+    # 
+    # Defaults to the repository root ('.').
     path: '.'
     
-    # Sets the build verbosity level for Charmcraft. Must be one of: "quiet", "brief", "verbose", "debug", or "trace" (the default).
+    # Sets the build verbosity level for Charmcraft. Must be one of: "quiet", "brief", "verbose", "debug", or "trace".
+    # Defaults to 'trace'.
     verbosity: 'trace'
 ```
 

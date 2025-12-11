@@ -1,6 +1,7 @@
 # rockcraft-pack
 
-Set up Rockcraft and pack a rock.
+When invoked, this action installs and configures LXD and Rockcraft before packing the rock
+at the root of the repository.
 
 ## Usage
 
@@ -21,23 +22,28 @@ All inputs and their defaults.
   uses: canonical/craft-actions/rockcraft-pack@main
   with:
     # The channel to install the Rockcraft snap from.
+    # Defaults to 'latest/stable'.
     rockcraft-channel: 'latest/stable'
     
     # The revision of the Rockcraft snap to install.
     # Overrides the `rockcraft-channel` option.
     revision: ''
     
-    # The location in your repository to run Rockcraft when packing. Defaults to the repository root.
+    # The location in your repository to run Rockcraft when packing.
     # 
     # In repositories with more complex file hierarchies, the path could be elsewhere. For example, if your project
     # stores multiple build tool manifests in a `dist/` directory, and `rockcraft.yaml` is stored in `dist/rock/`,
-    # you would want to run Rockcraft at `dist/rock/` instead of the repository root.
+    # you'd run Rockcraft at `dist/rock/` instead of the repository root.
+    # 
+    # Defaults to the repository root ('.').
+
     path: '.'
     
-    # Sets the build verbosity level for Rockcraft. Must be one of: "quiet", "brief", "verbose", "debug", or "trace" (the default).
+    # Sets the build verbosity level for Rockcraft. Must be one of: "quiet", "brief", "verbose", "debug", or "trace".
+    # Defaults to 'trace'.
     verbosity: 'trace'
     
-    # Whether or not to run `rockcraft test` when packing the rock.
+    # Whether to run `rockcraft test` when packing the rock.
     # Defaults to false.
     test: false
     

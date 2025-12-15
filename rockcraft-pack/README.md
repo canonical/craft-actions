@@ -39,7 +39,7 @@ All inputs and their defaults.
 
     path: '.'
     
-    # Sets the build verbosity level for Rockcraft. Must be one of: "quiet", "brief", "verbose", "debug", or "trace".
+    # Sets the build verbosity level for Rockcraft. Must be one of: 'quiet', 'brief', 'verbose', 'debug', or "trace".
     # Defaults to 'trace'.
     verbosity: 'trace'
     

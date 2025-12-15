@@ -13,7 +13,7 @@ The snapcraft/pack action can be added to your repository's workflows with:
 
 ### Inputs
 
-All inputs and their defaults.
+The action can be catered to your project with the following inputs. Where applicable, inputs are listed with their default values.
 
 ```yaml
 - name: Set up Charmcraft

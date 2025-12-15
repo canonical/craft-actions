@@ -41,7 +41,7 @@ All inputs and their defaults.
     # Defaults to the repository root ('.').
     path: '.'
     
-    # Sets the build verbosity level for Charmcraft. Must be one of: 'quiet', 'brief', 'verbose', 'debug', or "trace".
+    # Sets the build verbosity level for Charmcraft. Must be one of: 'quiet', 'brief', 'verbose', 'debug', or 'trace'.
     # Defaults to 'trace'.
     verbosity: 'trace'
 ```

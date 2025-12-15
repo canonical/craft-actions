@@ -2,7 +2,7 @@
 
 # Craft Actions
 
-This monorepo contains multiple custom GitHub actions for the Craft tools.
+This monorepo contains custom GitHub actions for setting up and packing artifacts with the Craft tools.
 
 ## Contents
 

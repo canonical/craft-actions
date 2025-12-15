@@ -25,14 +25,14 @@ All inputs and their defaults.
     rockcraft-channel: 'latest/stable'
     
     # The revision of the Rockcraft snap to install.
-    # Overrides the `rockcraft-channel` option.
+    # Overrides the 'rockcraft-channel' option.
     revision: ''
     
     # The location in your repository to run Rockcraft when packing.
     # 
     # In repositories with more complex file hierarchies, the path could be elsewhere. For example, if your project
-    # stores multiple build tool manifests in a `dist/` directory, and `rockcraft.yaml` is stored in `dist/rock/`,
-    # you'd run Rockcraft at `dist/rock/` instead of the repository root.
+    # stores multiple build tool manifests in a 'dist/' directory, and 'rockcraft.yaml' is stored in 'dist/rock/',
+    # you'd run Rockcraft at 'dist/rock/' instead of the repository root.
     # 
     # Defaults to the repository root ('.').
 
@@ -42,7 +42,7 @@ All inputs and their defaults.
     # Defaults to 'trace'.
     verbosity: 'trace'
     
-    # Whether to run `rockcraft test` when packing the rock.
+    # Whether to run 'rockcraft test' when packing the rock.
     # Defaults to false.
     test: false
     

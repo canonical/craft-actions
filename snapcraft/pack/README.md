@@ -25,7 +25,7 @@ All inputs and their defaults.
     channel: 'latest/stable'
     
     # The revision of the Snapcraft snap to install.
-    # Overrides the `channel` option.
+    # Overrides the 'channel' option.
     revision: ''
 
     # The channel to install the LXD snap from.
@@ -34,11 +34,11 @@ All inputs and their defaults.
     
     # The location in your repository to run Snapcraft when packing.
     # 
-    # In most simple cases, `snapcraft.yaml` is stored in the `snap/` directory at the repository root.
+    # In most simple cases, 'snapcraft.yaml' is stored in the 'snap/' directory at the repository root.
     # 
     # In repositories with more complex file hierarchies, the path could be elsewhere. For example, if your project
-    # stores multiple build tool manifests in a `dist/` directory, and `snapcraft.yaml` is stored in `dist/snap/`,
-    # you'd run Snapcraft at `dist/` instead of the repository root.
+    # stores multiple build tool manifests in a 'dist/' directory, and 'snapcraft.yaml' is stored in 'dist/snap/',
+    # you'd run Snapcraft at 'dist/' instead of the repository root.
     #
     # Defaults to the repository root ('.').
     path: '.'

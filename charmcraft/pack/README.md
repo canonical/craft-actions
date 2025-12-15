@@ -25,7 +25,7 @@ All inputs and their defaults.
     channel: 'latest/stable'
     
     # The revision of the Charmcraft snap to install.
-    # Overrides the `channel` option.
+    # Overrides the 'channel' option.
     revision: ''
 
     # The channel to install the LXD snap from.
@@ -35,8 +35,8 @@ All inputs and their defaults.
     # The location in your repository to run Charmcraft when packing.
     # 
     # In repositories with more complex file hierarchies, the path could be elsewhere. For example, if your project
-    # stores multiple build tool manifests in a `dist/` directory, and `charmcraft.yaml` is stored in `dist/charm/`,
-    # you'd run Charmcraft at `dist/charm/` instead of the repository root.
+    # stores multiple build tool manifests in a 'dist/' directory, and 'charmcraft.yaml' is stored in 'dist/charm/',
+    # you'd run Charmcraft at 'dist/charm/' instead of the repository root.
     # 
     # Defaults to the repository root ('.').
     path: '.'

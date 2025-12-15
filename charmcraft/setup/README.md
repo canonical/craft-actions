@@ -24,7 +24,7 @@ All inputs and their defaults.
     channel: 'latest/stable'
     
     # The revision of the Charmcraft snap to install.
-    # Overrides the `channel` option.
+    # Overrides the 'channel' option.
     revision: ''
 
     # The channel to install the LXD snap from.

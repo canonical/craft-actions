@@ -5,13 +5,12 @@ at the root of the repository.
 
 ## Usage
 
+The rockcraft/pack action can be added to your repository's workflows with:
+
 ```yaml
 - name: Package rock with Rockcraft
   uses: canonical/craft-actions/rockcraft-pack@main
 ```
-
-This installs and configures LXD and Rockcraft, then packs the rock
-at the root of the repository.
 
 ### Inputs
 

@@ -5,13 +5,12 @@ at the root of the repository.
 
 ## Usage
 
+The snapcraft/pack action can be added to your repository's workflows with:
+
 ```yaml
 - name: Package snap with Snapcraft
   uses: canonical/craft-actions/snapcraft/pack@main
 ```
-
-This installs and configures LXD and Snapcraft, then packs the snap
-at the root of the repository.
 
 ### Inputs
 

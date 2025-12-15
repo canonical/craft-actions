@@ -4,12 +4,12 @@ When invoked, this action installs and configures LXD and Snapcraft.
 
 ## Usage
 
+The snapcraft/setup action can be added to your repository's workflows with:
+
 ```yaml
 - name: Set up Snapcraft
   uses: canonical/craft-actions/snapcraft/setup@main
 ```
-
-This installs and configures LXD and Snapcraft.
 
 ### Inputs
 
@@ -28,7 +28,7 @@ All inputs and their defaults.
     revision: ''
 
     # The channel to install the LXD snap from.
-    # If left blank, defaults to the current recommended channel for Snapcraft.
+    # If unset or set to an empty string, defaults to the current recommended channel for Snapcraft.
     lxd-channel: ''
 ```
 

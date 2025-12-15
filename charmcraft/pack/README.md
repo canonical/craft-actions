@@ -5,13 +5,12 @@ at the root of the repository.
 
 ## Usage
 
+The charmcraft/pack action can be added to your repository's workflows with:
+
 ```yaml
 - name: Package charm with Charmcraft
   uses: canonical/craft-actions/charmcraft/pack@main
 ```
-
-This installs and configures LXD and Charmcraft, then packs the charm
-at the root of the repository.
 
 ### Inputs
 

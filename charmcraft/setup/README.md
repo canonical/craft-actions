@@ -4,12 +4,12 @@ When invoked, this action installs and configures LXD and Charmcraft.
 
 ## Usage
 
+The snapcraft/pack action can be added to your repository's workflows with:
+
 ```yaml
 - name: Set up Charmcraft
   uses: canonical/craft-actions/charmcraft/setup@main
 ```
-
-This installs and configures LXD and Charmcraft.
 
 ### Inputs
 

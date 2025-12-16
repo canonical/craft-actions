@@ -13,7 +13,7 @@ The snapcraft/setup action can be added to your repository's workflows with:
 
 ### Inputs
 
-The action can be catered to your project with the following inputs. Where applicable, inputs are listed with their default values.
+The action supports the following inputs.
 
 ```yaml
 - name: Set up Snapcraft

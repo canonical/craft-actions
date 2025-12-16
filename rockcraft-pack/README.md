@@ -1,6 +1,6 @@
 # rockcraft-pack
 
-When invoked, this action installs and configures LXD and Rockcraft before packing the rock
+This action installs and configures LXD and Rockcraft before packing the rock
 at the root of the repository.
 
 ## Usage

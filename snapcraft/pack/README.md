@@ -1,6 +1,6 @@
 # snapcraft/pack
 
-When invoked, this action installs and configures LXD and Snapcraft before packing the snap
+This action installs and configures LXD and Snapcraft before packing the snap
 at the root of the repository.
 
 ## Usage

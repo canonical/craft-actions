@@ -1,6 +1,6 @@
 # snapcraft/setup
 
-When invoked, this action installs and configures LXD and Snapcraft.
+This action installs and configures LXD and Snapcraft.
 
 ## Usage
 

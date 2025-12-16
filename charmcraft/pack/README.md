@@ -1,6 +1,6 @@
 # charmcraft/pack
 
-When invoked, this action installs and configures LXD and Charmcraft before packing the charm
+This action installs and configures LXD and Charmcraft before packing the charm
 at the root of the repository.
 
 ## Usage

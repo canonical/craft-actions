@@ -1,6 +1,6 @@
 # charmcraft/setup
 
-When invoked, this action installs and configures LXD and Charmcraft.
+This action installs and configures LXD and Charmcraft.
 
 ## Usage
 

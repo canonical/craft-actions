@@ -2,23 +2,23 @@
 
 # Craft Actions
 
-This monorepo contains custom GitHub actions for setting up and packing artifacts with the Craft tools.
+This monorepo contains GitHub actions for setting up craft tools and packing their artifacts.
 
 ## Contents
 
-### [Snapcraft](https://snapcraft.io/)
+### Actions related to snaps and [Snapcraft](https://snapcraft.io/)
 
-- [Package a snap](snapcraft/pack/README.md)
-- [Set up Snapcraft](snapcraft/setup/README.md)
+- [Package a snap](snapcraft/pack/README.md), for installing Snapcraft in the environment and packing a snap.
+- [Set up Snapcraft](snapcraft/setup/README.md), for installing Snapcraft in the environment.
 
-### [Rockcraft](https://documentation.ubuntu.com/rockcraft/stable)
+### Actions related to rocks and [Rockcraft](https://documentation.ubuntu.com/rockcraft/stable)
 
-- [Package a rock](rockcraft-pack/README.md)
+- [Package a rock](rockcraft-pack/README.md), for installing Rockcraft in the environment and packing a rock.
 
-### [Charmcraft](https://juju.is/)
+### Actions related to charms and [Charmcraft](https://juju.is/)
 
-- [Package a charm](charmcraft/pack/README.md)
-- [Set up Charmcraft](charmcraft/setup/README.md)
+- [Package a charm](charmcraft/pack/README.md), for installing Charmcraft in the environment and packing a charm.
+- [Set up Charmcraft](charmcraft/setup/README.md), for installing Charmcraft in the environment.
 
 ## Committing code
 

@@ -79,6 +79,7 @@ jobs:
           channel: ${{ matrix.channel }}
           revision: ${{ matrix.revision }}
       - name: Upload snap
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: test-snap-${{ matrix.os }}-${{ steps.snapcraft.outputs.snapcraft-revision }}

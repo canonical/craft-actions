@@ -1,0 +1,71 @@
+name: Test snapcraft
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/*snapcraft*"
+      - "snapcraft**"
+  push:
+    branches:
+      - main
+
+jobs:
+  setup:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, ubuntu-24.04, ubuntu-22.04-arm, ubuntu-24.04-arm]
+        channel: [latest/edge, 8.x/candidate, 7.x/candidate]
+        include:
+          - os: ubuntu-24.04
+            channel: ''
+            revision: 16570  # 8.13.2, but really here to test the revision.
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./snapcraft/setup
+        id: setup
+        with:
+          channel: ${{ matrix.channel }}
+          revision: ${{ matrix.revision }}
+      - name: Check revision number if set with a revision
+        if: matrix.revision != ''
+        run: |
+          [[ ${{ matrix.revision }} == ${{ steps.setup.outputs.snapcraft-revision }} ]]
+      - name: Check that revisions are set
+        run: |
+          [[ ${{ steps.setup.outputs.snapcraft-revision }} -ge 0 ]]
+          [[ ${{ steps.setup.outputs.lxd-revision }} -ge 0 ]]
+      - name: Check that install works even if Snapcraft is already installed
+        uses: ./snapcraft/setup
+  pack:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, ubuntu-24.04, ubuntu-22.04-arm, ubuntu-24.04-arm]
+        channel: [latest/candidate, latest/edge, 8.x/candidate, 7.x/candidate]
+        include:
+          - os: ubuntu-24.04
+            channel: ''
+            revision: 5303
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/checkout@v5
+        with:
+          repository: canonical/snapcraft
+          path: test-repo
+          ref: main
+      - name: Pack snap
+        id: snapcraft
+        uses: ./snapcraft/pack
+        with:
+          path: test-repo/tests/spread/core22/clean/snaps/clean
+          channel: ${{ matrix.channel }}
+          revision: ${{ matrix.revision }}
+      - name: Upload snap
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-snap-${{ matrix.os }}-${{ steps.snapcraft.outputs.snapcraft-revision }}
+          path: test-repo/tests/spread/core22/clean/snaps/clean/*.snap
+

@@ -19,7 +19,7 @@ jobs:
         include:
           - os: ubuntu-24.04
             channel: ''
-            revision: 16570  # 8.13.2, but really here to test the revision.
+            revision: 16570  # 8.13.2, but really here to test the revision field.
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v5
@@ -47,7 +47,7 @@ jobs:
         include:
           - os: ubuntu-24.04
             channel: ''
-            revision: 5303
+            revision: 16570  # 8.13.2, but really here to test the revision field.
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v5

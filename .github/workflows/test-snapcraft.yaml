@@ -5,6 +5,7 @@ on:
     paths:
       - ".github/workflows/*snapcraft*"
       - "snapcraft**"
+      - "_common/**"  # A change to a common action could affect this action.
   push:
     branches:
       - main

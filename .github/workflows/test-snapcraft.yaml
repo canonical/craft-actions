@@ -82,4 +82,5 @@ jobs:
         with:
           name: test-snap-${{ matrix.os }}-${{ steps.snapcraft.outputs.snapcraft-revision }}
           path: test-repo/tests/spread/core22/clean/snaps/clean/*.snap
+          overwrite: true
 

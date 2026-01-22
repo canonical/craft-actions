@@ -20101,7 +20101,9 @@ async function ensureLXD() {
       "install",
       "lxd",
       "--channel",
-      "5.21/stable"
+      "5.21/stable",
+      "--cohort",
+      "+"
     ]);
   }
   core.info("Initialising LXD...");

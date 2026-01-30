@@ -115,7 +115,9 @@ export async function ensureLXD(): Promise<void> {
       'install',
       'lxd',
       '--channel',
-      '5.21/stable'
+      '5.21/stable',
+      '--cohort',
+      '+'
     ])
   }
 

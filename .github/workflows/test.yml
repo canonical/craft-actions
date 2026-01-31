@@ -10,10 +10,10 @@ jobs:
   test-action-code:
     runs-on: ubuntu-24.04
     steps:
-    - uses: actions/checkout@v5
-    - uses: actions/setup-node@v4
+    - uses: actions/checkout@v6
+    - uses: actions/setup-node@v6
       with:
-        node-version: 22
+        node-version: 24
     - name: Install dependencies
       run: npm install
     - name: Build .js files
@@ -36,7 +36,7 @@ jobs:
         revision: ['1206', '']
     runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
     - name: Build a rock
       uses: ./rockcraft-pack
       id: rockcraft
@@ -51,7 +51,7 @@ jobs:
         installed_rev="$(snap info rockcraft | tail -1 | awk '{print $(NF-2)}')"
         [ "$installed_rev" == "(${{ matrix.revision }})" ]
     - name: Upload rock
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: test-rock-${{ matrix.os }}-${{ matrix.revision }}
         path: ${{ steps.rockcraft.outputs.rock }}

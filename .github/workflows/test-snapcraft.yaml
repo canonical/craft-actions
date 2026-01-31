@@ -30,7 +30,7 @@ jobs:
             revision: 16570  # 8.13.2, but really here to test the revision field.
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: ./snapcraft/setup
         id: setup
         with:
@@ -65,8 +65,8 @@ jobs:
             revision: 16570  # 8.13.2, but really here to test the revision field.
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
+      - uses: actions/checkout@v6
         with:
           repository: canonical/snapcraft
           path: test-repo
@@ -80,7 +80,7 @@ jobs:
           revision: ${{ matrix.revision }}
       - name: Upload snap
         continue-on-error: true
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: test-snap-${{ matrix.os }}-${{ steps.snapcraft.outputs.snapcraft-revision }}
           path: test-repo/tests/spread/core22/clean/snaps/clean/*.snap

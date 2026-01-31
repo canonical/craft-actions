@@ -20,7 +20,7 @@ jobs:
           - channel: latest/stable
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: ./charmcraft/setup
         id: setup
         with:
@@ -47,8 +47,8 @@ jobs:
             revision: 5303
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
+      - uses: actions/checkout@v6
         with:
           repository: juju/juju
           path: juju
@@ -61,7 +61,7 @@ jobs:
           channel: ${{ matrix.channel }}
           revision: ${{ matrix.revision }}
       - name: Upload charm
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: test-charm-${{ matrix.os }}-${{ steps.charmcraft.outputs.charmcraft-revision }}
           path: juju/testcharms/charms/lxd-profile/*.charm

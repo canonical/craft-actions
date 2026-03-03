@@ -100,7 +100,7 @@ runs:
           snapcraft pack
         fi
         echo "snap=$(ls *.snap)" >> "$GITHUB_OUTPUT"
-        echo "components=$(ls -1 *.comp | tr '\n' ' ')" >> "$GITHUB_OUTPUT"
+        echo "components=$(ls -1 *.comp 2>/dev/null | tr '\n' ' ')" >> "$GITHUB_OUTPUT"
 
 branding:
   icon: package

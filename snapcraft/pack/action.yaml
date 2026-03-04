@@ -86,7 +86,19 @@ runs:
         CRAFT_VERBOSITY_LEVEL: ${{ inputs.verbosity }}
       working-directory: ${{ inputs.path }}
       run: |
-        snapcraft pack
+        # Snapcraft < 8 doesn't fully support `snapcraft pack`.
+        # Examples of running `snapcraft --version`:
+        #   snapcraft 8.14.0.post57+dirty
+        #   snapcraft 8.14.2
+        #   snapcraft 7.5.9
+        #   snapcraft, version 6.1
+        SNAPCRAFT_VERSION=$(snapcraft --version | awk '{print $NF}')
+        MAJOR_VERSION=$(echo "$SNAPCRAFT_VERSION" | cut -d'.' -f1)
+        if [[ "$MAJOR_VERSION" =~ ^[0-9]+$ ]] && [ "$MAJOR_VERSION" -lt 8 ]; then
+          snapcraft
+        else
+          snapcraft pack
+        fi
         echo "snap=$(ls *.snap)" >> "$GITHUB_OUTPUT"
         echo "components=$(ls -1 *.comp | tr '\n' ' ')" >> "$GITHUB_OUTPUT"
 

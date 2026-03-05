@@ -102,7 +102,9 @@ runs:
         echo "snap=$(ls *.snap)" >> "$GITHUB_OUTPUT"
         components=( *.comp )
         if [ -e "${components[0]}" ]; then
-            echo "components=${components[*]}" >> "$GITHUB_OUTPUT"
+          echo "components=${components[*]}" >> "$GITHUB_OUTPUT"
+        else
+          echo "components=" >> "$GITHUB_OUTPUT"
         fi
 
 branding:

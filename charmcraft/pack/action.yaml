@@ -52,7 +52,7 @@ runs:
         channel: ${{ inputs.channel }}
         revision: ${{ inputs.revision }}
         lxd-channel: ${{ inputs.lxd-channel }}
-    - uses: actions/cache@v4
+    - uses: actions/cache@v5
       with:
         path: ${{ runner.temp }}/charmcraft_cache
         key: charmcraft-cache-${{ hashfiles('**/requirements.txt', '**/*.lock', '**/charmcraft.yaml') }}

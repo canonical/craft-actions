@@ -10,15 +10,17 @@ on:
       - main
 
 jobs:
-  install:
+  setup:
     strategy:
+      fail-fast: false
       matrix:
-        channel: [latest/stable, latest/edge, 2.x/stable]
+        os: [ubuntu-22.04, ubuntu-24.04, ubuntu-22.04-arm, ubuntu-24.04-arm]
+        channel: [latest/candidate, latest/edge, 3.x/candidate]
         include:
-          - channel: ''
+          - os: ubuntu-24.04
+            channel: ''
             revision: 5303
-          - channel: latest/stable
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v5
       - uses: ./charmcraft/setup
@@ -38,9 +40,10 @@ jobs:
         uses: ./charmcraft/setup
   pack:
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-22.04, ubuntu-24.04]
-        channel: [latest/stable]
+        os: [ubuntu-22.04, ubuntu-24.04, ubuntu-22.04-arm, ubuntu-24.04-arm]
+        channel: [latest/candidate, latest/edge, 3.x/candidate]
         include:
           - os: ubuntu-24.04
             channel: ''

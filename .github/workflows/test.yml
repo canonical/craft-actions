@@ -55,3 +55,23 @@ jobs:
       with:
         name: test-rock-${{ matrix.os }}-${{ matrix.revision }}
         path: ${{ steps.rockcraft.outputs.rock }}
+
+  run-rockcraft-pack-action-legacy-rock:
+    strategy:
+      matrix:
+        os: [ubuntu-24.04]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+      - name: Build a legacy rock
+        uses: ./rockcraft-pack
+        id: rockcraft
+        with:
+          path: tests/legacy
+          verbosity: debug
+          ignore: 'unmaintained'
+      - name: Upload legacy rock
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-legacy-rock-${{ matrix.os }}
+          path: ${{ steps.rockcraft.outputs.rock }}

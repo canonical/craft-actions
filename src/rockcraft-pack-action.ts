@@ -11,6 +11,7 @@ async function run(): Promise<void> {
     const rockcraftRevision = core.getInput('revision') || ''
     const rockcraftChannel = core.getInput('rockcraft-channel') || 'stable'
     const runRockcraftTest = core.getInput('test').toLowerCase() === 'true'
+    const ignore = core.getInput('ignore')
     if (rockcraftRevision.length < 1) {
       core.warning(
         `Rockcraft revision not provided. Installing from ${rockcraftChannel}`
@@ -24,7 +25,8 @@ async function run(): Promise<void> {
       rockcraftPackVerbosity,
       rockcraftRevision,
       runRockcraftTest,
-      buildPro
+      buildPro,
+      ignore
     })
     await builder.pack()
     const rock = await builder.outputRock()

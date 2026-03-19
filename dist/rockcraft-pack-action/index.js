@@ -20045,6 +20045,14 @@ async function haveProFlag() {
   });
   return output.includes("--pro");
 }
+async function haveIgnoreFlag() {
+  let output = "";
+  await exec.exec("script", ["-q", "-c", "rockcraft pack -h"], {
+    silent: true,
+    listeners: { stdout: (data) => output += data.toString() }
+  });
+  return output.includes("--ignore");
+}
 async function ensureSnapd() {
   const haveSnapd = await haveExecutable("/usr/bin/snap");
   if (!haveSnapd) {
@@ -20132,12 +20140,14 @@ var RockcraftBuilder = class {
   rockcraftRevision;
   runRockcraftTest;
   buildPro;
+  ignore;
   constructor(options) {
     this.projectRoot = expandHome(options.projectRoot);
     this.rockcraftChannel = options.rockcraftChannel;
     this.rockcraftRevision = options.rockcraftRevision;
     this.runRockcraftTest = options.runRockcraftTest;
     this.buildPro = options.buildPro;
+    this.ignore = options.ignore;
     if (allowedVerbosity.includes(options.rockcraftPackVerbosity)) {
       this.rockcraftPackVerbosity = options.rockcraftPackVerbosity;
     } else {
@@ -20181,6 +20191,13 @@ var RockcraftBuilder = class {
       validateArgument(this.rockcraftPackVerbosity, "verbosity");
       rockcraftPackArgs = `${rockcraftPackArgs} --verbosity ${this.rockcraftPackVerbosity}`;
     }
+    if (this.ignore) {
+      validateArgument(this.ignore, "ignore");
+      if (!await haveIgnoreFlag()) {
+        throw new Error("This rockcraft version does not support ignore.");
+      }
+      rockcraftPackArgs = `${rockcraftPackArgs} --ignore=${this.ignore}`;
+    }
     rockcraft = `${rockcraft} ${rockcraftPackArgs.trim()}`;
     await exec3.exec(
       "sudo",
@@ -20217,6 +20234,7 @@ async function run() {
     const rockcraftRevision = core3.getInput("revision") || "";
     const rockcraftChannel = core3.getInput("rockcraft-channel") || "stable";
     const runRockcraftTest = core3.getInput("test").toLowerCase() === "true";
+    const ignore = core3.getInput("ignore");
     if (rockcraftRevision.length < 1) {
       core3.warning(
         `Rockcraft revision not provided. Installing from ${rockcraftChannel}`
@@ -20229,7 +20247,8 @@ async function run() {
       rockcraftPackVerbosity,
       rockcraftRevision,
       runRockcraftTest,
-      buildPro
+      buildPro,
+      ignore
     });
     await builder.pack();
     const rock = await builder.outputRock();

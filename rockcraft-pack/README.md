@@ -51,6 +51,12 @@ The action supports the following inputs.
     # Usage of Ubuntu Pro services is currently experimental and only available when installing Rockcraft
     # from the 'latest/edge/pro-sources' channel.
     pro: ''
+
+    # Bypass a restriction to use an unsupported feature.
+    # For example, 'unmaintained' will ignore that the base is unmaintained.
+    # Defaults to empty.
+    ignore: ''
+
 ```
 
 ### Outputs

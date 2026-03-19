@@ -19,7 +19,8 @@ test('RockcraftBuilder expands tilde in project root', () => {
     rockcraftPackVerbosity: 'trace',
     rockcraftRevision: '1',
     runRockcraftTest: false,
-    buildPro: ''
+    buildPro: '',
+    ignore: ''
   })
   expect(builder.projectRoot).toBe(os.homedir())
 
@@ -29,7 +30,8 @@ test('RockcraftBuilder expands tilde in project root', () => {
     rockcraftPackVerbosity: 'trace',
     rockcraftRevision: '1',
     runRockcraftTest: false,
-    buildPro: ''
+    buildPro: '',
+    ignore: ''
   })
   expect(builder.projectRoot).toBe(path.join(os.homedir(), 'foo/bar'))
 })
@@ -66,7 +68,8 @@ test('RockcraftBuilder.pack runs a rock build', async () => {
     rockcraftPackVerbosity: 'debug',
     rockcraftRevision: '1',
     runRockcraftTest: false,
-    buildPro: ''
+    buildPro: '',
+    ignore: ''
   })
   await builder.pack()
 
@@ -117,7 +120,8 @@ test('RockcraftBuilder.build can set the Rockcraft channel', async () => {
     rockcraftPackVerbosity: 'trace',
     rockcraftRevision: '',
     runRockcraftTest: false,
-    buildPro: ''
+    buildPro: '',
+    ignore: ''
   })
   await builder.pack()
 
@@ -150,7 +154,8 @@ test('RockcraftBuilder.build can set the Rockcraft revision', async () => {
     rockcraftPackVerbosity: 'trace',
     rockcraftRevision: '123',
     runRockcraftTest: false,
-    buildPro: ''
+    buildPro: '',
+    ignore: ''
   })
   await builder.pack()
 
@@ -188,7 +193,8 @@ test('RockcraftBuilder.build can pass known verbosity', async () => {
     rockcraftPackVerbosity: 'trace',
     rockcraftRevision: '1',
     runRockcraftTest: false,
-    buildPro: ''
+    buildPro: '',
+    ignore: ''
   })
   await builder.pack()
 
@@ -213,10 +219,68 @@ test('RockcraftBuilder.build can pass known verbosity', async () => {
       rockcraftPackVerbosity: 'fake-verbosity',
       rockcraftRevision: '1',
       runRockcraftTest: false,
-      buildPro: ''
+      buildPro: '',
+      ignore: ''
     })
   }
   expect(badBuilder).toThrow()
+})
+
+test('RockcraftBuilder.build can ignore unmaintained', async () => {
+  expect.assertions(1)
+
+  const user = 'ubuntu'
+
+  const ensureSnapd = jest
+    .spyOn(tools, 'ensureSnapd')
+    .mockImplementation(async (): Promise<void> => {})
+  const ensureLXD = jest
+    .spyOn(tools, 'ensureLXD')
+    .mockImplementation(async (): Promise<void> => {})
+  const ensureRockcraft = jest
+    .spyOn(tools, 'ensureRockcraft')
+    .mockImplementation(async (channel): Promise<void> => {})
+  const haveIgnoreFlag = jest
+    .spyOn(tools, 'haveIgnoreFlag')
+    .mockImplementation(async (): Promise<boolean> => true)
+  const shellUser = jest
+    .spyOn(tools, 'shellUser')
+    .mockImplementation((): string => user)
+  const execMock = jest
+    .spyOn(exec, 'exec')
+    .mockImplementation(
+      async (program: string, args?: string[]): Promise<number> => {
+        return 0
+      }
+    )
+
+  const builder = new build.RockcraftBuilder({
+    projectRoot: '.',
+    rockcraftChannel: 'stable',
+    rockcraftPackVerbosity: 'trace',
+    rockcraftRevision: '1',
+    runRockcraftTest: false,
+    buildPro: '',
+    ignore: 'unmaintained'
+  })
+  await builder.pack()
+
+  expect(execMock).toHaveBeenCalledWith(
+    'sudo',
+    [
+      '--preserve-env',
+      '--user',
+      user,
+      'rockcraft',
+      'pack',
+      '--verbosity',
+      'trace',
+      '--ignore=unmaintained'
+    ],
+    {
+      cwd: '.'
+    }
+  )
 })
 
 test('RockcraftBuilder.pack runs a rock build and test', async () => {
@@ -257,7 +321,8 @@ test('RockcraftBuilder.pack runs a rock build and test', async () => {
     rockcraftPackVerbosity: 'debug',
     rockcraftRevision: '1',
     runRockcraftTest: true,
-    buildPro: ''
+    buildPro: '',
+    ignore: ''
   })
   await builder.pack()
 
@@ -309,7 +374,8 @@ test('RockcraftBuilder.pack fails if test is set to true and no spread.yaml is f
     rockcraftPackVerbosity: 'debug',
     rockcraftRevision: '1',
     runRockcraftTest: true,
-    buildPro: ''
+    buildPro: '',
+    ignore: ''
   })
 
   await expect(builder.pack()).rejects.toThrow(
@@ -349,7 +415,8 @@ test('RockcraftBuilder.pack fails if test is set to true and rockcraft test is i
     rockcraftPackVerbosity: 'debug',
     rockcraftRevision: '1',
     runRockcraftTest: true,
-    buildPro: ''
+    buildPro: '',
+    ignore: ''
   })
 
   await expect(builder.pack()).rejects.toThrow(
@@ -372,7 +439,8 @@ test('RockcraftBuilder.outputRock fails if there are no rocks', async () => {
     rockcraftPackVerbosity: 'trace',
     rockcraftRevision: '1',
     runRockcraftTest: false,
-    buildPro: ''
+    buildPro: '',
+    ignore: ''
   })
 
   const readdir = jest
@@ -395,7 +463,8 @@ test('RockcraftBuilder.outputRock returns the first rock', async () => {
     rockcraftPackVerbosity: 'trace',
     rockcraftRevision: '1',
     runRockcraftTest: false,
-    buildPro: ''
+    buildPro: '',
+    ignore: ''
   })
 
   const readdir = jest
@@ -440,7 +509,8 @@ test('RockcraftBuilder.build can pass pro option', async () => {
     rockcraftPackVerbosity: 'trace',
     rockcraftRevision: '1',
     runRockcraftTest: false,
-    buildPro: 'esm-apps,esm-infra'
+    buildPro: 'esm-apps,esm-infra',
+    ignore: ''
   })
   await builder.pack()
 
@@ -485,7 +555,8 @@ test('RockcraftBuilder.build fails if pro option is not available in rockcraft',
     rockcraftPackVerbosity: 'trace',
     rockcraftRevision: '1',
     runRockcraftTest: false,
-    buildPro: 'fips-updates'
+    buildPro: 'fips-updates',
+    ignore: ''
   })
 
   await expect(builder.pack()).rejects.toThrow(
@@ -521,7 +592,8 @@ test('RockcraftBuilder.build fails if pro argument is invalid', async () => {
     rockcraftPackVerbosity: 'trace',
     rockcraftRevision: '1',
     runRockcraftTest: false,
-    buildPro: 'fips-updates another-command'
+    buildPro: 'fips-updates another-command',
+    ignore: ''
   })
 
   await expect(builder.pack()).rejects.toThrow(

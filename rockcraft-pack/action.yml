@@ -39,6 +39,14 @@ inputs:
 
       If not provided, no Ubuntu Pro services will be enabled.
     default: ''
+  ignore:
+    description: >
+      Bypass a restriction to use an unsupported feature.
+
+      For example, 'unmaintained' will ignore that the base is unmaintained.
+
+      If not provided, it defaults to empty.
+    default: ''
 outputs:
   rock:
     description: 'The file name of the resulting rock.'

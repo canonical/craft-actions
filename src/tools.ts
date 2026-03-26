@@ -48,6 +48,15 @@ export async function haveProFlag(): Promise<boolean> {
   return output.includes('--pro')
 }
 
+export async function haveIgnoreFlag(): Promise<boolean> {
+  let output = ''
+  await exec.exec('script', ['-q', '-c', 'rockcraft pack -h'], {
+    silent: true,
+    listeners: {stdout: data => (output += data.toString())}
+  })
+  return output.includes('--ignore')
+}
+
 export async function ensureSnapd(): Promise<void> {
   const haveSnapd = await haveExecutable('/usr/bin/snap')
   if (!haveSnapd) {

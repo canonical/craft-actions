@@ -15,6 +15,7 @@ interface RockcraftBuilderOptions {
   rockcraftRevision: string
   runRockcraftTest: boolean
   buildPro: string
+  ignore: string
 }
 
 export class RockcraftBuilder {
@@ -24,6 +25,7 @@ export class RockcraftBuilder {
   rockcraftRevision: string
   runRockcraftTest: boolean
   buildPro: string
+  ignore: string
 
   constructor(options: RockcraftBuilderOptions) {
     this.projectRoot = tools.expandHome(options.projectRoot)
@@ -31,6 +33,7 @@ export class RockcraftBuilder {
     this.rockcraftRevision = options.rockcraftRevision
     this.runRockcraftTest = options.runRockcraftTest
     this.buildPro = options.buildPro
+    this.ignore = options.ignore
 
     if (allowedVerbosity.includes(options.rockcraftPackVerbosity)) {
       this.rockcraftPackVerbosity = options.rockcraftPackVerbosity
@@ -81,6 +84,14 @@ export class RockcraftBuilder {
     if (this.rockcraftPackVerbosity) {
       tools.validateArgument(this.rockcraftPackVerbosity, 'verbosity')
       rockcraftPackArgs = `${rockcraftPackArgs} --verbosity ${this.rockcraftPackVerbosity}`
+    }
+
+    if (this.ignore) {
+      tools.validateArgument(this.ignore, 'ignore')
+      if (!(await tools.haveIgnoreFlag())) {
+        throw new Error('This rockcraft version does not support ignore.')
+      }
+      rockcraftPackArgs = `${rockcraftPackArgs} --ignore=${this.ignore}`
     }
 
     rockcraft = `${rockcraft} ${rockcraftPackArgs.trim()}`

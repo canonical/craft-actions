@@ -48,7 +48,7 @@ export class RockcraftBuilder {
   async pack(): Promise<void> {
     core.startGroup('Installing Rockcraft plus dependencies')
     await tools.ensureSnapd()
-    await tools.ensureLXD()
+    await tools.ensureLXD(!!this.buildPro)
     await tools.ensureRockcraft(this.rockcraftChannel, this.rockcraftRevision)
     core.endGroup()
 
@@ -77,7 +77,6 @@ export class RockcraftBuilder {
           'Cannot build pro rock. This rockcraft version does not support pro.'
         )
       }
-      sudoArgs = []
       rockcraftPackArgs = `${rockcraftPackArgs} --pro=${this.buildPro}`
     }
 

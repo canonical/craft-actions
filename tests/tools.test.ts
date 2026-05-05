@@ -145,7 +145,7 @@ test('ensureLXD installs the snap version of LXD if needed', async () => {
       }
     )
 
-  await tools.ensureLXD()
+  await tools.ensureLXD(false)
 
   expect(execMock).toHaveBeenNthCalledWith(1, 'sudo', [
     'groupadd',
@@ -173,6 +173,63 @@ test('ensureLXD installs the snap version of LXD if needed', async () => {
   expect(execMock).toHaveBeenNthCalledWith(4, 'sudo', ['lxd', 'init', '--auto'])
 })
 
+test('ensureLXD configures lxd_guest_attach if needed', async () => {
+  expect.assertions(7)
+
+  const accessMock = jest
+    .spyOn(fs.promises, 'access')
+    .mockImplementation(
+      async (
+        filename: fs.PathLike,
+        mode?: number | undefined
+      ): Promise<void> => {
+        throw new Error('not found')
+      }
+    )
+  const execMock = jest
+    .spyOn(exec, 'exec')
+    .mockImplementation(
+      async (program: string, args?: string[]): Promise<number> => {
+        return 0
+      }
+    )
+
+  await tools.ensureLXD(true)
+
+  expect(execMock).toHaveBeenNthCalledWith(1, 'sudo', [
+    'groupadd',
+    '--force',
+    '--system',
+    'lxd'
+  ])
+  expect(execMock).toHaveBeenNthCalledWith(2, 'sudo', [
+    'usermod',
+    '--append',
+    '--groups',
+    'lxd',
+    os.userInfo().username
+  ])
+  expect(accessMock).toHaveBeenCalled()
+  expect(execMock).toHaveBeenNthCalledWith(3, 'sudo', [
+    'snap',
+    'install',
+    'lxd',
+    '--channel',
+    '5.21/stable',
+    '--cohort',
+    '+'
+  ])
+  expect(execMock).toHaveBeenNthCalledWith(4, 'sudo', ['lxd', 'init', '--auto'])
+
+  expect(execMock).toHaveBeenNthCalledWith(5, 'sudo', [
+    'pro',
+    'config',
+    'set',
+    'lxd_guest_attach=available'
+  ])
+  expect(execMock).toHaveBeenNthCalledWith(6, 'sudo', ['snap', 'restart', 'lxd'])
+})
+
 test('ensureLXD removes the apt version of LXD', async () => {
   expect.assertions(2)
 
@@ -194,7 +251,7 @@ test('ensureLXD removes the apt version of LXD', async () => {
       }
     )
 
-  await tools.ensureLXD()
+  await tools.ensureLXD(false)
 
   expect(accessMock).toHaveBeenCalled()
   expect(execMock).toHaveBeenNthCalledWith(1, 'sudo', [
@@ -230,7 +287,7 @@ test('ensureLXD is not refreshed if LXD is installed', async () => {
       }
     )
 
-  await tools.ensureLXD()
+  await tools.ensureLXD(false)
 
   expect(accessMock).toHaveBeenCalled()
   expect(execMock).not.toHaveBeenNthCalledWith(3, 'sudo', [
@@ -268,7 +325,7 @@ test('ensureLXD still calls "lxd init" if LXD is installed', async () => {
       }
     )
 
-  await tools.ensureLXD()
+  await tools.ensureLXD(false)
 
   expect(accessMock).toHaveBeenCalled()
   expect(execMock).toHaveBeenNthCalledWith(1, 'sudo', [

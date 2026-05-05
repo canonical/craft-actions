@@ -20118,7 +20118,12 @@ async function ensureLXD(configurePro) {
   await exec.exec("sudo", ["lxd", "init", "--auto"]);
   if (configurePro) {
     core.info("Configuring LXD for pro rockcraft builds...");
-    await exec.exec("sudo", ["pro", "config", "set", "lxd_guest_attach=available"]);
+    await exec.exec("sudo", [
+      "pro",
+      "config",
+      "set",
+      "lxd_guest_attach=available"
+    ]);
     await exec.exec("sudo", ["snap", "restart", "lxd"]);
   }
   await ensureLXDNetwork();
@@ -20167,7 +20172,7 @@ var RockcraftBuilder = class {
     await ensureLXD(!!this.buildPro);
     await ensureRockcraft(this.rockcraftChannel, this.rockcraftRevision);
     core2.endGroup();
-    let sudoArgs = ["--user", shellUser()];
+    const sudoArgs = ["--user", shellUser()];
     let rockcraft = "rockcraft pack";
     let rockcraftPackArgs = "";
     if (this.runRockcraftTest) {

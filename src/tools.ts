@@ -97,7 +97,7 @@ export async function ensureLXDNetwork(): Promise<void> {
   await exec.exec('sudo', ['iptables', '-P', 'FORWARD', 'ACCEPT'])
 }
 
-export async function ensureLXD(configurePro : boolean): Promise<void> {
+export async function ensureLXD(configurePro: boolean): Promise<void> {
   const haveDebLXD = await haveExecutable('/usr/bin/lxd')
   if (haveDebLXD) {
     core.info('Removing legacy .deb packaged LXD...')
@@ -134,7 +134,12 @@ export async function ensureLXD(configurePro : boolean): Promise<void> {
   await exec.exec('sudo', ['lxd', 'init', '--auto'])
   if (configurePro) {
     core.info('Configuring LXD for pro rockcraft builds...')
-    await exec.exec('sudo', ['pro', 'config', 'set', 'lxd_guest_attach=available'])
+    await exec.exec('sudo', [
+      'pro',
+      'config',
+      'set',
+      'lxd_guest_attach=available'
+    ])
     await exec.exec('sudo', ['snap', 'restart', 'lxd'])
   }
   await ensureLXDNetwork()

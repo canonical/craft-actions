@@ -52,7 +52,7 @@ export class RockcraftBuilder {
     await tools.ensureRockcraft(this.rockcraftChannel, this.rockcraftRevision)
     core.endGroup()
 
-    let sudoArgs = ['--user', tools.shellUser()]
+    const sudoArgs = ['--user', tools.shellUser()]
     let rockcraft = 'rockcraft pack'
     let rockcraftPackArgs = ''
 

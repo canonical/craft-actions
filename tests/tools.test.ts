@@ -227,7 +227,11 @@ test('ensureLXD configures lxd_guest_attach if needed', async () => {
     'set',
     'lxd_guest_attach=available'
   ])
-  expect(execMock).toHaveBeenNthCalledWith(6, 'sudo', ['snap', 'restart', 'lxd'])
+  expect(execMock).toHaveBeenNthCalledWith(6, 'sudo', [
+    'snap',
+    'restart',
+    'lxd'
+  ])
 })
 
 test('ensureLXD removes the apt version of LXD', async () => {

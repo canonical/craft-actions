@@ -20086,7 +20086,7 @@ async function ensureLXDNetwork() {
   );
   await exec.exec("sudo", ["iptables", "-P", "FORWARD", "ACCEPT"]);
 }
-async function ensureLXD() {
+async function ensureLXD(configurePro) {
   const haveDebLXD = await haveExecutable("/usr/bin/lxd");
   if (haveDebLXD) {
     core.info("Removing legacy .deb packaged LXD...");
@@ -20116,6 +20116,16 @@ async function ensureLXD() {
   }
   core.info("Initialising LXD...");
   await exec.exec("sudo", ["lxd", "init", "--auto"]);
+  if (configurePro) {
+    core.info("Configuring LXD for pro rockcraft builds...");
+    await exec.exec("sudo", [
+      "pro",
+      "config",
+      "set",
+      "lxd_guest_attach=available"
+    ]);
+    await exec.exec("sudo", ["snap", "restart", "lxd"]);
+  }
   await ensureLXDNetwork();
 }
 async function ensureRockcraft(channel, revision) {
@@ -20159,10 +20169,10 @@ var RockcraftBuilder = class {
   async pack() {
     core2.startGroup("Installing Rockcraft plus dependencies");
     await ensureSnapd();
-    await ensureLXD();
+    await ensureLXD(!!this.buildPro);
     await ensureRockcraft(this.rockcraftChannel, this.rockcraftRevision);
     core2.endGroup();
-    let sudoArgs = ["--user", shellUser()];
+    const sudoArgs = ["--user", shellUser()];
     let rockcraft = "rockcraft pack";
     let rockcraftPackArgs = "";
     if (this.runRockcraftTest) {
@@ -20184,7 +20194,6 @@ var RockcraftBuilder = class {
           "Cannot build pro rock. This rockcraft version does not support pro."
         );
       }
-      sudoArgs = [];
       rockcraftPackArgs = `${rockcraftPackArgs} --pro=${this.buildPro}`;
     }
     if (this.rockcraftPackVerbosity) {

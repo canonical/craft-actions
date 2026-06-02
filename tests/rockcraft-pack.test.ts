@@ -3,7 +3,6 @@
 import * as os from 'os'
 import * as path from 'path'
 import * as exec from '@actions/exec'
-import * as core from '@actions/core'
 import * as build from '../src/rockcraft-pack'
 import * as tools from '../src/tools'
 import * as fs from 'fs'
@@ -445,7 +444,7 @@ test('RockcraftBuilder.outputRock fails if there are no rocks', async () => {
 
   const readdir = jest
     .spyOn(fs.promises, 'readdir')
-    .mockResolvedValue(['not-a-rock' as unknown as fs.Dirent])
+    .mockResolvedValue(['not-a-rock'] as any)
 
   await expect(builder.outputRock()).rejects.toThrow(
     'No .rock files produced by build'
@@ -469,7 +468,7 @@ test('RockcraftBuilder.outputRock returns the first rock', async () => {
 
   const readdir = jest
     .spyOn(fs.promises, 'readdir')
-    .mockResolvedValue(['one.rock', 'two.rock'] as unknown as fs.Dirent[])
+    .mockResolvedValue(['one.rock', 'two.rock'] as any)
 
   await expect(builder.outputRock()).resolves.toEqual('project-root/one.rock')
   expect(readdir).toHaveBeenCalled()

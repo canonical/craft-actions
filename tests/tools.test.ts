@@ -26,10 +26,7 @@ test('ensureSnapd installs snapd if needed', async () => {
   const statMock = jest
     .spyOn(fs.promises, 'stat')
     .mockImplementation(async (filename: fs.PathLike): Promise<fs.Stats> => {
-      const s = new fs.Stats()
-      s.uid = 0
-      s.gid = 0
-      return s
+      return {uid: 0, gid: 0} as unknown as fs.Stats
     })
   const execMock = jest
     .spyOn(exec, 'exec')
@@ -70,10 +67,7 @@ test('ensureSnapd is a no-op if snapd is installed', async () => {
   const statMock = jest
     .spyOn(fs.promises, 'stat')
     .mockImplementation(async (filename: fs.PathLike): Promise<fs.Stats> => {
-      const s = new fs.Stats()
-      s.uid = 0
-      s.gid = 0
-      return s
+      return {uid: 0, gid: 0} as unknown as fs.Stats
     })
   const execMock = jest
     .spyOn(exec, 'exec')
@@ -104,10 +98,7 @@ test('ensureSnapd fixes permissions on the root directory', async () => {
   const statMock = jest
     .spyOn(fs.promises, 'stat')
     .mockImplementation(async (filename: fs.PathLike): Promise<fs.Stats> => {
-      const s = new fs.Stats()
-      s.uid = 500
-      s.gid = 0
-      return s
+      return {uid: 500, gid: 0} as unknown as fs.Stats
     })
   const execMock = jest
     .spyOn(exec, 'exec')

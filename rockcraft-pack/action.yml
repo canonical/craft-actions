@@ -51,7 +51,7 @@ outputs:
   rock:
     description: 'The file name of the resulting rock.'
 runs:
-  using: 'node20'
+  using: 'node24'
   main: '../dist/rockcraft-pack-action/index.js'
 branding:
   icon: layers

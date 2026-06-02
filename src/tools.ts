@@ -23,7 +23,7 @@ export function fileExists(path: string): boolean {
 async function haveExecutable(path: string): Promise<boolean> {
   try {
     await fs.promises.access(path, fs.constants.X_OK)
-  } catch (err) {
+  } catch {
     return false
   }
   return true

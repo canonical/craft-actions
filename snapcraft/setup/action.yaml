@@ -62,7 +62,7 @@ runs:
         sparse-checkout: |
           _common/
 
-    - uses: canonical/setup-lxd@da2ac84e727dc534215fd14cd088b9209d65893b # main
+    - uses: canonical/setup-lxd@da2ac84e727dc534215fd14cd088b9209d65893b # main as of 6-4-26
       with:
         channel: ${{ inputs.lxd-channel }}
 

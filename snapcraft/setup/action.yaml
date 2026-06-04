@@ -52,7 +52,7 @@ runs:
     # use the same branch of craft-actions to call other craft-actions workflows without just
     # making our own local copy of the repository. See https://github.com/canonical/craft-actions/pull/45#discussion_r2586507869
     # for a full explanation.
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       env:
         GITHUB_REF: ${{ github.action_ref }}
       with:
@@ -62,7 +62,7 @@ runs:
         sparse-checkout: |
           _common/
 
-    - uses: canonical/setup-lxd@main
+    - uses: canonical/setup-lxd@da2ac84e727dc534215fd14cd088b9209d65893b # main
       with:
         channel: ${{ inputs.lxd-channel }}
 

@@ -46,9 +46,9 @@ test('RockcraftBuilder.pack runs a rock build', async () => {
   const ensureLXD = jest
     .spyOn(tools, 'ensureLXD')
     .mockImplementation(async (): Promise<void> => {})
-  const ensureRockcraft = jest
-    .spyOn(tools, 'ensureRockcraft')
-    .mockImplementation(async (channel): Promise<void> => {})
+  const ensureCraftTool = jest
+    .spyOn(tools, 'ensureCraftTool')
+    .mockImplementation(async (): Promise<void> => {})
   const shellUser = jest
     .spyOn(tools, 'shellUser')
     .mockImplementation((): string => user)
@@ -74,7 +74,7 @@ test('RockcraftBuilder.pack runs a rock build', async () => {
 
   expect(ensureSnapd).toHaveBeenCalled()
   expect(ensureLXD).toHaveBeenCalled()
-  expect(ensureRockcraft).toHaveBeenCalled()
+  expect(ensureCraftTool).toHaveBeenCalled()
   expect(shellUser).toHaveBeenCalled()
   expect(execMock).toHaveBeenCalledWith(
     'sudo',
@@ -102,9 +102,9 @@ test('RockcraftBuilder.build can set the Rockcraft channel', async () => {
   const ensureLXD = jest
     .spyOn(tools, 'ensureLXD')
     .mockImplementation(async (): Promise<void> => {})
-  const ensureRockcraft = jest
-    .spyOn(tools, 'ensureRockcraft')
-    .mockImplementation(async (channel): Promise<void> => {})
+  const ensureCraftTool = jest
+    .spyOn(tools, 'ensureCraftTool')
+    .mockImplementation(async (): Promise<void> => {})
   const execMock = jest
     .spyOn(exec, 'exec')
     .mockImplementation(
@@ -124,7 +124,7 @@ test('RockcraftBuilder.build can set the Rockcraft channel', async () => {
   })
   await builder.pack()
 
-  expect(ensureRockcraft).toHaveBeenCalledWith('test-channel', '')
+  expect(ensureCraftTool).toHaveBeenCalledWith('rockcraft', 'test-channel', '')
 })
 
 test('RockcraftBuilder.build can set the Rockcraft revision', async () => {
@@ -136,9 +136,9 @@ test('RockcraftBuilder.build can set the Rockcraft revision', async () => {
   const ensureLXD = jest
     .spyOn(tools, 'ensureLXD')
     .mockImplementation(async (): Promise<void> => {})
-  const ensureRockcraft = jest
-    .spyOn(tools, 'ensureRockcraft')
-    .mockImplementation(async (channel): Promise<void> => {})
+  const ensureCraftTool = jest
+    .spyOn(tools, 'ensureCraftTool')
+    .mockImplementation(async (): Promise<void> => {})
   const execMock = jest
     .spyOn(exec, 'exec')
     .mockImplementation(
@@ -158,7 +158,7 @@ test('RockcraftBuilder.build can set the Rockcraft revision', async () => {
   })
   await builder.pack()
 
-  expect(ensureRockcraft).toHaveBeenCalledWith('channel', '123')
+  expect(ensureCraftTool).toHaveBeenCalledWith('rockcraft', 'channel', '123')
 })
 
 test('RockcraftBuilder.build can pass known verbosity', async () => {
@@ -172,9 +172,9 @@ test('RockcraftBuilder.build can pass known verbosity', async () => {
   const ensureLXD = jest
     .spyOn(tools, 'ensureLXD')
     .mockImplementation(async (): Promise<void> => {})
-  const ensureRockcraft = jest
-    .spyOn(tools, 'ensureRockcraft')
-    .mockImplementation(async (channel): Promise<void> => {})
+  const ensureCraftTool = jest
+    .spyOn(tools, 'ensureCraftTool')
+    .mockImplementation(async (): Promise<void> => {})
   const shellUser = jest
     .spyOn(tools, 'shellUser')
     .mockImplementation((): string => user)
@@ -236,11 +236,11 @@ test('RockcraftBuilder.build can ignore unmaintained', async () => {
   const ensureLXD = jest
     .spyOn(tools, 'ensureLXD')
     .mockImplementation(async (): Promise<void> => {})
-  const ensureRockcraft = jest
-    .spyOn(tools, 'ensureRockcraft')
-    .mockImplementation(async (channel): Promise<void> => {})
-  const haveIgnoreFlag = jest
-    .spyOn(tools, 'haveIgnoreFlag')
+  const ensureCraftTool = jest
+    .spyOn(tools, 'ensureCraftTool')
+    .mockImplementation(async (): Promise<void> => {})
+  const haveFlag = jest
+    .spyOn(tools, 'haveFlag')
     .mockImplementation(async (): Promise<boolean> => true)
   const shellUser = jest
     .spyOn(tools, 'shellUser')
@@ -293,14 +293,14 @@ test('RockcraftBuilder.pack runs a rock build and test', async () => {
   const ensureLXD = jest
     .spyOn(tools, 'ensureLXD')
     .mockImplementation(async (): Promise<void> => {})
-  const ensureRockcraft = jest
-    .spyOn(tools, 'ensureRockcraft')
-    .mockImplementation(async (channel): Promise<void> => {})
+  const ensureCraftTool = jest
+    .spyOn(tools, 'ensureCraftTool')
+    .mockImplementation(async (): Promise<void> => {})
   const shellUser = jest
     .spyOn(tools, 'shellUser')
     .mockImplementation((): string => user)
-  const haveRockcraftTest = jest
-    .spyOn(tools, 'haveRockcraftTest')
+  const haveSubcommand = jest
+    .spyOn(tools, 'haveSubcommand')
     .mockImplementation(async (): Promise<boolean> => true)
   const fileExists = jest
     .spyOn(tools, 'fileExists')
@@ -327,9 +327,9 @@ test('RockcraftBuilder.pack runs a rock build and test', async () => {
 
   expect(ensureSnapd).toHaveBeenCalled()
   expect(ensureLXD).toHaveBeenCalled()
-  expect(ensureRockcraft).toHaveBeenCalled()
+  expect(ensureCraftTool).toHaveBeenCalled()
   expect(shellUser).toHaveBeenCalled()
-  expect(haveRockcraftTest).toHaveBeenCalled()
+  expect(haveSubcommand).toHaveBeenCalled()
   expect(fileExists).toHaveBeenCalledWith('project-root/spread.yaml')
   expect(execMock).toHaveBeenCalledWith(
     'sudo',
@@ -359,9 +359,9 @@ test('RockcraftBuilder.pack fails if test is set to true and no spread.yaml is f
   const ensureLXD = jest
     .spyOn(tools, 'ensureLXD')
     .mockImplementation(async (): Promise<void> => {})
-  const ensureRockcraft = jest
-    .spyOn(tools, 'ensureRockcraft')
-    .mockImplementation(async (channel): Promise<void> => {})
+  const ensureCraftTool = jest
+    .spyOn(tools, 'ensureCraftTool')
+    .mockImplementation(async (): Promise<void> => {})
   const fileExists = jest
     .spyOn(tools, 'fileExists')
     .mockImplementation((path: string) => false)
@@ -382,7 +382,7 @@ test('RockcraftBuilder.pack fails if test is set to true and no spread.yaml is f
   )
   expect(ensureSnapd).toHaveBeenCalled()
   expect(ensureLXD).toHaveBeenCalled()
-  expect(ensureRockcraft).toHaveBeenCalled()
+  expect(ensureCraftTool).toHaveBeenCalled()
   expect(fileExists).toHaveBeenCalledWith('project-root/spread.yaml')
 })
 
@@ -397,11 +397,11 @@ test('RockcraftBuilder.pack fails if test is set to true and rockcraft test is i
   const ensureLXD = jest
     .spyOn(tools, 'ensureLXD')
     .mockImplementation(async (): Promise<void> => {})
-  const ensureRockcraft = jest
-    .spyOn(tools, 'ensureRockcraft')
-    .mockImplementation(async (channel): Promise<void> => {})
-  const haveRockcraftTest = jest
-    .spyOn(tools, 'haveRockcraftTest')
+  const ensureCraftTool = jest
+    .spyOn(tools, 'ensureCraftTool')
+    .mockImplementation(async (): Promise<void> => {})
+  const haveSubcommand = jest
+    .spyOn(tools, 'haveSubcommand')
     .mockImplementation(async (): Promise<boolean> => false)
   const fileExists = jest
     .spyOn(tools, 'fileExists')
@@ -423,8 +423,8 @@ test('RockcraftBuilder.pack fails if test is set to true and rockcraft test is i
   )
   expect(ensureSnapd).toHaveBeenCalled()
   expect(ensureLXD).toHaveBeenCalled()
-  expect(ensureRockcraft).toHaveBeenCalled()
-  expect(haveRockcraftTest).toHaveBeenCalled()
+  expect(ensureCraftTool).toHaveBeenCalled()
+  expect(haveSubcommand).toHaveBeenCalled()
   expect(fileExists).toHaveBeenCalledWith('project-root/spread.yaml')
 })
 
@@ -485,14 +485,14 @@ test('RockcraftBuilder.build can pass pro option', async () => {
   const ensureLXD = jest
     .spyOn(tools, 'ensureLXD')
     .mockImplementation(async (): Promise<void> => {})
-  const ensureRockcraft = jest
-    .spyOn(tools, 'ensureRockcraft')
-    .mockImplementation(async (channel): Promise<void> => {})
+  const ensureCraftTool = jest
+    .spyOn(tools, 'ensureCraftTool')
+    .mockImplementation(async (): Promise<void> => {})
   const shellUser = jest
     .spyOn(tools, 'shellUser')
     .mockImplementation((): string => user)
-  const haveProFlag = jest
-    .spyOn(tools, 'haveProFlag')
+  const haveFlag = jest
+    .spyOn(tools, 'haveFlag')
     .mockImplementation(async (): Promise<boolean> => true)
   const execMock = jest
     .spyOn(exec, 'exec')
@@ -540,14 +540,14 @@ test('RockcraftBuilder.build fails if pro option is not available in rockcraft',
   const ensureLXD = jest
     .spyOn(tools, 'ensureLXD')
     .mockImplementation(async (): Promise<void> => {})
-  const ensureRockcraft = jest
-    .spyOn(tools, 'ensureRockcraft')
-    .mockImplementation(async (channel): Promise<void> => {})
+  const ensureCraftTool = jest
+    .spyOn(tools, 'ensureCraftTool')
+    .mockImplementation(async (): Promise<void> => {})
   const shellUser = jest
     .spyOn(tools, 'shellUser')
     .mockImplementation((): string => user)
-  const haveProFlag = jest
-    .spyOn(tools, 'haveProFlag')
+  const haveFlag = jest
+    .spyOn(tools, 'haveFlag')
     .mockImplementation(async (): Promise<boolean> => false)
 
   const builder = new build.RockcraftBuilder({
@@ -563,7 +563,7 @@ test('RockcraftBuilder.build fails if pro option is not available in rockcraft',
   await expect(builder.pack()).rejects.toThrow(
     'Cannot build pro rock. This rockcraft version does not support pro.'
   )
-  expect(haveProFlag).toHaveBeenCalled()
+  expect(haveFlag).toHaveBeenCalled()
 })
 
 test('RockcraftBuilder.build fails if pro argument is invalid', async () => {
@@ -577,14 +577,14 @@ test('RockcraftBuilder.build fails if pro argument is invalid', async () => {
   const ensureLXD = jest
     .spyOn(tools, 'ensureLXD')
     .mockImplementation(async (): Promise<void> => {})
-  const ensureRockcraft = jest
-    .spyOn(tools, 'ensureRockcraft')
-    .mockImplementation(async (channel): Promise<void> => {})
+  const ensureCraftTool = jest
+    .spyOn(tools, 'ensureCraftTool')
+    .mockImplementation(async (): Promise<void> => {})
   const shellUser = jest
     .spyOn(tools, 'shellUser')
     .mockImplementation((): string => user)
-  const haveProFlag = jest
-    .spyOn(tools, 'haveProFlag')
+  const haveFlag = jest
+    .spyOn(tools, 'haveFlag')
     .mockImplementation(async (): Promise<boolean> => true)
 
   const builder = new build.RockcraftBuilder({

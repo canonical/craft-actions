@@ -35,26 +35,19 @@ export function validateArgument(value: string, field: string): void {
   }
 }
 
-export async function haveRockcraftTest(): Promise<boolean> {
-  return (await exec.exec('sudo', ['rockcraft', 'test', '-h'])) === 0
-}
-
-export async function haveProFlag(): Promise<boolean> {
+export async function haveFlag(tool: string, flag: string): Promise<boolean> {
   let output = ''
-  await exec.exec('script', ['-q', '-c', 'rockcraft pack -h'], {
+  await exec.exec('script', ['-q', '-c', `${tool} pack -h`], {
     silent: true,
     listeners: {stdout: data => (output += data.toString())}
   })
-  return output.includes('--pro')
+  return output.includes(flag)
 }
 
-export async function haveIgnoreFlag(): Promise<boolean> {
-  let output = ''
-  await exec.exec('script', ['-q', '-c', 'rockcraft pack -h'], {
-    silent: true,
-    listeners: {stdout: data => (output += data.toString())}
-  })
-  return output.includes('--ignore')
+export async function haveSubcommand(tool: string, subcommand: string): Promise<boolean> {
+  return (
+    (await exec.exec(tool, [subcommand, '-h'], {ignoreReturnCode: true})) === 0
+  )
 }
 
 export async function ensureSnapd(): Promise<void> {
@@ -145,18 +138,19 @@ export async function ensureLXD(configurePro: boolean): Promise<void> {
   await ensureLXDNetwork()
 }
 
-export async function ensureRockcraft(
+export async function ensureCraftTool(
+  name: string,
   channel: string,
   revision: string
 ): Promise<void> {
-  const haveRockcraft = await haveExecutable('/snap/bin/rockcraft')
-  core.info('Installing Rockcraft...')
+  const haveSnap = await haveExecutable(`/snap/bin/${name}`)
+  core.info(`Installing ${name}...`)
   await exec.exec('sudo', [
     'snap',
-    haveRockcraft ? 'refresh' : 'install',
+    haveSnap ? 'refresh' : 'install',
     revision.length > 0 ? '--revision' : '--channel',
     revision.length > 0 ? revision : channel,
     '--classic',
-    'rockcraft'
+    name
   ])
 }

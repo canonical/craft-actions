@@ -19817,7 +19817,7 @@ var exec3 = __toESM(require_exec());
 var fs2 = __toESM(require("fs"));
 var path = __toESM(require("path"));
 
-// src/tools.ts
+// src/common/tools.ts
 var core = __toESM(require_core());
 var exec = __toESM(require_exec());
 var fs = __toESM(require("fs"));
@@ -19847,24 +19847,18 @@ function validateArgument(value, field) {
     throw new Error(`Invalid argument '${value}' in field '${field}'`);
   }
 }
-async function haveRockcraftTest() {
-  return await exec.exec("sudo", ["rockcraft", "test", "-h"]) === 0;
-}
-async function haveProFlag() {
+async function haveFlag(tool, flag) {
   let output = "";
-  await exec.exec("script", ["-q", "-c", "rockcraft pack -h"], {
+  await exec.exec("script", ["-q", "-c", `${tool} pack -h`], {
     silent: true,
     listeners: { stdout: (data) => output += data.toString() }
   });
-  return output.includes("--pro");
+  return output.includes(flag);
 }
-async function haveIgnoreFlag() {
-  let output = "";
-  await exec.exec("script", ["-q", "-c", "rockcraft pack -h"], {
-    silent: true,
-    listeners: { stdout: (data) => output += data.toString() }
-  });
-  return output.includes("--ignore");
+async function haveSubcommand(tool, subcommand) {
+  return await exec.exec("sudo", [tool, subcommand, "-h"], {
+    ignoreReturnCode: true
+  }) === 0;
 }
 async function ensureSnapd() {
   const haveSnapd = await haveExecutable("/usr/bin/snap");
@@ -19941,16 +19935,16 @@ async function ensureLXD(configurePro) {
   }
   await ensureLXDNetwork();
 }
-async function ensureRockcraft(channel, revision) {
-  const haveRockcraft = await haveExecutable("/snap/bin/rockcraft");
-  core.info("Installing Rockcraft...");
+async function ensureCraftTool(name, channel, revision) {
+  const haveSnap = await haveExecutable(`/snap/bin/${name}`);
+  core.info(`Installing ${name}...`);
   await exec.exec("sudo", [
     "snap",
-    haveRockcraft ? "refresh" : "install",
+    haveSnap ? "refresh" : "install",
     revision.length > 0 ? "--revision" : "--channel",
     revision.length > 0 ? revision : channel,
     "--classic",
-    "rockcraft"
+    name
   ]);
 }
 
@@ -19983,7 +19977,7 @@ var RockcraftBuilder = class {
     core2.startGroup("Installing Rockcraft plus dependencies");
     await ensureSnapd();
     await ensureLXD(!!this.buildPro);
-    await ensureRockcraft(this.rockcraftChannel, this.rockcraftRevision);
+    await ensureCraftTool("rockcraft", this.rockcraftChannel, this.rockcraftRevision);
     core2.endGroup();
     const sudoArgs = ["--user", shellUser()];
     let rockcraft = "rockcraft pack";
@@ -19992,7 +19986,7 @@ var RockcraftBuilder = class {
       const testFile = `${this.projectRoot}/spread.yaml`;
       if (!fileExists(testFile)) {
         throw new Error(`Cannot run tests. Missing ${testFile} file.`);
-      } else if (!await haveRockcraftTest()) {
+      } else if (!await haveSubcommand("rockcraft", "test")) {
         throw new Error(
           "Cannot run tests. rockcraft test is not a valid command."
         );
@@ -20002,7 +19996,7 @@ var RockcraftBuilder = class {
     }
     if (this.buildPro) {
       validateArgument(this.buildPro, "pro");
-      if (!await haveProFlag()) {
+      if (!await haveFlag("rockcraft", "--pro")) {
         throw new Error(
           "Cannot build pro rock. This rockcraft version does not support pro."
         );
@@ -20015,7 +20009,7 @@ var RockcraftBuilder = class {
     }
     if (this.ignore) {
       validateArgument(this.ignore, "ignore");
-      if (!await haveIgnoreFlag()) {
+      if (!await haveFlag("rockcraft", "--ignore")) {
         throw new Error("This rockcraft version does not support ignore.");
       }
       rockcraftPackArgs = `${rockcraftPackArgs} --ignore=${this.ignore}`;

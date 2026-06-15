@@ -339,7 +339,7 @@ test('ensureLXD still calls "lxd init" if LXD is installed', async () => {
   expect(execMock).toHaveBeenNthCalledWith(3, 'sudo', ['lxd', 'init', '--auto'])
 })
 
-test('ensureRockcraft installs Rockcraft if needed', async () => {
+test('ensureCraftTool installs a craft tool if needed', async () => {
   expect.assertions(4)
 
   const accessMock = jest
@@ -360,7 +360,7 @@ test('ensureRockcraft installs Rockcraft if needed', async () => {
       }
     )
 
-  await tools.ensureRockcraft('edge', '')
+  await tools.ensureCraftTool('rockcraft', 'edge', '')
 
   expect(accessMock).toHaveBeenCalled()
   expect(execMock).toHaveBeenNthCalledWith(1, 'sudo', [
@@ -372,7 +372,7 @@ test('ensureRockcraft installs Rockcraft if needed', async () => {
     'rockcraft'
   ])
 
-  await tools.ensureRockcraft('stable', '1234')
+  await tools.ensureCraftTool('snapcraft', 'stable', '1234')
 
   expect(accessMock).toHaveBeenCalled()
   expect(execMock).toHaveBeenNthCalledWith(2, 'sudo', [
@@ -381,11 +381,11 @@ test('ensureRockcraft installs Rockcraft if needed', async () => {
     '--revision',
     '1234',
     '--classic',
-    'rockcraft'
+    'snapcraft'
   ])
 })
 
-test('ensureRockcraft refreshes if Rockcraft is installed', async () => {
+test('ensureCraftTool refreshes if the tool is already installed', async () => {
   expect.assertions(2)
 
   const accessMock = jest
@@ -406,7 +406,7 @@ test('ensureRockcraft refreshes if Rockcraft is installed', async () => {
       }
     )
 
-  await tools.ensureRockcraft('edge', '')
+  await tools.ensureCraftTool('rockcraft', 'edge', '')
 
   expect(accessMock).toHaveBeenCalled()
   expect(execMock).toHaveBeenNthCalledWith(1, 'sudo', [
@@ -529,4 +529,70 @@ test('ensureLXDNetwork sets up iptables and warns only about installed packages'
     'FORWARD',
     'ACCEPT'
   ])
+})
+
+test('haveFlag returns true if the flag is present in the help output', async () => {
+  expect.assertions(2)
+
+  const execMock = jest
+    .spyOn(exec, 'exec')
+    .mockImplementation(
+      async (program: string, args?: string[], options?: any): Promise<number> => {
+        options?.listeners?.stdout?.(Buffer.from('--pro\n--other-flag'))
+        return 0
+      }
+    )
+
+  await expect(tools.haveFlag('rockcraft', '--pro')).resolves.toBe(true)
+  expect(execMock).toHaveBeenCalledWith(
+    'script',
+    ['-q', '-c', 'rockcraft pack -h'],
+    expect.anything()
+  )
+})
+
+test('haveFlag returns false if the flag is absent from the help output', async () => {
+  expect.assertions(1)
+
+  jest
+    .spyOn(exec, 'exec')
+    .mockImplementation(
+      async (program: string, args?: string[], options?: any): Promise<number> => {
+        options?.listeners?.stdout?.(Buffer.from('--other-flag'))
+        return 0
+      }
+    )
+
+  await expect(tools.haveFlag('rockcraft', '--pro')).resolves.toBe(false)
+})
+
+test('haveSubcommand returns true if the subcommand is available', async () => {
+  expect.assertions(2)
+
+  const execMock = jest
+    .spyOn(exec, 'exec')
+    .mockImplementation(
+      async (program: string, args?: string[]): Promise<number> => {
+        return 0
+      }
+    )
+
+  await expect(tools.haveSubcommand('rockcraft', 'test')).resolves.toBe(true)
+  expect(execMock).toHaveBeenCalledWith('rockcraft', ['test', '-h'], {
+    ignoreReturnCode: true
+  })
+})
+
+test('haveSubcommand returns false if the subcommand is not available', async () => {
+  expect.assertions(1)
+
+  jest
+    .spyOn(exec, 'exec')
+    .mockImplementation(
+      async (program: string, args?: string[]): Promise<number> => {
+        return 1
+      }
+    )
+
+  await expect(tools.haveSubcommand('rockcraft', 'test')).resolves.toBe(false)
 })

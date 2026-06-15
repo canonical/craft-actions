@@ -49,7 +49,7 @@ export class RockcraftBuilder {
     core.startGroup('Installing Rockcraft plus dependencies')
     await tools.ensureSnapd()
     await tools.ensureLXD(!!this.buildPro)
-    await tools.ensureRockcraft(this.rockcraftChannel, this.rockcraftRevision)
+    await tools.ensureCraftTool('rockcraft', this.rockcraftChannel, this.rockcraftRevision)
     core.endGroup()
 
     const sudoArgs = ['--user', tools.shellUser()]
@@ -61,7 +61,7 @@ export class RockcraftBuilder {
 
       if (!tools.fileExists(testFile)) {
         throw new Error(`Cannot run tests. Missing ${testFile} file.`)
-      } else if (!(await tools.haveRockcraftTest())) {
+      } else if (!(await tools.haveSubcommand('rockcraft', 'test'))) {
         throw new Error(
           'Cannot run tests. rockcraft test is not a valid command.'
         )
@@ -72,7 +72,7 @@ export class RockcraftBuilder {
 
     if (this.buildPro) {
       tools.validateArgument(this.buildPro, 'pro')
-      if (!(await tools.haveProFlag())) {
+      if (!(await tools.haveFlag('rockcraft', '--pro'))) {
         throw new Error(
           'Cannot build pro rock. This rockcraft version does not support pro.'
         )
@@ -87,7 +87,7 @@ export class RockcraftBuilder {
 
     if (this.ignore) {
       tools.validateArgument(this.ignore, 'ignore')
-      if (!(await tools.haveIgnoreFlag())) {
+      if (!(await tools.haveFlag('rockcraft', '--ignore'))) {
         throw new Error('This rockcraft version does not support ignore.')
       }
       rockcraftPackArgs = `${rockcraftPackArgs} --ignore=${this.ignore}`

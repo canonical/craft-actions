@@ -1,124 +1,35 @@
 // -*- mode: javascript; js-indent-level: 2 -*-
 
-import * as core from '@actions/core'
-import * as exec from '@actions/exec'
-import * as fs from 'fs'
-import * as path from 'path'
 import * as tools from './tools'
+import {CraftBuilder, CraftBuilderOptions} from './craft-builder'
 
-const allowedVerbosity = ['quiet', 'brief', 'verbose', 'debug', 'trace']
-
-interface RockcraftBuilderOptions {
-  projectRoot: string
-  rockcraftChannel: string
-  rockcraftPackVerbosity: string
-  rockcraftRevision: string
-  runRockcraftTest: boolean
-  buildPro: string
+export interface RockcraftBuilderOptions extends CraftBuilderOptions {
   ignore: string
 }
 
-export class RockcraftBuilder {
-  projectRoot: string
-  rockcraftChannel: string
-  rockcraftPackVerbosity: string
-  rockcraftRevision: string
-  runRockcraftTest: boolean
-  buildPro: string
+export class RockcraftBuilder extends CraftBuilder {
+  toolName = 'rockcraft'
+  artifactType = '.rock'
   ignore: string
 
   constructor(options: RockcraftBuilderOptions) {
-    this.projectRoot = tools.expandHome(options.projectRoot)
-    this.rockcraftChannel = options.rockcraftChannel
-    this.rockcraftRevision = options.rockcraftRevision
-    this.runRockcraftTest = options.runRockcraftTest
-    this.buildPro = options.buildPro
+    super(options)
     this.ignore = options.ignore
-
-    if (allowedVerbosity.includes(options.rockcraftPackVerbosity)) {
-      this.rockcraftPackVerbosity = options.rockcraftPackVerbosity
-    } else {
-      throw new Error(
-        'Invalid verbosity "${options.rockcraftPackVerbosity}".' +
-          'Allowed values are ${allowedVerbosity.join(", ")}.'
-      )
-    }
   }
 
-  async pack(): Promise<void> {
-    core.startGroup('Installing Rockcraft plus dependencies')
-    await tools.ensureSnapd()
-    await tools.ensureLXD(!!this.buildPro)
-    await tools.ensureCraftTool('rockcraft', this.rockcraftChannel, this.rockcraftRevision)
-    core.endGroup()
-
-    const sudoArgs = ['--user', tools.shellUser()]
-    let rockcraft = 'rockcraft pack'
-    let rockcraftPackArgs = ''
-
-    if (this.runRockcraftTest) {
-      const testFile = `${this.projectRoot}/spread.yaml`
-
-      if (!tools.fileExists(testFile)) {
-        throw new Error(`Cannot run tests. Missing ${testFile} file.`)
-      } else if (!(await tools.haveSubcommand('rockcraft', 'test'))) {
-        throw new Error(
-          'Cannot run tests. rockcraft test is not a valid command.'
-        )
-      } else {
-        rockcraft = 'rockcraft test'
-      }
-    }
-
-    if (this.buildPro) {
-      tools.validateArgument(this.buildPro, 'pro')
-      if (!(await tools.haveFlag('rockcraft', '--pro'))) {
-        throw new Error(
-          'Cannot build pro rock. This rockcraft version does not support pro.'
-        )
-      }
-      rockcraftPackArgs = `${rockcraftPackArgs} --pro=${this.buildPro}`
-    }
-
-    if (this.rockcraftPackVerbosity) {
-      tools.validateArgument(this.rockcraftPackVerbosity, 'verbosity')
-      rockcraftPackArgs = `${rockcraftPackArgs} --verbosity ${this.rockcraftPackVerbosity}`
-    }
+  protected async buildPackArgs(): Promise<string[]> {
+    const args = await super.buildPackArgs()
 
     if (this.ignore) {
       tools.validateArgument(this.ignore, 'ignore')
-      if (!(await tools.haveFlag('rockcraft', '--ignore'))) {
-        throw new Error('This rockcraft version does not support ignore.')
+      if (!(await tools.haveFlag(this.toolName, '--ignore'))) {
+        throw new Error(
+          `This ${this.toolName} version does not support --ignore.`
+        )
       }
-      rockcraftPackArgs = `${rockcraftPackArgs} --ignore=${this.ignore}`
+      args.push(`--ignore=${this.ignore}`)
     }
 
-    rockcraft = `${rockcraft} ${rockcraftPackArgs.trim()}`
-    await exec.exec(
-      'sudo',
-      ['--preserve-env', ...sudoArgs, ...rockcraft.split(' ')],
-      {
-        cwd: this.projectRoot
-      }
-    )
-  }
-
-  // This wrapper is for the benefit of the tests, due to the crazy
-  // typing of fs.promises.readdir()
-  async #readdir(dir: string): Promise<string[]> {
-    return await fs.promises.readdir(dir)
-  }
-
-  async outputRock(): Promise<string> {
-    const files = await this.#readdir(this.projectRoot)
-    const rocks = files.filter(name => name.endsWith('.rock'))
-
-    if (rocks.length === 0) {
-      throw new Error('No .rock files produced by build')
-    }
-    if (rocks.length > 1) {
-      core.warning(`Multiple rocks found in ${this.projectRoot}`)
-    }
-    return path.join(this.projectRoot, rocks[0])
+    return args
   }
 }

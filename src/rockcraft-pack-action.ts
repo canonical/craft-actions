@@ -7,10 +7,10 @@ async function run(): Promise<void> {
   try {
     const projectRoot = core.getInput('path')
     core.info(`Building rock in "${projectRoot}"...`)
-    const buildPro = core.getInput('pro') || ''
+    const pro = core.getInput('pro') || ''
     const rockcraftRevision = core.getInput('revision') || ''
     const rockcraftChannel = core.getInput('rockcraft-channel') || 'stable'
-    const runRockcraftTest = core.getInput('test').toLowerCase() === 'true'
+    const runTests = core.getInput('test').toLowerCase() === 'true'
     const ignore = core.getInput('ignore')
     if (rockcraftRevision.length < 1) {
       core.warning(
@@ -21,15 +21,15 @@ async function run(): Promise<void> {
 
     const builder = new RockcraftBuilder({
       projectRoot,
-      rockcraftChannel,
-      rockcraftPackVerbosity,
-      rockcraftRevision,
-      runRockcraftTest,
-      buildPro,
+      channel: rockcraftChannel,
+      verbosity: rockcraftPackVerbosity,
+      revision: rockcraftRevision,
+      runTests,
+      pro,
       ignore
     })
     await builder.pack()
-    const rock = await builder.outputRock()
+    const rock = await builder.outputArtifact()
     core.setOutput('rock', rock)
   } catch (error) {
     core.setFailed((error as Error)?.message)

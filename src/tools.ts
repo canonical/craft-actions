@@ -44,7 +44,10 @@ export async function haveFlag(tool: string, flag: string): Promise<boolean> {
   return output.includes(flag)
 }
 
-export async function haveSubcommand(tool: string, subcommand: string): Promise<boolean> {
+export async function haveSubcommand(
+  tool: string,
+  subcommand: string
+): Promise<boolean> {
   return (
     (await exec.exec(tool, [subcommand, '-h'], {ignoreReturnCode: true})) === 0
   )

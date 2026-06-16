@@ -19674,7 +19674,7 @@ var require_core = __commonJS({
       process.env["PATH"] = `${inputPath}${path2.delimiter}${process.env["PATH"]}`;
     }
     exports2.addPath = addPath;
-    function getInput2(name, options) {
+    function getInput3(name, options) {
       const val = process.env[`INPUT_${name.replace(/ /g, "_").toUpperCase()}`] || "";
       if (options && options.required && !val) {
         throw new Error(`Input required and not supplied: ${name}`);
@@ -19684,9 +19684,9 @@ var require_core = __commonJS({
       }
       return val.trim();
     }
-    exports2.getInput = getInput2;
+    exports2.getInput = getInput3;
     function getMultilineInput(name, options) {
-      const inputs = getInput2(name, options).split("\n").filter((x) => x !== "");
+      const inputs = getInput3(name, options).split("\n").filter((x) => x !== "");
       if (options && options.trimWhitespace === false) {
         return inputs;
       }
@@ -19696,7 +19696,7 @@ var require_core = __commonJS({
     function getBooleanInput(name, options) {
       const trueValue = ["true", "True", "TRUE"];
       const falseValue = ["false", "False", "FALSE"];
-      const val = getInput2(name, options);
+      const val = getInput3(name, options);
       if (trueValue.includes(val))
         return true;
       if (falseValue.includes(val))
@@ -19735,10 +19735,10 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
       (0, command_1.issueCommand)("error", (0, utils_1.toCommandProperties)(properties), message instanceof Error ? message.toString() : message);
     }
     exports2.error = error;
-    function warning3(message, properties = {}) {
+    function warning2(message, properties = {}) {
       (0, command_1.issueCommand)("warning", (0, utils_1.toCommandProperties)(properties), message instanceof Error ? message.toString() : message);
     }
-    exports2.warning = warning3;
+    exports2.warning = warning2;
     function notice(message, properties = {}) {
       (0, command_1.issueCommand)("notice", (0, utils_1.toCommandProperties)(properties), message instanceof Error ? message.toString() : message);
     }
@@ -19809,15 +19809,9 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
 });
 
 // src/rockcraft-pack-action.ts
-var core3 = __toESM(require_core());
+var core4 = __toESM(require_core());
 
-// src/rockcraft-pack.ts
-var core2 = __toESM(require_core());
-var exec3 = __toESM(require_exec());
-var fs2 = __toESM(require("fs"));
-var path = __toESM(require("path"));
-
-// src/common/tools.ts
+// src/tools.ts
 var core = __toESM(require_core());
 var exec = __toESM(require_exec());
 var fs = __toESM(require("fs"));
@@ -19856,9 +19850,7 @@ async function haveFlag(tool, flag) {
   return output.includes(flag);
 }
 async function haveSubcommand(tool, subcommand) {
-  return await exec.exec("sudo", [tool, subcommand, "-h"], {
-    ignoreReturnCode: true
-  }) === 0;
+  return await exec.exec(tool, [subcommand, "-h"], { ignoreReturnCode: true }) === 0;
 }
 async function ensureSnapd() {
   const haveSnapd = await haveExecutable("/usr/bin/snap");
@@ -19948,132 +19940,159 @@ async function ensureCraftTool(name, channel, revision) {
   ]);
 }
 
-// src/rockcraft-pack.ts
+// src/craft-builder.ts
+var core2 = __toESM(require_core());
+var exec3 = __toESM(require_exec());
+var fs2 = __toESM(require("fs"));
+var path = __toESM(require("path"));
 var allowedVerbosity = ["quiet", "brief", "verbose", "debug", "trace"];
-var RockcraftBuilder = class {
+var CraftBuilder = class {
   projectRoot;
-  rockcraftChannel;
-  rockcraftPackVerbosity;
-  rockcraftRevision;
-  runRockcraftTest;
-  buildPro;
-  ignore;
+  channel;
+  revision;
+  verbosity;
+  pro;
+  runTests;
   constructor(options) {
     this.projectRoot = expandHome(options.projectRoot);
-    this.rockcraftChannel = options.rockcraftChannel;
-    this.rockcraftRevision = options.rockcraftRevision;
-    this.runRockcraftTest = options.runRockcraftTest;
-    this.buildPro = options.buildPro;
-    this.ignore = options.ignore;
-    if (allowedVerbosity.includes(options.rockcraftPackVerbosity)) {
-      this.rockcraftPackVerbosity = options.rockcraftPackVerbosity;
+    this.channel = options.channel;
+    this.revision = options.revision;
+    this.pro = options.pro ?? "";
+    this.runTests = options.runTests ?? false;
+    if (!options.verbosity || allowedVerbosity.includes(options.verbosity)) {
+      this.verbosity = options.verbosity ?? "";
     } else {
       throw new Error(
-        'Invalid verbosity "${options.rockcraftPackVerbosity}".Allowed values are ${allowedVerbosity.join(", ")}.'
+        `Invalid verbosity "${options.verbosity}". Allowed values are ${allowedVerbosity.join(", ")}.`
       );
     }
   }
-  async pack() {
-    core2.startGroup("Installing Rockcraft plus dependencies");
-    await ensureSnapd();
-    await ensureLXD(!!this.buildPro);
-    await ensureCraftTool("rockcraft", this.rockcraftChannel, this.rockcraftRevision);
-    core2.endGroup();
-    const sudoArgs = ["--user", shellUser()];
-    let rockcraft = "rockcraft pack";
-    let rockcraftPackArgs = "";
-    if (this.runRockcraftTest) {
-      const testFile = `${this.projectRoot}/spread.yaml`;
-      if (!fileExists(testFile)) {
-        throw new Error(`Cannot run tests. Missing ${testFile} file.`);
-      } else if (!await haveSubcommand("rockcraft", "test")) {
-        throw new Error(
-          "Cannot run tests. rockcraft test is not a valid command."
-        );
-      } else {
-        rockcraft = "rockcraft test";
+  async buildPackArgs() {
+    const args = [];
+    if (this.pro) {
+      validateArgument(this.pro, "pro");
+      if (!await haveFlag(this.toolName, "--pro")) {
+        throw new Error(`This ${this.toolName} version does not support --pro.`);
       }
+      args.push(`--pro=${this.pro}`);
     }
-    if (this.buildPro) {
-      validateArgument(this.buildPro, "pro");
-      if (!await haveFlag("rockcraft", "--pro")) {
-        throw new Error(
-          "Cannot build pro rock. This rockcraft version does not support pro."
-        );
-      }
-      rockcraftPackArgs = `${rockcraftPackArgs} --pro=${this.buildPro}`;
+    if (this.verbosity) {
+      validateArgument(this.verbosity, "verbosity");
+      args.push("--verbosity", this.verbosity);
     }
-    if (this.rockcraftPackVerbosity) {
-      validateArgument(this.rockcraftPackVerbosity, "verbosity");
-      rockcraftPackArgs = `${rockcraftPackArgs} --verbosity ${this.rockcraftPackVerbosity}`;
-    }
-    if (this.ignore) {
-      validateArgument(this.ignore, "ignore");
-      if (!await haveFlag("rockcraft", "--ignore")) {
-        throw new Error("This rockcraft version does not support ignore.");
-      }
-      rockcraftPackArgs = `${rockcraftPackArgs} --ignore=${this.ignore}`;
-    }
-    rockcraft = `${rockcraft} ${rockcraftPackArgs.trim()}`;
+    return args;
+  }
+  async doPack(subcommand) {
+    const packArgs = await this.buildPackArgs();
     await exec3.exec(
       "sudo",
-      ["--preserve-env", ...sudoArgs, ...rockcraft.split(" ")],
-      {
-        cwd: this.projectRoot
-      }
+      [
+        "--preserve-env",
+        "--user",
+        shellUser(),
+        this.toolName,
+        subcommand,
+        ...packArgs
+      ],
+      { cwd: this.projectRoot }
     );
   }
-  // This wrapper is for the benefit of the tests, due to the crazy
-  // typing of fs.promises.readdir()
+  async resolvePackSubcommand() {
+    if (!this.runTests) return "pack";
+    const testFile = `${this.projectRoot}/spread.yaml`;
+    if (!fileExists(testFile)) {
+      throw new Error(`Cannot run tests. Missing ${testFile} file.`);
+    }
+    if (!await haveSubcommand(this.toolName, "test")) {
+      throw new Error(
+        `Cannot run tests. ${this.toolName} test is not a valid command.`
+      );
+    }
+    return "test";
+  }
+  async pack() {
+    core2.startGroup(`Installing ${this.toolName} plus dependencies`);
+    await ensureSnapd();
+    await ensureLXD(!!this.pro);
+    await ensureCraftTool(this.toolName, this.channel, this.revision);
+    core2.endGroup();
+    await this.doPack(await this.resolvePackSubcommand());
+  }
   async #readdir(dir) {
     return await fs2.promises.readdir(dir);
   }
-  async outputRock() {
+  async findArtifacts(extension) {
     const files = await this.#readdir(this.projectRoot);
-    const rocks = files.filter((name) => name.endsWith(".rock"));
-    if (rocks.length === 0) {
-      throw new Error("No .rock files produced by build");
+    const artifacts = files.filter((name) => name.endsWith(extension)).map((name) => path.join(this.projectRoot, name));
+    if (artifacts.length === 0) {
+      throw new Error(`No ${extension} files produced by build`);
     }
-    if (rocks.length > 1) {
-      core2.warning(`Multiple rocks found in ${this.projectRoot}`);
-    }
-    return path.join(this.projectRoot, rocks[0]);
+    return artifacts;
   }
 };
 
-// src/rockcraft-pack-action.ts
-async function run() {
+// src/rockcraft-pack.ts
+var RockcraftBuilder = class extends CraftBuilder {
+  toolName = "rockcraft";
+  artifactType = ".rock";
+  ignore;
+  constructor(options) {
+    super(options);
+    this.ignore = options.ignore;
+  }
+  async buildPackArgs() {
+    const args = await super.buildPackArgs();
+    if (this.ignore) {
+      validateArgument(this.ignore, "ignore");
+      if (!await haveFlag(this.toolName, "--ignore")) {
+        throw new Error(
+          `This ${this.toolName} version does not support --ignore.`
+        );
+      }
+      args.push(`--ignore=${this.ignore}`);
+    }
+    return args;
+  }
+};
+
+// src/pack-action.ts
+var core3 = __toESM(require_core());
+function readBaseInputs(channelInput = "channel") {
+  return {
+    projectRoot: core3.getInput("path"),
+    channel: core3.getInput(channelInput) || "stable",
+    revision: core3.getInput("revision") || "",
+    verbosity: core3.getInput("verbosity"),
+    pro: core3.getInput("pro") || "",
+    runTests: core3.getInput("test").toLowerCase() === "true"
+  };
+}
+async function runPackAction(builder2, outputName) {
   try {
-    const projectRoot = core3.getInput("path");
-    core3.info(`Building rock in "${projectRoot}"...`);
-    const buildPro = core3.getInput("pro") || "";
-    const rockcraftRevision = core3.getInput("revision") || "";
-    const rockcraftChannel = core3.getInput("rockcraft-channel") || "stable";
-    const runRockcraftTest = core3.getInput("test").toLowerCase() === "true";
-    const ignore = core3.getInput("ignore");
-    if (rockcraftRevision.length < 1) {
-      core3.warning(
-        `Rockcraft revision not provided. Installing from ${rockcraftChannel}`
+    if (!builder2.revision) {
+      core3.info(
+        `${builder2.toolName} revision not provided. Installing from ${builder2.channel}`
       );
     }
-    const rockcraftPackVerbosity = core3.getInput("verbosity");
-    const builder = new RockcraftBuilder({
-      projectRoot,
-      rockcraftChannel,
-      rockcraftPackVerbosity,
-      rockcraftRevision,
-      runRockcraftTest,
-      buildPro,
-      ignore
-    });
-    await builder.pack();
-    const rock = await builder.outputRock();
-    core3.setOutput("rock", rock);
+    await builder2.pack();
+    const artifacts = await builder2.findArtifacts(builder2.artifactType);
+    if (artifacts.length > 1) {
+      core3.warning(
+        `Multiple ${builder2.artifactType} files found in ${builder2.projectRoot}`
+      );
+    }
+    core3.setOutput(outputName, artifacts[0]);
   } catch (error) {
     core3.setFailed(error?.message);
   }
 }
-void run();
+
+// src/rockcraft-pack-action.ts
+var builder = new RockcraftBuilder({
+  ...readBaseInputs("rockcraft-channel"),
+  ignore: core4.getInput("ignore")
+});
+void runPackAction(builder, "rock");
 /*! Bundled license information:
 
 undici/lib/fetch/body.js:

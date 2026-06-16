@@ -32,17 +32,9 @@ export abstract class CraftBuilder {
     this.projectRoot = tools.expandHome(options.projectRoot)
     this.channel = options.channel
     this.revision = options.revision
+    this.verbosity = options.verbosity
     this.pro = options.pro ?? ''
     this.runTests = options.runTests ?? false
-
-    if (!options.verbosity || allowedVerbosity.includes(options.verbosity)) {
-      this.verbosity = options.verbosity ?? ''
-    } else {
-      throw new Error(
-        `Invalid verbosity "${options.verbosity}". ` +
-          `Allowed values are ${allowedVerbosity.join(', ')}.`
-      )
-    }
   }
 
   protected async buildPackArgs(): Promise<string[]> {
@@ -57,7 +49,12 @@ export abstract class CraftBuilder {
     }
 
     if (this.verbosity) {
-      tools.validateArgument(this.verbosity, 'verbosity')
+      if (!allowedVerbosity.includes(this.verbosity)) {
+        throw new Error(
+          `Invalid verbosity "${this.verbosity}". ` +
+            `Allowed values are ${allowedVerbosity.join(', ')}.`
+        )
+      }
       args.push('--verbosity', this.verbosity)
     }
 

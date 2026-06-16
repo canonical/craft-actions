@@ -20,16 +20,20 @@ function makeStubBuilder(
     toolName: string
     channel: string
     revision: string
+    artifactType: string
+    projectRoot: string
     pack: () => Promise<void>
-    outputArtifact: () => Promise<string>
+    findArtifacts: (ext: string) => Promise<string[]>
   }> = {}
 ) {
   return {
     toolName: 'test-tool',
     channel: 'stable',
     revision: '',
+    artifactType: '.charm',
+    projectRoot: 'project-root',
     pack: jest.fn(async () => {}),
-    outputArtifact: jest.fn(async () => 'project-root/output.charm'),
+    findArtifacts: jest.fn(async () => ['project-root/output.charm']),
     ...overrides
   } as unknown as CraftBuilder
 }
@@ -130,4 +134,36 @@ test('runPackAction calls setFailed on error', async () => {
   await runPackAction(builder, 'charm')
 
   expect(setFailed).toHaveBeenCalledWith('pack failed')
+})
+
+test('runPackAction warns when multiple artifacts are found', async () => {
+  expect.assertions(1)
+
+  jest.spyOn(core, 'setOutput').mockImplementation(() => {})
+  jest.spyOn(core, 'info').mockImplementation(() => {})
+  const warning = jest.spyOn(core, 'warning').mockImplementation(() => {})
+  const builder = makeStubBuilder({
+    revision: '1',
+    findArtifacts: jest.fn(async () => [
+      'project-root/a.charm',
+      'project-root/b.charm'
+    ])
+  })
+
+  await runPackAction(builder, 'charm')
+
+  expect(warning).toHaveBeenCalled()
+})
+
+test('runPackAction does not warn when only one artifact is found', async () => {
+  expect.assertions(1)
+
+  jest.spyOn(core, 'setOutput').mockImplementation(() => {})
+  jest.spyOn(core, 'info').mockImplementation(() => {})
+  const warning = jest.spyOn(core, 'warning').mockImplementation(() => {})
+  const builder = makeStubBuilder({revision: '1'})
+
+  await runPackAction(builder, 'charm')
+
+  expect(warning).not.toHaveBeenCalled()
 })

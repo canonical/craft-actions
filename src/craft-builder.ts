@@ -104,21 +104,11 @@ export abstract class CraftBuilder {
     await this.doPack(await this.resolvePackSubcommand())
   }
 
-  async outputArtifact(): Promise<string> {
-    const artifacts = await this.outputArtifacts(this.artifactType)
-    if (artifacts.length > 1) {
-      core.warning(
-        `Multiple ${this.artifactType} files found in ${this.projectRoot}`
-      )
-    }
-    return artifacts[0]
-  }
-
   async #readdir(dir: string): Promise<string[]> {
     return await fs.promises.readdir(dir)
   }
 
-  protected async outputArtifacts(extension: string): Promise<string[]> {
+  async findArtifacts(extension: string): Promise<string[]> {
     const files = await this.#readdir(this.projectRoot)
     const artifacts = files
       .filter(name => name.endsWith(extension))

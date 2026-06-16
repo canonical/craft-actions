@@ -25,7 +25,13 @@ export async function runPackAction(
       )
     }
     await builder.pack()
-    core.setOutput(outputName, await builder.outputArtifact())
+    const artifacts = await builder.findArtifacts(builder.artifactType)
+    if (artifacts.length > 1) {
+      core.warning(
+        `Multiple ${builder.artifactType} files found in ${builder.projectRoot}`
+      )
+    }
+    core.setOutput(outputName, artifacts[0])
   } catch (error) {
     core.setFailed((error as Error)?.message)
   }

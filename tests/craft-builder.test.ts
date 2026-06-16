@@ -10,11 +10,6 @@ import * as tools from '../src/tools'
 class TestBuilder extends CraftBuilder {
   toolName = 'test-tool'
   artifactType = '.charm'
-
-  // Expose the protected method so tests can call it directly.
-  async testOutputArtifacts(ext: string): Promise<string[]> {
-    return this.outputArtifacts(ext)
-  }
 }
 
 function makeBuilder(overrides: Partial<CraftBuilderOptions> = {}): TestBuilder {
@@ -251,19 +246,19 @@ test('CraftBuilder.pack fails when pro argument is invalid', async () => {
   ).rejects.toThrow("Invalid argument 'fips-updates another-command' in field 'pro'")
 })
 
-test('CraftBuilder.outputArtifacts throws when no matching files are found', async () => {
+test('CraftBuilder.findArtifacts throws when no matching files are found', async () => {
   expect.assertions(1)
 
   jest
     .spyOn(fs.promises, 'readdir')
     .mockResolvedValue(['other-file.txt'] as any)
 
-  await expect(makeBuilder().testOutputArtifacts('.charm')).rejects.toThrow(
+  await expect(makeBuilder().findArtifacts('.charm')).rejects.toThrow(
     'No .charm files produced by build'
   )
 })
 
-test('CraftBuilder.outputArtifacts returns all matching files', async () => {
+test('CraftBuilder.findArtifacts returns all matching files', async () => {
   expect.assertions(1)
 
   jest
@@ -271,30 +266,6 @@ test('CraftBuilder.outputArtifacts returns all matching files', async () => {
     .mockResolvedValue(['a.charm', 'b.charm', 'readme.txt'] as any)
 
   await expect(
-    makeBuilder({projectRoot: 'project-root'}).testOutputArtifacts('.charm')
+    makeBuilder({projectRoot: 'project-root'}).findArtifacts('.charm')
   ).resolves.toEqual(['project-root/a.charm', 'project-root/b.charm'])
-})
-
-test('CraftBuilder.outputArtifact returns the first artifact of the declared type', async () => {
-  expect.assertions(1)
-
-  jest
-    .spyOn(fs.promises, 'readdir')
-    .mockResolvedValue(['a.charm', 'b.charm'] as any)
-
-  await expect(
-    makeBuilder({projectRoot: 'project-root'}).outputArtifact()
-  ).resolves.toEqual('project-root/a.charm')
-})
-
-test('CraftBuilder.outputArtifact throws when no artifacts are found', async () => {
-  expect.assertions(1)
-
-  jest
-    .spyOn(fs.promises, 'readdir')
-    .mockResolvedValue(['not-a-charm.txt'] as any)
-
-  await expect(makeBuilder().outputArtifact()).rejects.toThrow(
-    'No .charm files produced by build'
-  )
 })

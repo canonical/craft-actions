@@ -109,4 +109,3 @@ test('RockcraftBuilder.pack fails if test is set to true and rockcraft test is i
     makeBuilder({projectRoot: 'project-root', runTests: true}).pack()
   ).rejects.toThrow('Cannot run tests. rockcraft test is not a valid command.')
 })
-

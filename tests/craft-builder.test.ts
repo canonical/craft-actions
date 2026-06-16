@@ -12,7 +12,9 @@ class TestBuilder extends CraftBuilder {
   artifactType = '.charm'
 }
 
-function makeBuilder(overrides: Partial<CraftBuilderOptions> = {}): TestBuilder {
+function makeBuilder(
+  overrides: Partial<CraftBuilderOptions> = {}
+): TestBuilder {
   return new TestBuilder({
     projectRoot: '.',
     channel: 'stable',
@@ -170,9 +172,9 @@ test('CraftBuilder.pack fails when runTests is true and tool has no test subcomm
     .spyOn(tools, 'haveSubcommand')
     .mockImplementation(async (): Promise<boolean> => false)
 
-  await expect(
-    makeBuilder({runTests: true}).pack()
-  ).rejects.toThrow('Cannot run tests. test-tool test is not a valid command.')
+  await expect(makeBuilder({runTests: true}).pack()).rejects.toThrow(
+    'Cannot run tests. test-tool test is not a valid command.'
+  )
 })
 
 test('CraftBuilder.pack includes --verbosity flag when verbosity is set', async () => {
@@ -243,7 +245,9 @@ test('CraftBuilder.pack fails when pro argument is invalid', async () => {
 
   await expect(
     makeBuilder({pro: 'fips-updates another-command'}).pack()
-  ).rejects.toThrow("Invalid argument 'fips-updates another-command' in field 'pro'")
+  ).rejects.toThrow(
+    "Invalid argument 'fips-updates another-command' in field 'pro'"
+  )
 })
 
 test('CraftBuilder.findArtifacts throws when no matching files are found', async () => {

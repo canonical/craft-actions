@@ -537,7 +537,11 @@ test('haveFlag returns true if the flag is present in the help output', async ()
   const execMock = jest
     .spyOn(exec, 'exec')
     .mockImplementation(
-      async (program: string, args?: string[], options?: any): Promise<number> => {
+      async (
+        program: string,
+        args?: string[],
+        options?: any
+      ): Promise<number> => {
         options?.listeners?.stdout?.(Buffer.from('--pro\n--other-flag'))
         return 0
       }
@@ -557,7 +561,11 @@ test('haveFlag returns false if the flag is absent from the help output', async 
   jest
     .spyOn(exec, 'exec')
     .mockImplementation(
-      async (program: string, args?: string[], options?: any): Promise<number> => {
+      async (
+        program: string,
+        args?: string[],
+        options?: any
+      ): Promise<number> => {
         options?.listeners?.stdout?.(Buffer.from('--other-flag'))
         return 0
       }

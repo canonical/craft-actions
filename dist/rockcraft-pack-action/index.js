@@ -19945,7 +19945,6 @@ var core2 = __toESM(require_core());
 var exec3 = __toESM(require_exec());
 var fs2 = __toESM(require("fs"));
 var path = __toESM(require("path"));
-var allowedVerbosity = ["quiet", "brief", "verbose", "debug", "trace"];
 var CraftBuilder = class {
   projectRoot;
   channel;
@@ -19971,11 +19970,6 @@ var CraftBuilder = class {
       args.push(`--pro=${this.pro}`);
     }
     if (this.verbosity) {
-      if (!allowedVerbosity.includes(this.verbosity)) {
-        throw new Error(
-          `Invalid verbosity "${this.verbosity}". Allowed values are ${allowedVerbosity.join(", ")}.`
-        );
-      }
       args.push("--verbosity", this.verbosity);
     }
     return args;

@@ -6,8 +6,6 @@ import * as fs from 'fs'
 import * as path from 'path'
 import * as tools from './tools'
 
-export const allowedVerbosity = ['quiet', 'brief', 'verbose', 'debug', 'trace']
-
 export interface CraftBuilderOptions {
   projectRoot: string
   channel: string
@@ -49,12 +47,6 @@ export abstract class CraftBuilder {
     }
 
     if (this.verbosity) {
-      if (!allowedVerbosity.includes(this.verbosity)) {
-        throw new Error(
-          `Invalid verbosity "${this.verbosity}". ` +
-            `Allowed values are ${allowedVerbosity.join(', ')}.`
-        )
-      }
       args.push('--verbosity', this.verbosity)
     }
 

@@ -57,14 +57,6 @@ test('CraftBuilder expands tilde in project root', () => {
   )
 })
 
-test('CraftBuilder throws on invalid verbosity', async () => {
-  expect.assertions(1)
-
-  mockSetup()
-
-  await expect(makeBuilder({verbosity: 'not-valid'}).pack()).rejects.toThrow()
-})
-
 test('CraftBuilder allows empty verbosity', () => {
   expect(() => makeBuilder({verbosity: ''})).not.toThrow()
 })

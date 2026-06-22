@@ -68,4 +68,3 @@ test('RockcraftBuilder.build can ignore unmaintained', async () => {
     {cwd: '.'}
   )
 })
-

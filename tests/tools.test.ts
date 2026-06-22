@@ -531,7 +531,6 @@ test('ensureLXDNetwork sets up iptables and warns only about installed packages'
   ])
 })
 
-
 test('haveSubcommand returns true if the subcommand is available', async () => {
   expect.assertions(2)
 

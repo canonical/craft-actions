@@ -8,6 +8,10 @@ var __hasOwnProp = Object.prototype.hasOwnProperty;
 var __commonJS = (cb, mod) => function __require() {
   return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
 };
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
 var __copyProps = (to, from, except, desc) => {
   if (from && typeof from === "object" || typeof from === "function") {
     for (let key of __getOwnPropNames(from))
@@ -24,6 +28,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
   mod
 ));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
 // node_modules/@actions/core/lib/utils.js
 var require_utils = __commonJS({
@@ -19808,7 +19813,12 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
   }
 });
 
-// src/rockcraft-pack-action.ts
+// src/rockcraft-pack.ts
+var rockcraft_pack_exports = {};
+__export(rockcraft_pack_exports, {
+  RockcraftBuilder: () => RockcraftBuilder
+});
+module.exports = __toCommonJS(rockcraft_pack_exports);
 var core4 = __toESM(require_core());
 
 // src/craft-builder.ts
@@ -19989,6 +19999,38 @@ var CraftBuilder = class {
   }
 };
 
+// src/pack-action.ts
+var core3 = __toESM(require_core());
+function readBaseInputs(channelInput = "channel") {
+  return {
+    projectRoot: core3.getInput("path"),
+    channel: core3.getInput(channelInput) || "stable",
+    revision: core3.getInput("revision") || "",
+    verbosity: core3.getInput("verbosity"),
+    pro: core3.getInput("pro") || "",
+    runTests: core3.getInput("test").toLowerCase() === "true"
+  };
+}
+async function runPackAction(builder, outputName) {
+  try {
+    if (!builder.revision) {
+      core3.info(
+        `${builder.toolName} revision not provided. Installing from ${builder.channel}`
+      );
+    }
+    await builder.pack();
+    const artifacts = await builder.findArtifacts(builder.artifactType);
+    if (artifacts.length > 1) {
+      core3.warning(
+        `Multiple ${builder.artifactType} files found in ${builder.projectRoot}`
+      );
+    }
+    core3.setOutput(outputName, artifacts[0]);
+  } catch (error) {
+    core3.setFailed(error?.message);
+  }
+}
+
 // src/rockcraft-pack.ts
 var RockcraftBuilder = class extends CraftBuilder {
   toolName = "rockcraft";
@@ -20006,45 +20048,17 @@ var RockcraftBuilder = class extends CraftBuilder {
     return args;
   }
 };
-
-// src/pack-action.ts
-var core3 = __toESM(require_core());
-function readBaseInputs(channelInput = "channel") {
-  return {
-    projectRoot: core3.getInput("path"),
-    channel: core3.getInput(channelInput) || "stable",
-    revision: core3.getInput("revision") || "",
-    verbosity: core3.getInput("verbosity"),
-    pro: core3.getInput("pro") || "",
-    runTests: core3.getInput("test").toLowerCase() === "true"
-  };
+if (require.main === module) {
+  const builder = new RockcraftBuilder({
+    ...readBaseInputs("rockcraft-channel"),
+    ignore: core4.getInput("ignore")
+  });
+  void runPackAction(builder, "rock");
 }
-async function runPackAction(builder2, outputName) {
-  try {
-    if (!builder2.revision) {
-      core3.info(
-        `${builder2.toolName} revision not provided. Installing from ${builder2.channel}`
-      );
-    }
-    await builder2.pack();
-    const artifacts = await builder2.findArtifacts(builder2.artifactType);
-    if (artifacts.length > 1) {
-      core3.warning(
-        `Multiple ${builder2.artifactType} files found in ${builder2.projectRoot}`
-      );
-    }
-    core3.setOutput(outputName, artifacts[0]);
-  } catch (error) {
-    core3.setFailed(error?.message);
-  }
-}
-
-// src/rockcraft-pack-action.ts
-var builder = new RockcraftBuilder({
-  ...readBaseInputs("rockcraft-channel"),
-  ignore: core4.getInput("ignore")
+// Annotate the CommonJS export names for ESM import in node:
+0 && (module.exports = {
+  RockcraftBuilder
 });
-void runPackAction(builder, "rock");
 /*! Bundled license information:
 
 undici/lib/fetch/body.js:

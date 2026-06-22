@@ -2,7 +2,7 @@
 
 import {build} from 'esbuild'
 
-const entryPoints = ['src/rockcraft-pack-action.ts']
+const entryPoints = ['src/rockcraft-pack.ts']
 
 await build({
   entryPoints,

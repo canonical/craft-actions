@@ -29,21 +29,6 @@ async function haveExecutable(path: string): Promise<boolean> {
   return true
 }
 
-export function validateArgument(value: string, field: string): void {
-  if (value.includes(' ')) {
-    throw new Error(`Invalid argument '${value}' in field '${field}'`)
-  }
-}
-
-export async function haveFlag(tool: string, flag: string): Promise<boolean> {
-  let output = ''
-  await exec.exec('script', ['-q', '-c', `${tool} pack -h`], {
-    silent: true,
-    listeners: {stdout: data => (output += data.toString())}
-  })
-  return output.includes(flag)
-}
-
 export async function haveSubcommand(
   tool: string,
   subcommand: string

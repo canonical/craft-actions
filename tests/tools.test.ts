@@ -531,48 +531,6 @@ test('ensureLXDNetwork sets up iptables and warns only about installed packages'
   ])
 })
 
-test('haveFlag returns true if the flag is present in the help output', async () => {
-  expect.assertions(2)
-
-  const execMock = jest
-    .spyOn(exec, 'exec')
-    .mockImplementation(
-      async (
-        program: string,
-        args?: string[],
-        options?: any
-      ): Promise<number> => {
-        options?.listeners?.stdout?.(Buffer.from('--pro\n--other-flag'))
-        return 0
-      }
-    )
-
-  await expect(tools.haveFlag('rockcraft', '--pro')).resolves.toBe(true)
-  expect(execMock).toHaveBeenCalledWith(
-    'script',
-    ['-q', '-c', 'rockcraft pack -h'],
-    expect.anything()
-  )
-})
-
-test('haveFlag returns false if the flag is absent from the help output', async () => {
-  expect.assertions(1)
-
-  jest
-    .spyOn(exec, 'exec')
-    .mockImplementation(
-      async (
-        program: string,
-        args?: string[],
-        options?: any
-      ): Promise<number> => {
-        options?.listeners?.stdout?.(Buffer.from('--other-flag'))
-        return 0
-      }
-    )
-
-  await expect(tools.haveFlag('rockcraft', '--pro')).resolves.toBe(false)
-})
 
 test('haveSubcommand returns true if the subcommand is available', async () => {
   expect.assertions(2)

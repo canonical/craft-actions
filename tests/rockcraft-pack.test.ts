@@ -50,9 +50,6 @@ test('RockcraftBuilder.build can ignore unmaintained', async () => {
   expect.assertions(1)
 
   const {execMock} = mockSetup()
-  jest
-    .spyOn(tools, 'haveFlag')
-    .mockImplementation(async (): Promise<boolean> => true)
 
   await makeBuilder({ignore: 'unmaintained', verbosity: 'trace'}).pack()
 
@@ -72,40 +69,3 @@ test('RockcraftBuilder.build can ignore unmaintained', async () => {
   )
 })
 
-test('RockcraftBuilder.build fails if ignore flag is not supported', async () => {
-  expect.assertions(1)
-
-  mockSetup()
-  jest
-    .spyOn(tools, 'haveFlag')
-    .mockImplementation(async (): Promise<boolean> => false)
-
-  await expect(makeBuilder({ignore: 'unmaintained'}).pack()).rejects.toThrow(
-    'This rockcraft version does not support --ignore.'
-  )
-})
-
-test('RockcraftBuilder.pack fails if test is set to true and no spread.yaml is found', async () => {
-  expect.assertions(1)
-
-  mockSetup()
-  jest.spyOn(tools, 'fileExists').mockImplementation((): boolean => false)
-
-  await expect(
-    makeBuilder({projectRoot: 'project-root', runTests: true}).pack()
-  ).rejects.toThrow('Cannot run tests. Missing project-root/spread.yaml file.')
-})
-
-test('RockcraftBuilder.pack fails if test is set to true and rockcraft test is invalid', async () => {
-  expect.assertions(1)
-
-  mockSetup()
-  jest
-    .spyOn(tools, 'haveSubcommand')
-    .mockImplementation(async (): Promise<boolean> => false)
-  jest.spyOn(tools, 'fileExists').mockImplementation((): boolean => true)
-
-  await expect(
-    makeBuilder({projectRoot: 'project-root', runTests: true}).pack()
-  ).rejects.toThrow('Cannot run tests. rockcraft test is not a valid command.')
-})

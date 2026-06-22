@@ -107,9 +107,6 @@ test('CraftBuilder.pack calls ensureLXD with pro when pro is set', async () => {
   expect.assertions(1)
 
   const {ensureLXD} = mockSetup()
-  jest
-    .spyOn(tools, 'haveFlag')
-    .mockImplementation(async (): Promise<boolean> => true)
 
   await makeBuilder({pro: 'esm-apps'}).pack()
 
@@ -134,10 +131,6 @@ test('CraftBuilder.pack executes test subcommand when runTests is true', async (
   expect.assertions(1)
 
   const {execMock} = mockSetup()
-  jest.spyOn(tools, 'fileExists').mockReturnValue(true)
-  jest
-    .spyOn(tools, 'haveSubcommand')
-    .mockImplementation(async (): Promise<boolean> => true)
 
   await makeBuilder({projectRoot: 'my-dir', runTests: true}).pack()
 
@@ -145,31 +138,6 @@ test('CraftBuilder.pack executes test subcommand when runTests is true', async (
     'sudo',
     ['--preserve-env', '--user', 'ubuntu', 'test-tool', 'test'],
     {cwd: 'my-dir'}
-  )
-})
-
-test('CraftBuilder.pack fails when runTests is true and no spread.yaml is found', async () => {
-  expect.assertions(1)
-
-  mockSetup()
-  jest.spyOn(tools, 'fileExists').mockReturnValue(false)
-
-  await expect(
-    makeBuilder({projectRoot: 'project-root', runTests: true}).pack()
-  ).rejects.toThrow('Cannot run tests. Missing project-root/spread.yaml file.')
-})
-
-test('CraftBuilder.pack fails when runTests is true and tool has no test subcommand', async () => {
-  expect.assertions(1)
-
-  mockSetup()
-  jest.spyOn(tools, 'fileExists').mockReturnValue(true)
-  jest
-    .spyOn(tools, 'haveSubcommand')
-    .mockImplementation(async (): Promise<boolean> => false)
-
-  await expect(makeBuilder({runTests: true}).pack()).rejects.toThrow(
-    'Cannot run tests. test-tool test is not a valid command.'
   )
 })
 
@@ -205,9 +173,6 @@ test('CraftBuilder.pack includes --pro flag when pro is set', async () => {
   expect.assertions(1)
 
   const {execMock} = mockSetup()
-  jest
-    .spyOn(tools, 'haveFlag')
-    .mockImplementation(async (): Promise<boolean> => true)
 
   await makeBuilder({pro: 'esm-apps,esm-infra'}).pack()
 
@@ -215,34 +180,6 @@ test('CraftBuilder.pack includes --pro flag when pro is set', async () => {
     'sudo',
     expect.arrayContaining(['--pro=esm-apps,esm-infra']),
     expect.anything()
-  )
-})
-
-test('CraftBuilder.pack fails when pro flag is not supported by tool', async () => {
-  expect.assertions(1)
-
-  mockSetup()
-  jest
-    .spyOn(tools, 'haveFlag')
-    .mockImplementation(async (): Promise<boolean> => false)
-
-  await expect(makeBuilder({pro: 'fips-updates'}).pack()).rejects.toThrow(
-    'This test-tool version does not support --pro.'
-  )
-})
-
-test('CraftBuilder.pack fails when pro argument is invalid', async () => {
-  expect.assertions(1)
-
-  mockSetup()
-  jest
-    .spyOn(tools, 'haveFlag')
-    .mockImplementation(async (): Promise<boolean> => true)
-
-  await expect(
-    makeBuilder({pro: 'fips-updates another-command'}).pack()
-  ).rejects.toThrow(
-    "Invalid argument 'fips-updates another-command' in field 'pro'"
   )
 })
 

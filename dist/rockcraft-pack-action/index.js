@@ -19811,6 +19811,12 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
 // src/rockcraft-pack-action.ts
 var core4 = __toESM(require_core());
 
+// src/craft-builder.ts
+var core2 = __toESM(require_core());
+var exec3 = __toESM(require_exec());
+var fs2 = __toESM(require("fs"));
+var path = __toESM(require("path"));
+
 // src/tools.ts
 var core = __toESM(require_core());
 var exec = __toESM(require_exec());
@@ -19825,9 +19831,6 @@ function expandHome(p) {
 function shellUser() {
   return os.userInfo().username;
 }
-function fileExists(path2) {
-  return fs.existsSync(path2);
-}
 async function haveExecutable(path2) {
   try {
     await fs.promises.access(path2, fs.constants.X_OK);
@@ -19835,22 +19838,6 @@ async function haveExecutable(path2) {
     return false;
   }
   return true;
-}
-function validateArgument(value, field) {
-  if (value.includes(" ")) {
-    throw new Error(`Invalid argument '${value}' in field '${field}'`);
-  }
-}
-async function haveFlag(tool, flag) {
-  let output = "";
-  await exec.exec("script", ["-q", "-c", `${tool} pack -h`], {
-    silent: true,
-    listeners: { stdout: (data) => output += data.toString() }
-  });
-  return output.includes(flag);
-}
-async function haveSubcommand(tool, subcommand) {
-  return await exec.exec(tool, [subcommand, "-h"], { ignoreReturnCode: true }) === 0;
 }
 async function ensureSnapd() {
   const haveSnapd = await haveExecutable("/usr/bin/snap");
@@ -19941,10 +19928,6 @@ async function ensureCraftTool(name, channel, revision) {
 }
 
 // src/craft-builder.ts
-var core2 = __toESM(require_core());
-var exec3 = __toESM(require_exec());
-var fs2 = __toESM(require("fs"));
-var path = __toESM(require("path"));
 var CraftBuilder = class {
   projectRoot;
   channel;
@@ -19963,10 +19946,6 @@ var CraftBuilder = class {
   async buildPackArgs() {
     const args = [];
     if (this.pro) {
-      validateArgument(this.pro, "pro");
-      if (!await haveFlag(this.toolName, "--pro")) {
-        throw new Error(`This ${this.toolName} version does not support --pro.`);
-      }
       args.push(`--pro=${this.pro}`);
     }
     if (this.verbosity) {
@@ -19989,26 +19968,13 @@ var CraftBuilder = class {
       { cwd: this.projectRoot }
     );
   }
-  async resolvePackSubcommand() {
-    if (!this.runTests) return "pack";
-    const testFile = `${this.projectRoot}/spread.yaml`;
-    if (!fileExists(testFile)) {
-      throw new Error(`Cannot run tests. Missing ${testFile} file.`);
-    }
-    if (!await haveSubcommand(this.toolName, "test")) {
-      throw new Error(
-        `Cannot run tests. ${this.toolName} test is not a valid command.`
-      );
-    }
-    return "test";
-  }
   async pack() {
     core2.startGroup(`Installing ${this.toolName} plus dependencies`);
     await ensureSnapd();
     await ensureLXD(!!this.pro);
     await ensureCraftTool(this.toolName, this.channel, this.revision);
     core2.endGroup();
-    await this.doPack(await this.resolvePackSubcommand());
+    await this.doPack(this.runTests ? "test" : "pack");
   }
   async #readdir(dir) {
     return await fs2.promises.readdir(dir);
@@ -20035,12 +20001,6 @@ var RockcraftBuilder = class extends CraftBuilder {
   async buildPackArgs() {
     const args = await super.buildPackArgs();
     if (this.ignore) {
-      validateArgument(this.ignore, "ignore");
-      if (!await haveFlag(this.toolName, "--ignore")) {
-        throw new Error(
-          `This ${this.toolName} version does not support --ignore.`
-        );
-      }
       args.push(`--ignore=${this.ignore}`);
     }
     return args;

@@ -39,10 +39,6 @@ export abstract class CraftBuilder {
     const args: string[] = []
 
     if (this.pro) {
-      tools.validateArgument(this.pro, 'pro')
-      if (!(await tools.haveFlag(this.toolName, '--pro'))) {
-        throw new Error(`This ${this.toolName} version does not support --pro.`)
-      }
       args.push(`--pro=${this.pro}`)
     }
 
@@ -69,28 +65,13 @@ export abstract class CraftBuilder {
     )
   }
 
-  private async resolvePackSubcommand(): Promise<'pack' | 'test'> {
-    if (!this.runTests) return 'pack'
-
-    const testFile = `${this.projectRoot}/spread.yaml`
-    if (!tools.fileExists(testFile)) {
-      throw new Error(`Cannot run tests. Missing ${testFile} file.`)
-    }
-    if (!(await tools.haveSubcommand(this.toolName, 'test'))) {
-      throw new Error(
-        `Cannot run tests. ${this.toolName} test is not a valid command.`
-      )
-    }
-    return 'test'
-  }
-
   async pack(): Promise<void> {
     core.startGroup(`Installing ${this.toolName} plus dependencies`)
     await tools.ensureSnapd()
     await tools.ensureLXD(!!this.pro)
     await tools.ensureCraftTool(this.toolName, this.channel, this.revision)
     core.endGroup()
-    await this.doPack(await this.resolvePackSubcommand())
+    await this.doPack(this.runTests ? 'test' : 'pack')
   }
 
   async #readdir(dir: string): Promise<string[]> {

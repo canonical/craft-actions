@@ -3,8 +3,8 @@ import * as os from "os";
 import * as path from "path";
 import * as fs from "fs";
 import * as exec from "@actions/exec";
-import { CraftBuilder, CraftBuilderOptions } from "../src/craft-builder";
-import * as tools from "../src/tools";
+import { CraftBuilder, CraftBuilderOptions } from "../src/craft-builder.ts";
+import * as tools from "../src/tools.ts";
 
 class TestBuilder extends CraftBuilder {
   toolName = "test-tool";
@@ -39,9 +39,7 @@ function mockSetup(user = "ubuntu") {
       .mockImplementation((): string => user),
     execMock: vi
       .spyOn(exec, "exec")
-      .mockImplementation(
-        async (program: string, args?: string[]): Promise<number> => 0,
-      ),
+      .mockImplementation(async (): Promise<number> => 0),
   };
 }
 
@@ -185,7 +183,9 @@ test("CraftBuilder.pack includes --pro flag when pro is set", async () => {
 test("CraftBuilder.findArtifacts throws when no matching files are found", async () => {
   expect.assertions(1);
 
-  vi.spyOn(fs.promises, "readdir").mockResolvedValue(["other-file.txt"] as any);
+  vi.spyOn(fs.promises, "readdir").mockResolvedValue([
+    "other-file.txt",
+  ] as never);
 
   await expect(makeBuilder().findArtifacts(".charm")).rejects.toThrow(
     "No .charm files produced by build",
@@ -199,7 +199,7 @@ test("CraftBuilder.findArtifacts returns all matching files", async () => {
     "a.charm",
     "b.charm",
     "readme.txt",
-  ] as any);
+  ] as never);
 
   await expect(
     makeBuilder({ projectRoot: "project-root" }).findArtifacts(".charm"),

@@ -1,7 +1,7 @@
 import { vi, afterEach, test, expect } from "vitest";
 import * as core from "@actions/core";
-import { readBaseInputs, runPackAction } from "../src/pack-action";
-import { CraftBuilder } from "../src/craft-builder";
+import { readBaseInputs, runPackAction } from "../src/pack-action.ts";
+import { CraftBuilder } from "../src/craft-builder.ts";
 
 afterEach(() => {
   vi.restoreAllMocks();

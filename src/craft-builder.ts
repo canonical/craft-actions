@@ -2,7 +2,7 @@ import * as core from "@actions/core";
 import * as exec from "@actions/exec";
 import * as fs from "fs";
 import * as path from "path";
-import * as tools from "./tools";
+import * as tools from "./tools.ts";
 
 export interface CraftBuilderOptions {
   projectRoot: string;

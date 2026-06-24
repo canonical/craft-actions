@@ -1,8 +1,7 @@
 import { vi, afterEach, test, expect } from "vitest";
 import * as exec from "@actions/exec";
-import * as build from "../src/rockcraft-pack";
-import * as tools from "../src/tools";
-import * as fs from "fs";
+import * as build from "../src/rockcraft-pack.ts";
+import * as tools from "../src/tools.ts";
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -24,9 +23,7 @@ function mockSetup(user = "ubuntu") {
       .mockImplementation((): string => user),
     execMock: vi
       .spyOn(exec, "exec")
-      .mockImplementation(
-        async (program: string, args?: string[]): Promise<number> => 0,
-      ),
+      .mockImplementation(async (): Promise<number> => 0),
   };
 }
 

@@ -3,7 +3,7 @@ import * as fs from "fs";
 import * as os from "os";
 import * as core from "@actions/core";
 import * as exec from "@actions/exec";
-import * as tools from "../src/tools";
+import * as tools from "../src/tools.ts";
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -14,26 +14,19 @@ test("ensureSnapd installs snapd if needed", async () => {
 
   const accessMock = vi
     .spyOn(fs.promises, "access")
-    .mockImplementation(
-      async (
-        filename: fs.PathLike,
-        mode?: number | undefined,
-      ): Promise<void> => {
-        throw new Error("not found");
-      },
-    );
+    .mockImplementation(async (): Promise<void> => {
+      throw new Error("not found");
+    });
   const statMock = vi
     .spyOn(fs.promises, "stat")
-    .mockImplementation(async (filename: fs.PathLike): Promise<fs.Stats> => {
+    .mockImplementation(async (): Promise<fs.Stats> => {
       return { uid: 0, gid: 0 } as unknown as fs.Stats;
     });
   const execMock = vi
     .spyOn(exec, "exec")
-    .mockImplementation(
-      async (program: string, args?: string[]): Promise<number> => {
-        return 0;
-      },
-    );
+    .mockImplementation(async (): Promise<number> => {
+      return 0;
+    });
 
   await tools.ensureSnapd();
 
@@ -57,24 +50,17 @@ test("ensureSnapd is a no-op if snapd is installed", async () => {
 
   const accessMock = vi
     .spyOn(fs.promises, "access")
-    .mockImplementation(
-      async (
-        filename: fs.PathLike,
-        mode?: number | undefined,
-      ): Promise<void> => {},
-    );
+    .mockImplementation(async (): Promise<void> => {});
   const statMock = vi
     .spyOn(fs.promises, "stat")
-    .mockImplementation(async (filename: fs.PathLike): Promise<fs.Stats> => {
+    .mockImplementation(async (): Promise<fs.Stats> => {
       return { uid: 0, gid: 0 } as unknown as fs.Stats;
     });
   const execMock = vi
     .spyOn(exec, "exec")
-    .mockImplementation(
-      async (program: string, args?: string[]): Promise<number> => {
-        return 0;
-      },
-    );
+    .mockImplementation(async (): Promise<number> => {
+      return 0;
+    });
 
   await tools.ensureSnapd();
 
@@ -89,22 +75,17 @@ test("ensureSnapd fixes permissions on the root directory", async () => {
   const accessMock = vi
     .spyOn(fs.promises, "access")
     .mockImplementation(
-      async (
-        filename: fs.PathLike,
-        mode?: number | undefined,
-      ): Promise<void> => {},
+      async (): Promise<void> => {},
     );
   const statMock = vi
     .spyOn(fs.promises, "stat")
-    .mockImplementation(async (filename: fs.PathLike): Promise<fs.Stats> => {
+    .mockImplementation(async (): Promise<fs.Stats> => {
       return { uid: 500, gid: 0 } as unknown as fs.Stats;
     });
   const execMock = vi
     .spyOn(exec, "exec")
     .mockImplementation(
-      async (program: string, args?: string[]): Promise<number> => {
-        return 0;
-      },
+      async (): Promise<number> => 0,
     );
 
   await tools.ensureSnapd();
@@ -120,19 +101,14 @@ test("ensureLXD installs the snap version of LXD if needed", async () => {
   const accessMock = vi
     .spyOn(fs.promises, "access")
     .mockImplementation(
-      async (
-        filename: fs.PathLike,
-        mode?: number | undefined,
-      ): Promise<void> => {
+      async (): Promise<void> => {
         throw new Error("not found");
       },
     );
   const execMock = vi
     .spyOn(exec, "exec")
     .mockImplementation(
-      async (program: string, args?: string[]): Promise<number> => {
-        return 0;
-      },
+      async (): Promise<number> => 0,
     );
 
   await tools.ensureLXD(false);
@@ -173,19 +149,14 @@ test("ensureLXD configures lxd_guest_attach if needed", async () => {
   const accessMock = vi
     .spyOn(fs.promises, "access")
     .mockImplementation(
-      async (
-        filename: fs.PathLike,
-        mode?: number | undefined,
-      ): Promise<void> => {
+      async (): Promise<void> => {
         throw new Error("not found");
       },
     );
   const execMock = vi
     .spyOn(exec, "exec")
     .mockImplementation(
-      async (program: string, args?: string[]): Promise<number> => {
-        return 0;
-      },
+      async (): Promise<number> => 0,
     );
 
   await tools.ensureLXD(true);
@@ -238,19 +209,14 @@ test("ensureLXD removes the apt version of LXD", async () => {
   const accessMock = vi
     .spyOn(fs.promises, "access")
     .mockImplementation(
-      async (
-        filename: fs.PathLike,
-        mode?: number | undefined,
-      ): Promise<void> => {
+      async (): Promise<void> => {
         return;
       },
     );
   const execMock = vi
     .spyOn(exec, "exec")
     .mockImplementation(
-      async (program: string, args?: string[]): Promise<number> => {
-        return 0;
-      },
+      async (): Promise<number> => 0,
     );
 
   await tools.ensureLXD(false);
@@ -271,10 +237,7 @@ test("ensureLXD is not refreshed if LXD is installed", async () => {
   const accessMock = vi
     .spyOn(fs.promises, "access")
     .mockImplementation(
-      async (
-        filename: fs.PathLike,
-        mode?: number | undefined,
-      ): Promise<void> => {
+      async (filename: fs.PathLike): Promise<void> => {
         if (filename === "/snap/bin/lxd") {
           return;
         }
@@ -284,9 +247,7 @@ test("ensureLXD is not refreshed if LXD is installed", async () => {
   const execMock = vi
     .spyOn(exec, "exec")
     .mockImplementation(
-      async (program: string, args?: string[]): Promise<number> => {
-        return 0;
-      },
+      async (): Promise<number> => 0,
     );
 
   await tools.ensureLXD(false);
@@ -309,10 +270,7 @@ test('ensureLXD still calls "lxd init" if LXD is installed', async () => {
   const accessMock = vi
     .spyOn(fs.promises, "access")
     .mockImplementation(
-      async (
-        filename: fs.PathLike,
-        mode?: number | undefined,
-      ): Promise<void> => {
+      async (filename: fs.PathLike): Promise<void> => {
         if (filename === "/snap/bin/lxd") {
           return;
         }
@@ -322,9 +280,7 @@ test('ensureLXD still calls "lxd init" if LXD is installed', async () => {
   const execMock = vi
     .spyOn(exec, "exec")
     .mockImplementation(
-      async (program: string, args?: string[]): Promise<number> => {
-        return 0;
-      },
+      async (): Promise<number> => 0,
     );
 
   await tools.ensureLXD(false);
@@ -356,19 +312,14 @@ test("ensureCraftTool installs a craft tool if needed", async () => {
   const accessMock = vi
     .spyOn(fs.promises, "access")
     .mockImplementation(
-      async (
-        filename: fs.PathLike,
-        mode?: number | undefined,
-      ): Promise<void> => {
+      async (): Promise<void> => {
         throw new Error("not found");
       },
     );
   const execMock = vi
     .spyOn(exec, "exec")
     .mockImplementation(
-      async (program: string, args?: string[]): Promise<number> => {
-        return 0;
-      },
+      async (): Promise<number> => 0,
     );
 
   await tools.ensureCraftTool("rockcraft", "edge", "");
@@ -402,19 +353,14 @@ test("ensureCraftTool refreshes if the tool is already installed", async () => {
   const accessMock = vi
     .spyOn(fs.promises, "access")
     .mockImplementation(
-      async (
-        filename: fs.PathLike,
-        mode?: number | undefined,
-      ): Promise<void> => {
+      async (): Promise<void> => {
         return;
       },
     );
   const execMock = vi
     .spyOn(exec, "exec")
     .mockImplementation(
-      async (program: string, args?: string[]): Promise<number> => {
-        return 0;
-      },
+      async (): Promise<number> => 0,
     );
 
   await tools.ensureCraftTool("rockcraft", "edge", "");
@@ -435,12 +381,12 @@ test("ensureLXDNetwork sets up iptables and warns about Docker", async () => {
 
   const infoMock = vi
     .spyOn(core, "info")
-    .mockImplementation((info: string) => {});
+    .mockImplementation(() => {});
 
   const execMock = vi
     .spyOn(exec, "exec")
     .mockImplementation(
-      async (program: string, args?: string[]): Promise<number> => {
+      async (_: string, args?: string[]): Promise<number> => {
         if (args != undefined && args[1] == "moby-runc") {
           return 0;
         } else {
@@ -493,13 +439,11 @@ test("ensureLXDNetwork sets up iptables and warns only about installed packages"
 
   const infoMock = vi
     .spyOn(core, "info")
-    .mockImplementation((info: string) => {});
+    .mockImplementation(() => {});
   const execMock = vi
     .spyOn(exec, "exec")
     .mockImplementation(
-      async (program: string, args?: string[]): Promise<number> => {
-        return 0;
-      },
+      async (): Promise<number> => 0,
     );
 
   await tools.ensureLXDNetwork();
@@ -548,9 +492,7 @@ test("haveSubcommand returns true if the subcommand is available", async () => {
   const execMock = vi
     .spyOn(exec, "exec")
     .mockImplementation(
-      async (program: string, args?: string[]): Promise<number> => {
-        return 0;
-      },
+      async (): Promise<number> => 0,
     );
 
   await expect(tools.haveSubcommand("rockcraft", "test")).resolves.toBe(true);
@@ -563,9 +505,7 @@ test("haveSubcommand returns false if the subcommand is not available", async ()
   expect.assertions(1);
 
   vi.spyOn(exec, "exec").mockImplementation(
-    async (program: string, args?: string[]): Promise<number> => {
-      return 1;
-    },
+    async (): Promise<number> => 1,
   );
 
   await expect(tools.haveSubcommand("rockcraft", "test")).resolves.toBe(false);

@@ -1,5 +1,5 @@
 import * as core from "@actions/core";
-import { CraftBuilder, CraftBuilderOptions } from "./craft-builder";
+import { CraftBuilder, CraftBuilderOptions } from "./craft-builder.ts";
 
 export function readBaseInputs(channelInput = "channel"): CraftBuilderOptions {
   return {

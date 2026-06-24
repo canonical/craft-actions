@@ -1,6 +1,6 @@
 import * as core from "@actions/core";
-import { CraftBuilder, CraftBuilderOptions } from "./craft-builder";
-import { readBaseInputs, runPackAction } from "./pack-action";
+import { CraftBuilder, CraftBuilderOptions } from "./craft-builder.ts";
+import { readBaseInputs, runPackAction } from "./pack-action.ts";
 
 export interface RockcraftBuilderOptions extends CraftBuilderOptions {
   ignore: string;

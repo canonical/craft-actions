@@ -12,7 +12,7 @@
     "test": "vitest run",
     "format": "prettier --write **/*.ts",
     "format-check": "prettier --check **/*.ts",
-    "lint": "eslint .; tsc --noEmit",
+    "lint": "eslint .; ESLINT=$?; tsc --noEmit; TSC=$?; exit $((ESLINT | TSC))",
     "lint-fix": "eslint . --fix"
   },
   "repository": {

@@ -1,13 +1,14 @@
+import {vi, afterEach, test, expect} from 'vitest'
 import * as core from '@actions/core'
 import {readBaseInputs, runPackAction} from '../src/pack-action'
 import {CraftBuilder} from '../src/craft-builder'
 
 afterEach(() => {
-  jest.restoreAllMocks()
+  vi.restoreAllMocks()
 })
 
 function mockInputs(inputs: Record<string, string>) {
-  jest.spyOn(core, 'getInput').mockImplementation((name: string) => {
+  vi.spyOn(core, 'getInput').mockImplementation((name: string) => {
     return inputs[name] ?? ''
   })
 }
@@ -30,8 +31,8 @@ function makeStubBuilder(
     revision: '',
     artifactType: '.charm',
     projectRoot: 'project-root',
-    pack: jest.fn(async () => {}),
-    findArtifacts: jest.fn(async () => ['project-root/output.charm']),
+    pack: vi.fn(async () => {}),
+    findArtifacts: vi.fn(async () => ['project-root/output.charm']),
     ...overrides
   } as unknown as CraftBuilder
 }
@@ -83,8 +84,8 @@ test('readBaseInputs parses runTests as false when input is not "true"', () => {
 test('runPackAction calls pack and sets output', async () => {
   expect.assertions(2)
 
-  const setOutput = jest.spyOn(core, 'setOutput').mockImplementation(() => {})
-  jest.spyOn(core, 'info').mockImplementation(() => {})
+  const setOutput = vi.spyOn(core, 'setOutput').mockImplementation(() => {})
+  vi.spyOn(core, 'info').mockImplementation(() => {})
   const builder = makeStubBuilder({revision: '1'})
 
   await runPackAction(builder, 'charm')
@@ -96,8 +97,8 @@ test('runPackAction calls pack and sets output', async () => {
 test('runPackAction logs info when revision is not set', async () => {
   expect.assertions(1)
 
-  const info = jest.spyOn(core, 'info').mockImplementation(() => {})
-  jest.spyOn(core, 'setOutput').mockImplementation(() => {})
+  const info = vi.spyOn(core, 'info').mockImplementation(() => {})
+  vi.spyOn(core, 'setOutput').mockImplementation(() => {})
   const builder = makeStubBuilder({revision: ''})
 
   await runPackAction(builder, 'charm')
@@ -108,8 +109,8 @@ test('runPackAction logs info when revision is not set', async () => {
 test('runPackAction does not log info when revision is set', async () => {
   expect.assertions(1)
 
-  const info = jest.spyOn(core, 'info').mockImplementation(() => {})
-  jest.spyOn(core, 'setOutput').mockImplementation(() => {})
+  const info = vi.spyOn(core, 'info').mockImplementation(() => {})
+  vi.spyOn(core, 'setOutput').mockImplementation(() => {})
   const builder = makeStubBuilder({revision: '42'})
 
   await runPackAction(builder, 'charm')
@@ -120,11 +121,11 @@ test('runPackAction does not log info when revision is set', async () => {
 test('runPackAction calls setFailed on error', async () => {
   expect.assertions(1)
 
-  const setFailed = jest.spyOn(core, 'setFailed').mockImplementation(() => {})
-  jest.spyOn(core, 'info').mockImplementation(() => {})
+  const setFailed = vi.spyOn(core, 'setFailed').mockImplementation(() => {})
+  vi.spyOn(core, 'info').mockImplementation(() => {})
   const builder = makeStubBuilder({
     revision: '1',
-    pack: jest.fn(async () => {
+    pack: vi.fn(async () => {
       throw new Error('pack failed')
     })
   })
@@ -137,12 +138,12 @@ test('runPackAction calls setFailed on error', async () => {
 test('runPackAction warns when multiple artifacts are found', async () => {
   expect.assertions(1)
 
-  jest.spyOn(core, 'setOutput').mockImplementation(() => {})
-  jest.spyOn(core, 'info').mockImplementation(() => {})
-  const warning = jest.spyOn(core, 'warning').mockImplementation(() => {})
+  vi.spyOn(core, 'setOutput').mockImplementation(() => {})
+  vi.spyOn(core, 'info').mockImplementation(() => {})
+  const warning = vi.spyOn(core, 'warning').mockImplementation(() => {})
   const builder = makeStubBuilder({
     revision: '1',
-    findArtifacts: jest.fn(async () => [
+    findArtifacts: vi.fn(async () => [
       'project-root/a.charm',
       'project-root/b.charm'
     ])
@@ -156,9 +157,9 @@ test('runPackAction warns when multiple artifacts are found', async () => {
 test('runPackAction does not warn when only one artifact is found', async () => {
   expect.assertions(1)
 
-  jest.spyOn(core, 'setOutput').mockImplementation(() => {})
-  jest.spyOn(core, 'info').mockImplementation(() => {})
-  const warning = jest.spyOn(core, 'warning').mockImplementation(() => {})
+  vi.spyOn(core, 'setOutput').mockImplementation(() => {})
+  vi.spyOn(core, 'info').mockImplementation(() => {})
+  const warning = vi.spyOn(core, 'warning').mockImplementation(() => {})
   const builder = makeStubBuilder({revision: '1'})
 
   await runPackAction(builder, 'charm')

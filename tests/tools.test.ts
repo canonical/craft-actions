@@ -1,3 +1,4 @@
+import {vi, afterEach, test, expect} from 'vitest'
 import * as fs from 'fs'
 import * as os from 'os'
 import * as core from '@actions/core'
@@ -5,13 +6,13 @@ import * as exec from '@actions/exec'
 import * as tools from '../src/tools'
 
 afterEach(() => {
-  jest.restoreAllMocks()
+  vi.restoreAllMocks()
 })
 
 test('ensureSnapd installs snapd if needed', async () => {
   expect.assertions(4)
 
-  const accessMock = jest
+  const accessMock = vi
     .spyOn(fs.promises, 'access')
     .mockImplementation(
       async (
@@ -21,12 +22,12 @@ test('ensureSnapd installs snapd if needed', async () => {
         throw new Error('not found')
       }
     )
-  const statMock = jest
+  const statMock = vi
     .spyOn(fs.promises, 'stat')
     .mockImplementation(async (filename: fs.PathLike): Promise<fs.Stats> => {
       return {uid: 0, gid: 0} as unknown as fs.Stats
     })
-  const execMock = jest
+  const execMock = vi
     .spyOn(exec, 'exec')
     .mockImplementation(
       async (program: string, args?: string[]): Promise<number> => {
@@ -54,7 +55,7 @@ test('ensureSnapd installs snapd if needed', async () => {
 test('ensureSnapd is a no-op if snapd is installed', async () => {
   expect.assertions(3)
 
-  const accessMock = jest
+  const accessMock = vi
     .spyOn(fs.promises, 'access')
     .mockImplementation(
       async (
@@ -62,12 +63,12 @@ test('ensureSnapd is a no-op if snapd is installed', async () => {
         mode?: number | undefined
       ): Promise<void> => {}
     )
-  const statMock = jest
+  const statMock = vi
     .spyOn(fs.promises, 'stat')
     .mockImplementation(async (filename: fs.PathLike): Promise<fs.Stats> => {
       return {uid: 0, gid: 0} as unknown as fs.Stats
     })
-  const execMock = jest
+  const execMock = vi
     .spyOn(exec, 'exec')
     .mockImplementation(
       async (program: string, args?: string[]): Promise<number> => {
@@ -85,7 +86,7 @@ test('ensureSnapd is a no-op if snapd is installed', async () => {
 test('ensureSnapd fixes permissions on the root directory', async () => {
   expect.assertions(3)
 
-  const accessMock = jest
+  const accessMock = vi
     .spyOn(fs.promises, 'access')
     .mockImplementation(
       async (
@@ -93,12 +94,12 @@ test('ensureSnapd fixes permissions on the root directory', async () => {
         mode?: number | undefined
       ): Promise<void> => {}
     )
-  const statMock = jest
+  const statMock = vi
     .spyOn(fs.promises, 'stat')
     .mockImplementation(async (filename: fs.PathLike): Promise<fs.Stats> => {
       return {uid: 500, gid: 0} as unknown as fs.Stats
     })
-  const execMock = jest
+  const execMock = vi
     .spyOn(exec, 'exec')
     .mockImplementation(
       async (program: string, args?: string[]): Promise<number> => {
@@ -116,7 +117,7 @@ test('ensureSnapd fixes permissions on the root directory', async () => {
 test('ensureLXD installs the snap version of LXD if needed', async () => {
   expect.assertions(5)
 
-  const accessMock = jest
+  const accessMock = vi
     .spyOn(fs.promises, 'access')
     .mockImplementation(
       async (
@@ -126,7 +127,7 @@ test('ensureLXD installs the snap version of LXD if needed', async () => {
         throw new Error('not found')
       }
     )
-  const execMock = jest
+  const execMock = vi
     .spyOn(exec, 'exec')
     .mockImplementation(
       async (program: string, args?: string[]): Promise<number> => {
@@ -165,7 +166,7 @@ test('ensureLXD installs the snap version of LXD if needed', async () => {
 test('ensureLXD configures lxd_guest_attach if needed', async () => {
   expect.assertions(7)
 
-  const accessMock = jest
+  const accessMock = vi
     .spyOn(fs.promises, 'access')
     .mockImplementation(
       async (
@@ -175,7 +176,7 @@ test('ensureLXD configures lxd_guest_attach if needed', async () => {
         throw new Error('not found')
       }
     )
-  const execMock = jest
+  const execMock = vi
     .spyOn(exec, 'exec')
     .mockImplementation(
       async (program: string, args?: string[]): Promise<number> => {
@@ -226,7 +227,7 @@ test('ensureLXD configures lxd_guest_attach if needed', async () => {
 test('ensureLXD removes the apt version of LXD', async () => {
   expect.assertions(2)
 
-  const accessMock = jest
+  const accessMock = vi
     .spyOn(fs.promises, 'access')
     .mockImplementation(
       async (
@@ -236,7 +237,7 @@ test('ensureLXD removes the apt version of LXD', async () => {
         return
       }
     )
-  const execMock = jest
+  const execMock = vi
     .spyOn(exec, 'exec')
     .mockImplementation(
       async (program: string, args?: string[]): Promise<number> => {
@@ -259,7 +260,7 @@ test('ensureLXD removes the apt version of LXD', async () => {
 test('ensureLXD is not refreshed if LXD is installed', async () => {
   expect.assertions(2)
 
-  const accessMock = jest
+  const accessMock = vi
     .spyOn(fs.promises, 'access')
     .mockImplementation(
       async (
@@ -272,7 +273,7 @@ test('ensureLXD is not refreshed if LXD is installed', async () => {
         throw new Error('not found')
       }
     )
-  const execMock = jest
+  const execMock = vi
     .spyOn(exec, 'exec')
     .mockImplementation(
       async (program: string, args?: string[]): Promise<number> => {
@@ -297,7 +298,7 @@ test('ensureLXD is not refreshed if LXD is installed', async () => {
 test('ensureLXD still calls "lxd init" if LXD is installed', async () => {
   expect.assertions(4)
 
-  const accessMock = jest
+  const accessMock = vi
     .spyOn(fs.promises, 'access')
     .mockImplementation(
       async (
@@ -310,7 +311,7 @@ test('ensureLXD still calls "lxd init" if LXD is installed', async () => {
         throw new Error('not found')
       }
     )
-  const execMock = jest
+  const execMock = vi
     .spyOn(exec, 'exec')
     .mockImplementation(
       async (program: string, args?: string[]): Promise<number> => {
@@ -340,7 +341,7 @@ test('ensureLXD still calls "lxd init" if LXD is installed', async () => {
 test('ensureCraftTool installs a craft tool if needed', async () => {
   expect.assertions(4)
 
-  const accessMock = jest
+  const accessMock = vi
     .spyOn(fs.promises, 'access')
     .mockImplementation(
       async (
@@ -350,7 +351,7 @@ test('ensureCraftTool installs a craft tool if needed', async () => {
         throw new Error('not found')
       }
     )
-  const execMock = jest
+  const execMock = vi
     .spyOn(exec, 'exec')
     .mockImplementation(
       async (program: string, args?: string[]): Promise<number> => {
@@ -386,7 +387,7 @@ test('ensureCraftTool installs a craft tool if needed', async () => {
 test('ensureCraftTool refreshes if the tool is already installed', async () => {
   expect.assertions(2)
 
-  const accessMock = jest
+  const accessMock = vi
     .spyOn(fs.promises, 'access')
     .mockImplementation(
       async (
@@ -396,7 +397,7 @@ test('ensureCraftTool refreshes if the tool is already installed', async () => {
         return
       }
     )
-  const execMock = jest
+  const execMock = vi
     .spyOn(exec, 'exec')
     .mockImplementation(
       async (program: string, args?: string[]): Promise<number> => {
@@ -420,11 +421,11 @@ test('ensureCraftTool refreshes if the tool is already installed', async () => {
 test('ensureLXDNetwork sets up iptables and warns about Docker', async () => {
   expect.assertions(8)
 
-  const infoMock = jest
+  const infoMock = vi
     .spyOn(core, 'info')
     .mockImplementation((info: string) => {})
 
-  const execMock = jest
+  const execMock = vi
     .spyOn(exec, 'exec')
     .mockImplementation(
       async (program: string, args?: string[]): Promise<number> => {
@@ -478,10 +479,10 @@ test('ensureLXDNetwork sets up iptables and warns about Docker', async () => {
 test('ensureLXDNetwork sets up iptables and warns only about installed packages', async () => {
   expect.assertions(8)
 
-  const infoMock = jest
+  const infoMock = vi
     .spyOn(core, 'info')
     .mockImplementation((info: string) => {})
-  const execMock = jest
+  const execMock = vi
     .spyOn(exec, 'exec')
     .mockImplementation(
       async (program: string, args?: string[]): Promise<number> => {
@@ -532,7 +533,7 @@ test('ensureLXDNetwork sets up iptables and warns only about installed packages'
 test('haveSubcommand returns true if the subcommand is available', async () => {
   expect.assertions(2)
 
-  const execMock = jest
+  const execMock = vi
     .spyOn(exec, 'exec')
     .mockImplementation(
       async (program: string, args?: string[]): Promise<number> => {
@@ -549,7 +550,7 @@ test('haveSubcommand returns true if the subcommand is available', async () => {
 test('haveSubcommand returns false if the subcommand is not available', async () => {
   expect.assertions(1)
 
-  jest
+  vi
     .spyOn(exec, 'exec')
     .mockImplementation(
       async (program: string, args?: string[]): Promise<number> => {

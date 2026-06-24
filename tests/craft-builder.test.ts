@@ -1,3 +1,4 @@
+import {vi, afterEach, test, expect} from 'vitest'
 import * as os from 'os'
 import * as path from 'path'
 import * as fs from 'fs'
@@ -24,19 +25,19 @@ function makeBuilder(
 
 function mockSetup(user = 'ubuntu') {
   return {
-    ensureSnapd: jest
+    ensureSnapd: vi
       .spyOn(tools, 'ensureSnapd')
       .mockImplementation(async (): Promise<void> => {}),
-    ensureLXD: jest
+    ensureLXD: vi
       .spyOn(tools, 'ensureLXD')
       .mockImplementation(async (): Promise<void> => {}),
-    ensureCraftTool: jest
+    ensureCraftTool: vi
       .spyOn(tools, 'ensureCraftTool')
       .mockImplementation(async (): Promise<void> => {}),
-    shellUser: jest
+    shellUser: vi
       .spyOn(tools, 'shellUser')
       .mockImplementation((): string => user),
-    execMock: jest
+    execMock: vi
       .spyOn(exec, 'exec')
       .mockImplementation(
         async (program: string, args?: string[]): Promise<number> => 0
@@ -45,7 +46,7 @@ function mockSetup(user = 'ubuntu') {
 }
 
 afterEach(() => {
-  jest.restoreAllMocks()
+  vi.restoreAllMocks()
 })
 
 test('CraftBuilder expands tilde in project root', () => {
@@ -184,7 +185,7 @@ test('CraftBuilder.pack includes --pro flag when pro is set', async () => {
 test('CraftBuilder.findArtifacts throws when no matching files are found', async () => {
   expect.assertions(1)
 
-  jest
+  vi
     .spyOn(fs.promises, 'readdir')
     .mockResolvedValue(['other-file.txt'] as any)
 
@@ -196,7 +197,7 @@ test('CraftBuilder.findArtifacts throws when no matching files are found', async
 test('CraftBuilder.findArtifacts returns all matching files', async () => {
   expect.assertions(1)
 
-  jest
+  vi
     .spyOn(fs.promises, 'readdir')
     .mockResolvedValue(['a.charm', 'b.charm', 'readme.txt'] as any)
 

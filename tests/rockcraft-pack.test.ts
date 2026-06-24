@@ -1,27 +1,28 @@
+import {vi, afterEach, test, expect} from 'vitest'
 import * as exec from '@actions/exec'
 import * as build from '../src/rockcraft-pack'
 import * as tools from '../src/tools'
 import * as fs from 'fs'
 
 afterEach(() => {
-  jest.restoreAllMocks()
+  vi.restoreAllMocks()
 })
 
 function mockSetup(user = 'ubuntu') {
   return {
-    ensureSnapd: jest
+    ensureSnapd: vi
       .spyOn(tools, 'ensureSnapd')
       .mockImplementation(async (): Promise<void> => {}),
-    ensureLXD: jest
+    ensureLXD: vi
       .spyOn(tools, 'ensureLXD')
       .mockImplementation(async (): Promise<void> => {}),
-    ensureCraftTool: jest
+    ensureCraftTool: vi
       .spyOn(tools, 'ensureCraftTool')
       .mockImplementation(async (): Promise<void> => {}),
-    shellUser: jest
+    shellUser: vi
       .spyOn(tools, 'shellUser')
       .mockImplementation((): string => user),
-    execMock: jest
+    execMock: vi
       .spyOn(exec, 'exec')
       .mockImplementation(
         async (program: string, args?: string[]): Promise<number> => 0

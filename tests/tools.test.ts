@@ -1,562 +1,572 @@
-import {vi, afterEach, test, expect} from 'vitest'
-import * as fs from 'fs'
-import * as os from 'os'
-import * as core from '@actions/core'
-import * as exec from '@actions/exec'
-import * as tools from '../src/tools'
+import { vi, afterEach, test, expect } from "vitest";
+import * as fs from "fs";
+import * as os from "os";
+import * as core from "@actions/core";
+import * as exec from "@actions/exec";
+import * as tools from "../src/tools";
 
 afterEach(() => {
-  vi.restoreAllMocks()
-})
+  vi.restoreAllMocks();
+});
 
-test('ensureSnapd installs snapd if needed', async () => {
-  expect.assertions(4)
+test("ensureSnapd installs snapd if needed", async () => {
+  expect.assertions(4);
 
   const accessMock = vi
-    .spyOn(fs.promises, 'access')
+    .spyOn(fs.promises, "access")
     .mockImplementation(
       async (
         filename: fs.PathLike,
-        mode?: number | undefined
+        mode?: number | undefined,
       ): Promise<void> => {
-        throw new Error('not found')
-      }
-    )
+        throw new Error("not found");
+      },
+    );
   const statMock = vi
-    .spyOn(fs.promises, 'stat')
+    .spyOn(fs.promises, "stat")
     .mockImplementation(async (filename: fs.PathLike): Promise<fs.Stats> => {
-      return {uid: 0, gid: 0} as unknown as fs.Stats
-    })
+      return { uid: 0, gid: 0 } as unknown as fs.Stats;
+    });
   const execMock = vi
-    .spyOn(exec, 'exec')
+    .spyOn(exec, "exec")
     .mockImplementation(
       async (program: string, args?: string[]): Promise<number> => {
-        return 0
-      }
-    )
+        return 0;
+      },
+    );
 
-  await tools.ensureSnapd()
+  await tools.ensureSnapd();
 
-  expect(accessMock).toHaveBeenCalled()
-  expect(statMock).toHaveBeenCalled()
-  expect(execMock).toHaveBeenNthCalledWith(1, 'sudo', [
-    'apt-get',
-    'update',
-    '-q'
-  ])
-  expect(execMock).toHaveBeenNthCalledWith(2, 'sudo', [
-    'apt-get',
-    'install',
-    '-qy',
-    'snapd'
-  ])
-})
+  expect(accessMock).toHaveBeenCalled();
+  expect(statMock).toHaveBeenCalled();
+  expect(execMock).toHaveBeenNthCalledWith(1, "sudo", [
+    "apt-get",
+    "update",
+    "-q",
+  ]);
+  expect(execMock).toHaveBeenNthCalledWith(2, "sudo", [
+    "apt-get",
+    "install",
+    "-qy",
+    "snapd",
+  ]);
+});
 
-test('ensureSnapd is a no-op if snapd is installed', async () => {
-  expect.assertions(3)
+test("ensureSnapd is a no-op if snapd is installed", async () => {
+  expect.assertions(3);
 
   const accessMock = vi
-    .spyOn(fs.promises, 'access')
+    .spyOn(fs.promises, "access")
     .mockImplementation(
       async (
         filename: fs.PathLike,
-        mode?: number | undefined
-      ): Promise<void> => {}
-    )
+        mode?: number | undefined,
+      ): Promise<void> => {},
+    );
   const statMock = vi
-    .spyOn(fs.promises, 'stat')
+    .spyOn(fs.promises, "stat")
     .mockImplementation(async (filename: fs.PathLike): Promise<fs.Stats> => {
-      return {uid: 0, gid: 0} as unknown as fs.Stats
-    })
+      return { uid: 0, gid: 0 } as unknown as fs.Stats;
+    });
   const execMock = vi
-    .spyOn(exec, 'exec')
+    .spyOn(exec, "exec")
     .mockImplementation(
       async (program: string, args?: string[]): Promise<number> => {
-        return 0
-      }
-    )
+        return 0;
+      },
+    );
 
-  await tools.ensureSnapd()
+  await tools.ensureSnapd();
 
-  expect(accessMock).toHaveBeenCalled()
-  expect(statMock).toHaveBeenCalled()
-  expect(execMock).not.toHaveBeenCalled()
-})
+  expect(accessMock).toHaveBeenCalled();
+  expect(statMock).toHaveBeenCalled();
+  expect(execMock).not.toHaveBeenCalled();
+});
 
-test('ensureSnapd fixes permissions on the root directory', async () => {
-  expect.assertions(3)
+test("ensureSnapd fixes permissions on the root directory", async () => {
+  expect.assertions(3);
 
   const accessMock = vi
-    .spyOn(fs.promises, 'access')
+    .spyOn(fs.promises, "access")
     .mockImplementation(
       async (
         filename: fs.PathLike,
-        mode?: number | undefined
-      ): Promise<void> => {}
-    )
+        mode?: number | undefined,
+      ): Promise<void> => {},
+    );
   const statMock = vi
-    .spyOn(fs.promises, 'stat')
+    .spyOn(fs.promises, "stat")
     .mockImplementation(async (filename: fs.PathLike): Promise<fs.Stats> => {
-      return {uid: 500, gid: 0} as unknown as fs.Stats
-    })
+      return { uid: 500, gid: 0 } as unknown as fs.Stats;
+    });
   const execMock = vi
-    .spyOn(exec, 'exec')
+    .spyOn(exec, "exec")
     .mockImplementation(
       async (program: string, args?: string[]): Promise<number> => {
-        return 0
-      }
-    )
+        return 0;
+      },
+    );
 
-  await tools.ensureSnapd()
+  await tools.ensureSnapd();
 
-  expect(accessMock).toHaveBeenCalled()
-  expect(statMock).toHaveBeenCalled()
-  expect(execMock).toHaveBeenCalledWith('sudo', ['chown', 'root:root', '/'])
-})
+  expect(accessMock).toHaveBeenCalled();
+  expect(statMock).toHaveBeenCalled();
+  expect(execMock).toHaveBeenCalledWith("sudo", ["chown", "root:root", "/"]);
+});
 
-test('ensureLXD installs the snap version of LXD if needed', async () => {
-  expect.assertions(5)
+test("ensureLXD installs the snap version of LXD if needed", async () => {
+  expect.assertions(5);
 
   const accessMock = vi
-    .spyOn(fs.promises, 'access')
+    .spyOn(fs.promises, "access")
     .mockImplementation(
       async (
         filename: fs.PathLike,
-        mode?: number | undefined
+        mode?: number | undefined,
       ): Promise<void> => {
-        throw new Error('not found')
-      }
-    )
+        throw new Error("not found");
+      },
+    );
   const execMock = vi
-    .spyOn(exec, 'exec')
+    .spyOn(exec, "exec")
     .mockImplementation(
       async (program: string, args?: string[]): Promise<number> => {
-        return 0
-      }
-    )
+        return 0;
+      },
+    );
 
-  await tools.ensureLXD(false)
+  await tools.ensureLXD(false);
 
-  expect(execMock).toHaveBeenNthCalledWith(1, 'sudo', [
-    'groupadd',
-    '--force',
-    '--system',
-    'lxd'
-  ])
-  expect(execMock).toHaveBeenNthCalledWith(2, 'sudo', [
-    'usermod',
-    '--append',
-    '--groups',
-    'lxd',
-    os.userInfo().username
-  ])
-  expect(accessMock).toHaveBeenCalled()
-  expect(execMock).toHaveBeenNthCalledWith(3, 'sudo', [
-    'snap',
-    'install',
-    'lxd',
-    '--channel',
-    '5.21/stable',
-    '--cohort',
-    '+'
-  ])
-  expect(execMock).toHaveBeenNthCalledWith(4, 'sudo', ['lxd', 'init', '--auto'])
-})
+  expect(execMock).toHaveBeenNthCalledWith(1, "sudo", [
+    "groupadd",
+    "--force",
+    "--system",
+    "lxd",
+  ]);
+  expect(execMock).toHaveBeenNthCalledWith(2, "sudo", [
+    "usermod",
+    "--append",
+    "--groups",
+    "lxd",
+    os.userInfo().username,
+  ]);
+  expect(accessMock).toHaveBeenCalled();
+  expect(execMock).toHaveBeenNthCalledWith(3, "sudo", [
+    "snap",
+    "install",
+    "lxd",
+    "--channel",
+    "5.21/stable",
+    "--cohort",
+    "+",
+  ]);
+  expect(execMock).toHaveBeenNthCalledWith(4, "sudo", [
+    "lxd",
+    "init",
+    "--auto",
+  ]);
+});
 
-test('ensureLXD configures lxd_guest_attach if needed', async () => {
-  expect.assertions(7)
+test("ensureLXD configures lxd_guest_attach if needed", async () => {
+  expect.assertions(7);
 
   const accessMock = vi
-    .spyOn(fs.promises, 'access')
+    .spyOn(fs.promises, "access")
     .mockImplementation(
       async (
         filename: fs.PathLike,
-        mode?: number | undefined
+        mode?: number | undefined,
       ): Promise<void> => {
-        throw new Error('not found')
-      }
-    )
+        throw new Error("not found");
+      },
+    );
   const execMock = vi
-    .spyOn(exec, 'exec')
+    .spyOn(exec, "exec")
     .mockImplementation(
       async (program: string, args?: string[]): Promise<number> => {
-        return 0
-      }
-    )
+        return 0;
+      },
+    );
 
-  await tools.ensureLXD(true)
+  await tools.ensureLXD(true);
 
-  expect(execMock).toHaveBeenNthCalledWith(1, 'sudo', [
-    'groupadd',
-    '--force',
-    '--system',
-    'lxd'
-  ])
-  expect(execMock).toHaveBeenNthCalledWith(2, 'sudo', [
-    'usermod',
-    '--append',
-    '--groups',
-    'lxd',
-    os.userInfo().username
-  ])
-  expect(accessMock).toHaveBeenCalled()
-  expect(execMock).toHaveBeenNthCalledWith(3, 'sudo', [
-    'snap',
-    'install',
-    'lxd',
-    '--channel',
-    '5.21/stable',
-    '--cohort',
-    '+'
-  ])
-  expect(execMock).toHaveBeenNthCalledWith(4, 'sudo', ['lxd', 'init', '--auto'])
+  expect(execMock).toHaveBeenNthCalledWith(1, "sudo", [
+    "groupadd",
+    "--force",
+    "--system",
+    "lxd",
+  ]);
+  expect(execMock).toHaveBeenNthCalledWith(2, "sudo", [
+    "usermod",
+    "--append",
+    "--groups",
+    "lxd",
+    os.userInfo().username,
+  ]);
+  expect(accessMock).toHaveBeenCalled();
+  expect(execMock).toHaveBeenNthCalledWith(3, "sudo", [
+    "snap",
+    "install",
+    "lxd",
+    "--channel",
+    "5.21/stable",
+    "--cohort",
+    "+",
+  ]);
+  expect(execMock).toHaveBeenNthCalledWith(4, "sudo", [
+    "lxd",
+    "init",
+    "--auto",
+  ]);
 
-  expect(execMock).toHaveBeenNthCalledWith(5, 'sudo', [
-    'pro',
-    'config',
-    'set',
-    'lxd_guest_attach=available'
-  ])
-  expect(execMock).toHaveBeenNthCalledWith(6, 'sudo', [
-    'snap',
-    'restart',
-    'lxd'
-  ])
-})
+  expect(execMock).toHaveBeenNthCalledWith(5, "sudo", [
+    "pro",
+    "config",
+    "set",
+    "lxd_guest_attach=available",
+  ]);
+  expect(execMock).toHaveBeenNthCalledWith(6, "sudo", [
+    "snap",
+    "restart",
+    "lxd",
+  ]);
+});
 
-test('ensureLXD removes the apt version of LXD', async () => {
-  expect.assertions(2)
+test("ensureLXD removes the apt version of LXD", async () => {
+  expect.assertions(2);
 
   const accessMock = vi
-    .spyOn(fs.promises, 'access')
+    .spyOn(fs.promises, "access")
     .mockImplementation(
       async (
         filename: fs.PathLike,
-        mode?: number | undefined
+        mode?: number | undefined,
       ): Promise<void> => {
-        return
-      }
-    )
+        return;
+      },
+    );
   const execMock = vi
-    .spyOn(exec, 'exec')
+    .spyOn(exec, "exec")
     .mockImplementation(
       async (program: string, args?: string[]): Promise<number> => {
-        return 0
-      }
-    )
+        return 0;
+      },
+    );
 
-  await tools.ensureLXD(false)
+  await tools.ensureLXD(false);
 
-  expect(accessMock).toHaveBeenCalled()
-  expect(execMock).toHaveBeenNthCalledWith(1, 'sudo', [
-    'apt-get',
-    'remove',
-    '-qy',
-    'lxd',
-    'lxd-client'
-  ])
-})
+  expect(accessMock).toHaveBeenCalled();
+  expect(execMock).toHaveBeenNthCalledWith(1, "sudo", [
+    "apt-get",
+    "remove",
+    "-qy",
+    "lxd",
+    "lxd-client",
+  ]);
+});
 
-test('ensureLXD is not refreshed if LXD is installed', async () => {
-  expect.assertions(2)
+test("ensureLXD is not refreshed if LXD is installed", async () => {
+  expect.assertions(2);
 
   const accessMock = vi
-    .spyOn(fs.promises, 'access')
+    .spyOn(fs.promises, "access")
     .mockImplementation(
       async (
         filename: fs.PathLike,
-        mode?: number | undefined
+        mode?: number | undefined,
       ): Promise<void> => {
-        if (filename === '/snap/bin/lxd') {
-          return
+        if (filename === "/snap/bin/lxd") {
+          return;
         }
-        throw new Error('not found')
-      }
-    )
+        throw new Error("not found");
+      },
+    );
   const execMock = vi
-    .spyOn(exec, 'exec')
+    .spyOn(exec, "exec")
     .mockImplementation(
       async (program: string, args?: string[]): Promise<number> => {
-        return 0
-      }
-    )
+        return 0;
+      },
+    );
 
-  await tools.ensureLXD(false)
+  await tools.ensureLXD(false);
 
-  expect(accessMock).toHaveBeenCalled()
-  expect(execMock).not.toHaveBeenNthCalledWith(3, 'sudo', [
-    'snap',
-    'install',
-    'lxd',
-    '--channel',
-    '5.21/stable',
-    '--cohort',
-    '+'
-  ])
-})
+  expect(accessMock).toHaveBeenCalled();
+  expect(execMock).not.toHaveBeenNthCalledWith(3, "sudo", [
+    "snap",
+    "install",
+    "lxd",
+    "--channel",
+    "5.21/stable",
+    "--cohort",
+    "+",
+  ]);
+});
 
 test('ensureLXD still calls "lxd init" if LXD is installed', async () => {
-  expect.assertions(4)
+  expect.assertions(4);
 
   const accessMock = vi
-    .spyOn(fs.promises, 'access')
+    .spyOn(fs.promises, "access")
     .mockImplementation(
       async (
         filename: fs.PathLike,
-        mode?: number | undefined
+        mode?: number | undefined,
       ): Promise<void> => {
-        if (filename === '/snap/bin/lxd') {
-          return
+        if (filename === "/snap/bin/lxd") {
+          return;
         }
-        throw new Error('not found')
-      }
-    )
+        throw new Error("not found");
+      },
+    );
   const execMock = vi
-    .spyOn(exec, 'exec')
+    .spyOn(exec, "exec")
     .mockImplementation(
       async (program: string, args?: string[]): Promise<number> => {
-        return 0
-      }
-    )
+        return 0;
+      },
+    );
 
-  await tools.ensureLXD(false)
+  await tools.ensureLXD(false);
 
-  expect(accessMock).toHaveBeenCalled()
-  expect(execMock).toHaveBeenNthCalledWith(1, 'sudo', [
-    'groupadd',
-    '--force',
-    '--system',
-    'lxd'
-  ])
-  expect(execMock).toHaveBeenNthCalledWith(2, 'sudo', [
-    'usermod',
-    '--append',
-    '--groups',
-    'lxd',
-    os.userInfo().username
-  ])
-  expect(execMock).toHaveBeenNthCalledWith(3, 'sudo', ['lxd', 'init', '--auto'])
-})
+  expect(accessMock).toHaveBeenCalled();
+  expect(execMock).toHaveBeenNthCalledWith(1, "sudo", [
+    "groupadd",
+    "--force",
+    "--system",
+    "lxd",
+  ]);
+  expect(execMock).toHaveBeenNthCalledWith(2, "sudo", [
+    "usermod",
+    "--append",
+    "--groups",
+    "lxd",
+    os.userInfo().username,
+  ]);
+  expect(execMock).toHaveBeenNthCalledWith(3, "sudo", [
+    "lxd",
+    "init",
+    "--auto",
+  ]);
+});
 
-test('ensureCraftTool installs a craft tool if needed', async () => {
-  expect.assertions(4)
+test("ensureCraftTool installs a craft tool if needed", async () => {
+  expect.assertions(4);
 
   const accessMock = vi
-    .spyOn(fs.promises, 'access')
+    .spyOn(fs.promises, "access")
     .mockImplementation(
       async (
         filename: fs.PathLike,
-        mode?: number | undefined
+        mode?: number | undefined,
       ): Promise<void> => {
-        throw new Error('not found')
-      }
-    )
+        throw new Error("not found");
+      },
+    );
   const execMock = vi
-    .spyOn(exec, 'exec')
+    .spyOn(exec, "exec")
     .mockImplementation(
       async (program: string, args?: string[]): Promise<number> => {
-        return 0
-      }
-    )
+        return 0;
+      },
+    );
 
-  await tools.ensureCraftTool('rockcraft', 'edge', '')
+  await tools.ensureCraftTool("rockcraft", "edge", "");
 
-  expect(accessMock).toHaveBeenCalled()
-  expect(execMock).toHaveBeenNthCalledWith(1, 'sudo', [
-    'snap',
-    'install',
-    '--channel',
-    'edge',
-    '--classic',
-    'rockcraft'
-  ])
+  expect(accessMock).toHaveBeenCalled();
+  expect(execMock).toHaveBeenNthCalledWith(1, "sudo", [
+    "snap",
+    "install",
+    "--channel",
+    "edge",
+    "--classic",
+    "rockcraft",
+  ]);
 
-  await tools.ensureCraftTool('snapcraft', 'stable', '1234')
+  await tools.ensureCraftTool("snapcraft", "stable", "1234");
 
-  expect(accessMock).toHaveBeenCalled()
-  expect(execMock).toHaveBeenNthCalledWith(2, 'sudo', [
-    'snap',
-    'install',
-    '--revision',
-    '1234',
-    '--classic',
-    'snapcraft'
-  ])
-})
+  expect(accessMock).toHaveBeenCalled();
+  expect(execMock).toHaveBeenNthCalledWith(2, "sudo", [
+    "snap",
+    "install",
+    "--revision",
+    "1234",
+    "--classic",
+    "snapcraft",
+  ]);
+});
 
-test('ensureCraftTool refreshes if the tool is already installed', async () => {
-  expect.assertions(2)
+test("ensureCraftTool refreshes if the tool is already installed", async () => {
+  expect.assertions(2);
 
   const accessMock = vi
-    .spyOn(fs.promises, 'access')
+    .spyOn(fs.promises, "access")
     .mockImplementation(
       async (
         filename: fs.PathLike,
-        mode?: number | undefined
+        mode?: number | undefined,
       ): Promise<void> => {
-        return
-      }
-    )
+        return;
+      },
+    );
   const execMock = vi
-    .spyOn(exec, 'exec')
+    .spyOn(exec, "exec")
     .mockImplementation(
       async (program: string, args?: string[]): Promise<number> => {
-        return 0
-      }
-    )
+        return 0;
+      },
+    );
 
-  await tools.ensureCraftTool('rockcraft', 'edge', '')
+  await tools.ensureCraftTool("rockcraft", "edge", "");
 
-  expect(accessMock).toHaveBeenCalled()
-  expect(execMock).toHaveBeenNthCalledWith(1, 'sudo', [
-    'snap',
-    'refresh',
-    '--channel',
-    'edge',
-    '--classic',
-    'rockcraft'
-  ])
-})
+  expect(accessMock).toHaveBeenCalled();
+  expect(execMock).toHaveBeenNthCalledWith(1, "sudo", [
+    "snap",
+    "refresh",
+    "--channel",
+    "edge",
+    "--classic",
+    "rockcraft",
+  ]);
+});
 
-test('ensureLXDNetwork sets up iptables and warns about Docker', async () => {
-  expect.assertions(8)
+test("ensureLXDNetwork sets up iptables and warns about Docker", async () => {
+  expect.assertions(8);
 
   const infoMock = vi
-    .spyOn(core, 'info')
-    .mockImplementation((info: string) => {})
+    .spyOn(core, "info")
+    .mockImplementation((info: string) => {});
 
   const execMock = vi
-    .spyOn(exec, 'exec')
+    .spyOn(exec, "exec")
     .mockImplementation(
       async (program: string, args?: string[]): Promise<number> => {
-        if (args != undefined && args[1] == 'moby-runc') {
-          return 0
+        if (args != undefined && args[1] == "moby-runc") {
+          return 0;
         } else {
-          return 1
+          return 1;
         }
-      }
-    )
+      },
+    );
 
-  await tools.ensureLXDNetwork()
+  await tools.ensureLXDNetwork();
 
   expect(infoMock).toHaveBeenCalledWith(
-    'Installed docker related packages might interfere with LXD networking: moby-runc'
-  )
-  expect(execMock).toHaveBeenNthCalledWith(1, 'dpkg', ['-l', 'moby-buildx'], {
+    "Installed docker related packages might interfere with LXD networking: moby-runc",
+  );
+  expect(execMock).toHaveBeenNthCalledWith(1, "dpkg", ["-l", "moby-buildx"], {
     ignoreReturnCode: true,
-    silent: true
-  })
-  expect(execMock).toHaveBeenNthCalledWith(2, 'dpkg', ['-l', 'moby-engine'], {
+    silent: true,
+  });
+  expect(execMock).toHaveBeenNthCalledWith(2, "dpkg", ["-l", "moby-engine"], {
     ignoreReturnCode: true,
-    silent: true
-  })
-  expect(execMock).toHaveBeenNthCalledWith(3, 'dpkg', ['-l', 'moby-cli'], {
+    silent: true,
+  });
+  expect(execMock).toHaveBeenNthCalledWith(3, "dpkg", ["-l", "moby-cli"], {
     ignoreReturnCode: true,
-    silent: true
-  })
-  expect(execMock).toHaveBeenNthCalledWith(4, 'dpkg', ['-l', 'moby-compose'], {
+    silent: true,
+  });
+  expect(execMock).toHaveBeenNthCalledWith(4, "dpkg", ["-l", "moby-compose"], {
     ignoreReturnCode: true,
-    silent: true
-  })
+    silent: true,
+  });
   expect(execMock).toHaveBeenNthCalledWith(
     5,
-    'dpkg',
-    ['-l', 'moby-containerd'],
-    {ignoreReturnCode: true, silent: true}
-  )
-  expect(execMock).toHaveBeenNthCalledWith(6, 'dpkg', ['-l', 'moby-runc'], {
+    "dpkg",
+    ["-l", "moby-containerd"],
+    { ignoreReturnCode: true, silent: true },
+  );
+  expect(execMock).toHaveBeenNthCalledWith(6, "dpkg", ["-l", "moby-runc"], {
     ignoreReturnCode: true,
-    silent: true
-  })
-  expect(execMock).toHaveBeenNthCalledWith(7, 'sudo', [
-    'iptables',
-    '-P',
-    'FORWARD',
-    'ACCEPT'
-  ])
-})
+    silent: true,
+  });
+  expect(execMock).toHaveBeenNthCalledWith(7, "sudo", [
+    "iptables",
+    "-P",
+    "FORWARD",
+    "ACCEPT",
+  ]);
+});
 
-test('ensureLXDNetwork sets up iptables and warns only about installed packages', async () => {
-  expect.assertions(8)
+test("ensureLXDNetwork sets up iptables and warns only about installed packages", async () => {
+  expect.assertions(8);
 
   const infoMock = vi
-    .spyOn(core, 'info')
-    .mockImplementation((info: string) => {})
+    .spyOn(core, "info")
+    .mockImplementation((info: string) => {});
   const execMock = vi
-    .spyOn(exec, 'exec')
+    .spyOn(exec, "exec")
     .mockImplementation(
       async (program: string, args?: string[]): Promise<number> => {
-        return 0
-      }
-    )
+        return 0;
+      },
+    );
 
-  await tools.ensureLXDNetwork()
+  await tools.ensureLXDNetwork();
 
   expect(infoMock).toHaveBeenCalledWith(
-    'Installed docker related packages might interfere with LXD networking: ' +
-      'moby-buildx,moby-engine,moby-cli,moby-compose,moby-containerd,moby-runc'
-  )
-  expect(execMock).toHaveBeenNthCalledWith(1, 'dpkg', ['-l', 'moby-buildx'], {
+    "Installed docker related packages might interfere with LXD networking: " +
+      "moby-buildx,moby-engine,moby-cli,moby-compose,moby-containerd,moby-runc",
+  );
+  expect(execMock).toHaveBeenNthCalledWith(1, "dpkg", ["-l", "moby-buildx"], {
     ignoreReturnCode: true,
-    silent: true
-  })
-  expect(execMock).toHaveBeenNthCalledWith(2, 'dpkg', ['-l', 'moby-engine'], {
+    silent: true,
+  });
+  expect(execMock).toHaveBeenNthCalledWith(2, "dpkg", ["-l", "moby-engine"], {
     ignoreReturnCode: true,
-    silent: true
-  })
-  expect(execMock).toHaveBeenNthCalledWith(3, 'dpkg', ['-l', 'moby-cli'], {
+    silent: true,
+  });
+  expect(execMock).toHaveBeenNthCalledWith(3, "dpkg", ["-l", "moby-cli"], {
     ignoreReturnCode: true,
-    silent: true
-  })
-  expect(execMock).toHaveBeenNthCalledWith(4, 'dpkg', ['-l', 'moby-compose'], {
+    silent: true,
+  });
+  expect(execMock).toHaveBeenNthCalledWith(4, "dpkg", ["-l", "moby-compose"], {
     ignoreReturnCode: true,
-    silent: true
-  })
+    silent: true,
+  });
   expect(execMock).toHaveBeenNthCalledWith(
     5,
-    'dpkg',
-    ['-l', 'moby-containerd'],
-    {ignoreReturnCode: true, silent: true}
-  )
-  expect(execMock).toHaveBeenNthCalledWith(6, 'dpkg', ['-l', 'moby-runc'], {
+    "dpkg",
+    ["-l", "moby-containerd"],
+    { ignoreReturnCode: true, silent: true },
+  );
+  expect(execMock).toHaveBeenNthCalledWith(6, "dpkg", ["-l", "moby-runc"], {
     ignoreReturnCode: true,
-    silent: true
-  })
-  expect(execMock).toHaveBeenNthCalledWith(7, 'sudo', [
-    'iptables',
-    '-P',
-    'FORWARD',
-    'ACCEPT'
-  ])
-})
+    silent: true,
+  });
+  expect(execMock).toHaveBeenNthCalledWith(7, "sudo", [
+    "iptables",
+    "-P",
+    "FORWARD",
+    "ACCEPT",
+  ]);
+});
 
-test('haveSubcommand returns true if the subcommand is available', async () => {
-  expect.assertions(2)
+test("haveSubcommand returns true if the subcommand is available", async () => {
+  expect.assertions(2);
 
   const execMock = vi
-    .spyOn(exec, 'exec')
+    .spyOn(exec, "exec")
     .mockImplementation(
       async (program: string, args?: string[]): Promise<number> => {
-        return 0
-      }
-    )
+        return 0;
+      },
+    );
 
-  await expect(tools.haveSubcommand('rockcraft', 'test')).resolves.toBe(true)
-  expect(execMock).toHaveBeenCalledWith('rockcraft', ['test', '-h'], {
-    ignoreReturnCode: true
-  })
-})
+  await expect(tools.haveSubcommand("rockcraft", "test")).resolves.toBe(true);
+  expect(execMock).toHaveBeenCalledWith("rockcraft", ["test", "-h"], {
+    ignoreReturnCode: true,
+  });
+});
 
-test('haveSubcommand returns false if the subcommand is not available', async () => {
-  expect.assertions(1)
+test("haveSubcommand returns false if the subcommand is not available", async () => {
+  expect.assertions(1);
 
-  vi
-    .spyOn(exec, 'exec')
-    .mockImplementation(
-      async (program: string, args?: string[]): Promise<number> => {
-        return 1
-      }
-    )
+  vi.spyOn(exec, "exec").mockImplementation(
+    async (program: string, args?: string[]): Promise<number> => {
+      return 1;
+    },
+  );
 
-  await expect(tools.haveSubcommand('rockcraft', 'test')).resolves.toBe(false)
-})
+  await expect(tools.haveSubcommand("rockcraft", "test")).resolves.toBe(false);
+});

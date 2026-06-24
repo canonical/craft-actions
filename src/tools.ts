@@ -1,142 +1,143 @@
-import * as core from '@actions/core'
-import * as exec from '@actions/exec'
-import * as fs from 'fs'
-import * as os from 'os'
+import * as core from "@actions/core";
+import * as exec from "@actions/exec";
+import * as fs from "fs";
+import * as os from "os";
 
 export function expandHome(p: string): string {
-  if (p === '~' || p.startsWith('~/')) {
-    p = os.homedir() + p.slice(1)
+  if (p === "~" || p.startsWith("~/")) {
+    p = os.homedir() + p.slice(1);
   }
-  return p
+  return p;
 }
 
 export function shellUser(): string {
-  return os.userInfo().username
+  return os.userInfo().username;
 }
 
 export function fileExists(path: string): boolean {
-  return fs.existsSync(path)
+  return fs.existsSync(path);
 }
 
 async function haveExecutable(path: string): Promise<boolean> {
   try {
-    await fs.promises.access(path, fs.constants.X_OK)
+    await fs.promises.access(path, fs.constants.X_OK);
   } catch {
-    return false
+    return false;
   }
-  return true
+  return true;
 }
 
 export async function haveSubcommand(
   tool: string,
-  subcommand: string
+  subcommand: string,
 ): Promise<boolean> {
   return (
-    (await exec.exec(tool, [subcommand, '-h'], {ignoreReturnCode: true})) === 0
-  )
+    (await exec.exec(tool, [subcommand, "-h"], { ignoreReturnCode: true })) ===
+    0
+  );
 }
 
 export async function ensureSnapd(): Promise<void> {
-  const haveSnapd = await haveExecutable('/usr/bin/snap')
+  const haveSnapd = await haveExecutable("/usr/bin/snap");
   if (!haveSnapd) {
-    core.info('Installing snapd...')
-    await exec.exec('sudo', ['apt-get', 'update', '-q'])
-    await exec.exec('sudo', ['apt-get', 'install', '-qy', 'snapd'])
+    core.info("Installing snapd...");
+    await exec.exec("sudo", ["apt-get", "update", "-q"]);
+    await exec.exec("sudo", ["apt-get", "install", "-qy", "snapd"]);
   }
   // The Github worker environment has weird permissions on the root,
   // which trip up snap-confine.
-  const root = await fs.promises.stat('/')
+  const root = await fs.promises.stat("/");
   if (root.uid !== 0 || root.gid !== 0) {
-    await exec.exec('sudo', ['chown', 'root:root', '/'])
+    await exec.exec("sudo", ["chown", "root:root", "/"]);
   }
 }
 
 export async function ensureLXDNetwork(): Promise<void> {
   const mobyPackages: string[] = [
-    'moby-buildx',
-    'moby-engine',
-    'moby-cli',
-    'moby-compose',
-    'moby-containerd',
-    'moby-runc'
-  ]
-  const installedPackages: string[] = []
-  const options = {silent: true, ignoreReturnCode: true}
+    "moby-buildx",
+    "moby-engine",
+    "moby-cli",
+    "moby-compose",
+    "moby-containerd",
+    "moby-runc",
+  ];
+  const installedPackages: string[] = [];
+  const options = { silent: true, ignoreReturnCode: true };
   for (const mobyPackage of mobyPackages) {
-    if ((await exec.exec('dpkg', ['-l', mobyPackage], options)) === 0) {
-      installedPackages.push(mobyPackage)
+    if ((await exec.exec("dpkg", ["-l", mobyPackage], options)) === 0) {
+      installedPackages.push(mobyPackage);
     }
   }
   core.info(
-    `Installed docker related packages might interfere with LXD networking: ${installedPackages}`
-  )
+    `Installed docker related packages might interfere with LXD networking: ${installedPackages}`,
+  );
   // Removing docker is the best option, but some pipelines depend on it.
   // https://linuxcontainers.org/lxd/docs/master/howto/network_bridge_firewalld/#prevent-issues-with-lxd-and-docker
   // https://github.com/canonical/lxd-cloud/blob/f20a64a8af42485440dcbfd370faf14137d2f349/test/includes/lxd.sh#L13-L23
-  await exec.exec('sudo', ['iptables', '-P', 'FORWARD', 'ACCEPT'])
+  await exec.exec("sudo", ["iptables", "-P", "FORWARD", "ACCEPT"]);
 }
 
 export async function ensureLXD(configurePro: boolean): Promise<void> {
-  const haveDebLXD = await haveExecutable('/usr/bin/lxd')
+  const haveDebLXD = await haveExecutable("/usr/bin/lxd");
   if (haveDebLXD) {
-    core.info('Removing legacy .deb packaged LXD...')
-    await exec.exec('sudo', ['apt-get', 'remove', '-qy', 'lxd', 'lxd-client'])
+    core.info("Removing legacy .deb packaged LXD...");
+    await exec.exec("sudo", ["apt-get", "remove", "-qy", "lxd", "lxd-client"]);
   }
 
-  core.info(`Ensuring ${shellUser()} is in the lxd group...`)
-  await exec.exec('sudo', ['groupadd', '--force', '--system', 'lxd'])
-  await exec.exec('sudo', [
-    'usermod',
-    '--append',
-    '--groups',
-    'lxd',
-    shellUser()
-  ])
+  core.info(`Ensuring ${shellUser()} is in the lxd group...`);
+  await exec.exec("sudo", ["groupadd", "--force", "--system", "lxd"]);
+  await exec.exec("sudo", [
+    "usermod",
+    "--append",
+    "--groups",
+    "lxd",
+    shellUser(),
+  ]);
 
   // Install a specific version of LXD that we know works well with Rockcraft
   // (latest LTS release, tracked in 5.21/stable)
-  const haveSnapLXD = await haveExecutable('/snap/bin/lxd')
+  const haveSnapLXD = await haveExecutable("/snap/bin/lxd");
   if (!haveSnapLXD) {
-    core.info('Installing LXD...')
-    await exec.exec('sudo', [
-      'snap',
-      'install',
-      'lxd',
-      '--channel',
-      '5.21/stable',
-      '--cohort',
-      '+'
-    ])
+    core.info("Installing LXD...");
+    await exec.exec("sudo", [
+      "snap",
+      "install",
+      "lxd",
+      "--channel",
+      "5.21/stable",
+      "--cohort",
+      "+",
+    ]);
   }
 
-  core.info('Initialising LXD...')
-  await exec.exec('sudo', ['lxd', 'init', '--auto'])
+  core.info("Initialising LXD...");
+  await exec.exec("sudo", ["lxd", "init", "--auto"]);
   if (configurePro) {
-    core.info('Configuring LXD for pro rockcraft builds...')
-    await exec.exec('sudo', [
-      'pro',
-      'config',
-      'set',
-      'lxd_guest_attach=available'
-    ])
-    await exec.exec('sudo', ['snap', 'restart', 'lxd'])
+    core.info("Configuring LXD for pro rockcraft builds...");
+    await exec.exec("sudo", [
+      "pro",
+      "config",
+      "set",
+      "lxd_guest_attach=available",
+    ]);
+    await exec.exec("sudo", ["snap", "restart", "lxd"]);
   }
-  await ensureLXDNetwork()
+  await ensureLXDNetwork();
 }
 
 export async function ensureCraftTool(
   name: string,
   channel: string,
-  revision: string
+  revision: string,
 ): Promise<void> {
-  const haveSnap = await haveExecutable(`/snap/bin/${name}`)
-  core.info(`Installing ${name}...`)
-  await exec.exec('sudo', [
-    'snap',
-    haveSnap ? 'refresh' : 'install',
-    revision.length > 0 ? '--revision' : '--channel',
+  const haveSnap = await haveExecutable(`/snap/bin/${name}`);
+  core.info(`Installing ${name}...`);
+  await exec.exec("sudo", [
+    "snap",
+    haveSnap ? "refresh" : "install",
+    revision.length > 0 ? "--revision" : "--channel",
     revision.length > 0 ? revision : channel,
-    '--classic',
-    name
-  ])
+    "--classic",
+    name,
+  ]);
 }

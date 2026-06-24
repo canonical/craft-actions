@@ -1,5 +1,3 @@
-// -*- mode: javascript; js-indent-level: 2 -*-
-
 import * as os from 'os'
 import * as path from 'path'
 import * as fs from 'fs'

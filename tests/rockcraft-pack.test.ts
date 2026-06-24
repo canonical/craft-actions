@@ -1,5 +1,3 @@
-// -*- mode: javascript; js-indent-level: 2 -*-
-
 import * as exec from '@actions/exec'
 import * as build from '../src/rockcraft-pack'
 import * as tools from '../src/tools'

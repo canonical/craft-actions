@@ -8,7 +8,7 @@
     "test": "tests"
   },
   "scripts": {
-    "build": "pnpm node build.mjs src/rockcraft-pack.ts dist/rockcraft-pack/index.js",
+    "build": "pnpm node build.js src/rockcraft-pack.ts dist/rockcraft-pack/index.js",
     "test": "vitest run",
     "format": "prettier --write **/*.ts",
     "format-check": "prettier --check **/*.ts",

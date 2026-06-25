@@ -18,8 +18,6 @@ jobs:
         cache: 'pnpm'
     - name: Install dependencies
       run: pnpm install
-    - name: Build .js files
-      run: pnpm build
     - name: Check the formatting
       run: pnpm format-check
     - name: Lint the code

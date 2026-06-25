@@ -27,7 +27,7 @@ jobs:
     - name: Run the unit tests
       run: pnpm test
     - name: Try to package code
-      run: pnpm pack
+      run: pnpm build
     - name: Ensure packaged code is committed
       run: git diff --exit-code
 

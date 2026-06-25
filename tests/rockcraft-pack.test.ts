@@ -1,70 +1,66 @@
-// -*- mode: javascript; js-indent-level: 2 -*-
-
-import * as exec from '@actions/exec'
-import * as build from '../src/rockcraft-pack'
-import * as tools from '../src/tools'
-import * as fs from 'fs'
+import { vi, afterEach, test, expect } from "vitest";
+import * as exec from "@actions/exec";
+import * as build from "../src/rockcraft-pack.ts";
+import * as tools from "../src/tools.ts";
 
 afterEach(() => {
-  jest.restoreAllMocks()
-})
+  vi.restoreAllMocks();
+});
 
-function mockSetup(user = 'ubuntu') {
+function mockSetup(user = "ubuntu") {
   return {
-    ensureSnapd: jest
-      .spyOn(tools, 'ensureSnapd')
+    ensureSnapd: vi
+      .spyOn(tools, "ensureSnapd")
       .mockImplementation(async (): Promise<void> => {}),
-    ensureLXD: jest
-      .spyOn(tools, 'ensureLXD')
+    ensureLXD: vi
+      .spyOn(tools, "ensureLXD")
       .mockImplementation(async (): Promise<void> => {}),
-    ensureCraftTool: jest
-      .spyOn(tools, 'ensureCraftTool')
+    ensureCraftTool: vi
+      .spyOn(tools, "ensureCraftTool")
       .mockImplementation(async (): Promise<void> => {}),
-    shellUser: jest
-      .spyOn(tools, 'shellUser')
+    shellUser: vi
+      .spyOn(tools, "shellUser")
       .mockImplementation((): string => user),
-    execMock: jest
-      .spyOn(exec, 'exec')
-      .mockImplementation(
-        async (program: string, args?: string[]): Promise<number> => 0
-      )
-  }
+    execMock: vi
+      .spyOn(exec, "exec")
+      .mockImplementation(async (): Promise<number> => 0),
+  };
 }
 
 function makeBuilder(
-  overrides: Partial<build.RockcraftBuilderOptions> = {}
+  overrides: Partial<build.RockcraftBuilderOptions> = {},
 ): build.RockcraftBuilder {
   return new build.RockcraftBuilder({
-    projectRoot: '.',
-    channel: 'stable',
-    verbosity: '',
-    revision: '',
+    projectRoot: ".",
+    channel: "stable",
+    verbosity: "",
+    revision: "",
     runTests: false,
-    pro: '',
-    ignore: '',
-    ...overrides
-  })
+    pro: "",
+    ignore: "",
+    ...overrides,
+  });
 }
 
-test('RockcraftBuilder.build can ignore unmaintained', async () => {
-  expect.assertions(1)
+test("RockcraftBuilder.build can ignore unmaintained", async () => {
+  expect.assertions(1);
 
-  const {execMock} = mockSetup()
+  const { execMock } = mockSetup();
 
-  await makeBuilder({ignore: 'unmaintained', verbosity: 'trace'}).pack()
+  await makeBuilder({ ignore: "unmaintained", verbosity: "trace" }).pack();
 
   expect(execMock).toHaveBeenCalledWith(
-    'sudo',
+    "sudo",
     [
-      '--preserve-env',
-      '--user',
-      'ubuntu',
-      'rockcraft',
-      'pack',
-      '--verbosity',
-      'trace',
-      '--ignore=unmaintained'
+      "--preserve-env",
+      "--user",
+      "ubuntu",
+      "rockcraft",
+      "pack",
+      "--verbosity",
+      "trace",
+      "--ignore=unmaintained",
     ],
-    {cwd: '.'}
-  )
-})
+    { cwd: "." },
+  );
+});

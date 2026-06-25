@@ -1,208 +1,207 @@
-// -*- mode: javascript; js-indent-level: 2 -*-
-
-import * as os from 'os'
-import * as path from 'path'
-import * as fs from 'fs'
-import * as exec from '@actions/exec'
-import {CraftBuilder, CraftBuilderOptions} from '../src/craft-builder'
-import * as tools from '../src/tools'
+import { vi, afterEach, test, expect } from "vitest";
+import * as os from "os";
+import * as path from "path";
+import * as fs from "fs";
+import * as exec from "@actions/exec";
+import { CraftBuilder, CraftBuilderOptions } from "../src/craft-builder.ts";
+import * as tools from "../src/tools.ts";
 
 class TestBuilder extends CraftBuilder {
-  toolName = 'test-tool'
-  artifactType = '.charm'
+  toolName = "test-tool";
+  artifactType = ".charm";
 }
 
 function makeBuilder(
-  overrides: Partial<CraftBuilderOptions> = {}
+  overrides: Partial<CraftBuilderOptions> = {},
 ): TestBuilder {
   return new TestBuilder({
-    projectRoot: '.',
-    channel: 'stable',
-    verbosity: '',
-    revision: '',
-    ...overrides
-  })
+    projectRoot: ".",
+    channel: "stable",
+    verbosity: "",
+    revision: "",
+    ...overrides,
+  });
 }
 
-function mockSetup(user = 'ubuntu') {
+function mockSetup(user = "ubuntu") {
   return {
-    ensureSnapd: jest
-      .spyOn(tools, 'ensureSnapd')
+    ensureSnapd: vi
+      .spyOn(tools, "ensureSnapd")
       .mockImplementation(async (): Promise<void> => {}),
-    ensureLXD: jest
-      .spyOn(tools, 'ensureLXD')
+    ensureLXD: vi
+      .spyOn(tools, "ensureLXD")
       .mockImplementation(async (): Promise<void> => {}),
-    ensureCraftTool: jest
-      .spyOn(tools, 'ensureCraftTool')
+    ensureCraftTool: vi
+      .spyOn(tools, "ensureCraftTool")
       .mockImplementation(async (): Promise<void> => {}),
-    shellUser: jest
-      .spyOn(tools, 'shellUser')
+    shellUser: vi
+      .spyOn(tools, "shellUser")
       .mockImplementation((): string => user),
-    execMock: jest
-      .spyOn(exec, 'exec')
-      .mockImplementation(
-        async (program: string, args?: string[]): Promise<number> => 0
-      )
-  }
+    execMock: vi
+      .spyOn(exec, "exec")
+      .mockImplementation(async (): Promise<number> => 0),
+  };
 }
 
 afterEach(() => {
-  jest.restoreAllMocks()
-})
+  vi.restoreAllMocks();
+});
 
-test('CraftBuilder expands tilde in project root', () => {
-  expect(makeBuilder({projectRoot: '~'}).projectRoot).toBe(os.homedir())
-  expect(makeBuilder({projectRoot: '~/foo/bar'}).projectRoot).toBe(
-    path.join(os.homedir(), 'foo/bar')
-  )
-})
+test("CraftBuilder expands tilde in project root", () => {
+  expect(makeBuilder({ projectRoot: "~" }).projectRoot).toBe(os.homedir());
+  expect(makeBuilder({ projectRoot: "~/foo/bar" }).projectRoot).toBe(
+    path.join(os.homedir(), "foo/bar"),
+  );
+});
 
-test('CraftBuilder allows empty verbosity', () => {
-  expect(() => makeBuilder({verbosity: ''})).not.toThrow()
-})
+test("CraftBuilder allows empty verbosity", () => {
+  expect(() => makeBuilder({ verbosity: "" })).not.toThrow();
+});
 
-test('CraftBuilder.pack calls ensureSnapd, ensureLXD, and ensureCraftTool', async () => {
-  expect.assertions(3)
+test("CraftBuilder.pack calls ensureSnapd, ensureLXD, and ensureCraftTool", async () => {
+  expect.assertions(3);
 
-  const {ensureSnapd, ensureLXD, ensureCraftTool} = mockSetup()
+  const { ensureSnapd, ensureLXD, ensureCraftTool } = mockSetup();
 
-  await makeBuilder().pack()
+  await makeBuilder().pack();
 
-  expect(ensureSnapd).toHaveBeenCalled()
-  expect(ensureLXD).toHaveBeenCalled()
-  expect(ensureCraftTool).toHaveBeenCalled()
-})
+  expect(ensureSnapd).toHaveBeenCalled();
+  expect(ensureLXD).toHaveBeenCalled();
+  expect(ensureCraftTool).toHaveBeenCalled();
+});
 
-test('CraftBuilder.pack passes channel to ensureCraftTool', async () => {
-  expect.assertions(1)
+test("CraftBuilder.pack passes channel to ensureCraftTool", async () => {
+  expect.assertions(1);
 
-  const {ensureCraftTool} = mockSetup()
+  const { ensureCraftTool } = mockSetup();
 
-  await makeBuilder({channel: 'test-channel', revision: ''}).pack()
+  await makeBuilder({ channel: "test-channel", revision: "" }).pack();
 
-  expect(ensureCraftTool).toHaveBeenCalledWith('test-tool', 'test-channel', '')
-})
+  expect(ensureCraftTool).toHaveBeenCalledWith("test-tool", "test-channel", "");
+});
 
-test('CraftBuilder.pack passes revision to ensureCraftTool', async () => {
-  expect.assertions(1)
+test("CraftBuilder.pack passes revision to ensureCraftTool", async () => {
+  expect.assertions(1);
 
-  const {ensureCraftTool} = mockSetup()
+  const { ensureCraftTool } = mockSetup();
 
-  await makeBuilder({revision: '42'}).pack()
+  await makeBuilder({ revision: "42" }).pack();
 
-  expect(ensureCraftTool).toHaveBeenCalledWith('test-tool', 'stable', '42')
-})
+  expect(ensureCraftTool).toHaveBeenCalledWith("test-tool", "stable", "42");
+});
 
-test('CraftBuilder.pack calls ensureLXD without pro when pro is not set', async () => {
-  expect.assertions(1)
+test("CraftBuilder.pack calls ensureLXD without pro when pro is not set", async () => {
+  expect.assertions(1);
 
-  const {ensureLXD} = mockSetup()
+  const { ensureLXD } = mockSetup();
 
-  await makeBuilder().pack()
+  await makeBuilder().pack();
 
-  expect(ensureLXD).toHaveBeenCalledWith(false)
-})
+  expect(ensureLXD).toHaveBeenCalledWith(false);
+});
 
-test('CraftBuilder.pack calls ensureLXD with pro when pro is set', async () => {
-  expect.assertions(1)
+test("CraftBuilder.pack calls ensureLXD with pro when pro is set", async () => {
+  expect.assertions(1);
 
-  const {ensureLXD} = mockSetup()
+  const { ensureLXD } = mockSetup();
 
-  await makeBuilder({pro: 'esm-apps'}).pack()
+  await makeBuilder({ pro: "esm-apps" }).pack();
 
-  expect(ensureLXD).toHaveBeenCalledWith(true)
-})
+  expect(ensureLXD).toHaveBeenCalledWith(true);
+});
 
-test('CraftBuilder.pack executes the correct base command', async () => {
-  expect.assertions(1)
+test("CraftBuilder.pack executes the correct base command", async () => {
+  expect.assertions(1);
 
-  const {execMock} = mockSetup()
+  const { execMock } = mockSetup();
 
-  await makeBuilder({projectRoot: 'my-dir'}).pack()
-
-  expect(execMock).toHaveBeenCalledWith(
-    'sudo',
-    ['--preserve-env', '--user', 'ubuntu', 'test-tool', 'pack'],
-    {cwd: 'my-dir'}
-  )
-})
-
-test('CraftBuilder.pack executes test subcommand when runTests is true', async () => {
-  expect.assertions(1)
-
-  const {execMock} = mockSetup()
-
-  await makeBuilder({projectRoot: 'my-dir', runTests: true}).pack()
+  await makeBuilder({ projectRoot: "my-dir" }).pack();
 
   expect(execMock).toHaveBeenCalledWith(
-    'sudo',
-    ['--preserve-env', '--user', 'ubuntu', 'test-tool', 'test'],
-    {cwd: 'my-dir'}
-  )
-})
+    "sudo",
+    ["--preserve-env", "--user", "ubuntu", "test-tool", "pack"],
+    { cwd: "my-dir" },
+  );
+});
 
-test('CraftBuilder.pack includes --verbosity flag when verbosity is set', async () => {
-  expect.assertions(1)
+test("CraftBuilder.pack executes test subcommand when runTests is true", async () => {
+  expect.assertions(1);
 
-  const {execMock} = mockSetup()
+  const { execMock } = mockSetup();
 
-  await makeBuilder({verbosity: 'debug'}).pack()
-
-  expect(execMock).toHaveBeenCalledWith(
-    'sudo',
-    expect.arrayContaining(['--verbosity', 'debug']),
-    expect.anything()
-  )
-})
-
-test('CraftBuilder.pack omits --verbosity flag when verbosity is empty', async () => {
-  expect.assertions(1)
-
-  const {execMock} = mockSetup()
-
-  await makeBuilder({verbosity: ''}).pack()
+  await makeBuilder({ projectRoot: "my-dir", runTests: true }).pack();
 
   expect(execMock).toHaveBeenCalledWith(
-    'sudo',
-    expect.not.arrayContaining(['--verbosity']),
-    expect.anything()
-  )
-})
+    "sudo",
+    ["--preserve-env", "--user", "ubuntu", "test-tool", "test"],
+    { cwd: "my-dir" },
+  );
+});
 
-test('CraftBuilder.pack includes --pro flag when pro is set', async () => {
-  expect.assertions(1)
+test("CraftBuilder.pack includes --verbosity flag when verbosity is set", async () => {
+  expect.assertions(1);
 
-  const {execMock} = mockSetup()
+  const { execMock } = mockSetup();
 
-  await makeBuilder({pro: 'esm-apps,esm-infra'}).pack()
+  await makeBuilder({ verbosity: "debug" }).pack();
 
   expect(execMock).toHaveBeenCalledWith(
-    'sudo',
-    expect.arrayContaining(['--pro=esm-apps,esm-infra']),
-    expect.anything()
-  )
-})
+    "sudo",
+    expect.arrayContaining(["--verbosity", "debug"]),
+    expect.anything(),
+  );
+});
 
-test('CraftBuilder.findArtifacts throws when no matching files are found', async () => {
-  expect.assertions(1)
+test("CraftBuilder.pack omits --verbosity flag when verbosity is empty", async () => {
+  expect.assertions(1);
 
-  jest
-    .spyOn(fs.promises, 'readdir')
-    .mockResolvedValue(['other-file.txt'] as any)
+  const { execMock } = mockSetup();
 
-  await expect(makeBuilder().findArtifacts('.charm')).rejects.toThrow(
-    'No .charm files produced by build'
-  )
-})
+  await makeBuilder({ verbosity: "" }).pack();
 
-test('CraftBuilder.findArtifacts returns all matching files', async () => {
-  expect.assertions(1)
+  expect(execMock).toHaveBeenCalledWith(
+    "sudo",
+    expect.not.arrayContaining(["--verbosity"]),
+    expect.anything(),
+  );
+});
 
-  jest
-    .spyOn(fs.promises, 'readdir')
-    .mockResolvedValue(['a.charm', 'b.charm', 'readme.txt'] as any)
+test("CraftBuilder.pack includes --pro flag when pro is set", async () => {
+  expect.assertions(1);
+
+  const { execMock } = mockSetup();
+
+  await makeBuilder({ pro: "esm-apps,esm-infra" }).pack();
+
+  expect(execMock).toHaveBeenCalledWith(
+    "sudo",
+    expect.arrayContaining(["--pro=esm-apps,esm-infra"]),
+    expect.anything(),
+  );
+});
+
+test("CraftBuilder.findArtifacts throws when no matching files are found", async () => {
+  expect.assertions(1);
+
+  vi.spyOn(fs.promises, "readdir").mockResolvedValue([
+    "other-file.txt",
+  ] as never);
+
+  await expect(makeBuilder().findArtifacts(".charm")).rejects.toThrow(
+    "No .charm files produced by build",
+  );
+});
+
+test("CraftBuilder.findArtifacts returns all matching files", async () => {
+  expect.assertions(1);
+
+  vi.spyOn(fs.promises, "readdir").mockResolvedValue([
+    "a.charm",
+    "b.charm",
+    "readme.txt",
+  ] as never);
 
   await expect(
-    makeBuilder({projectRoot: 'project-root'}).findArtifacts('.charm')
-  ).resolves.toEqual(['project-root/a.charm', 'project-root/b.charm'])
-})
+    makeBuilder({ projectRoot: "project-root" }).findArtifacts(".charm"),
+  ).resolves.toEqual(["project-root/a.charm", "project-root/b.charm"]);
+});

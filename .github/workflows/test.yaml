@@ -11,21 +11,21 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
     - uses: actions/checkout@v5
+    - uses: pnpm/action-setup@v4
     - uses: actions/setup-node@v6
       with:
         node-version: 24
+        cache: 'pnpm'
     - name: Install dependencies
-      run: npm install
-    - name: Build .js files
-      run: npm run build
+      run: pnpm install
     - name: Check the formatting
-      run: npm run format-check
+      run: pnpm format-check
     - name: Lint the code
-      run: npm run lint
+      run: pnpm lint
     - name: Run the unit tests
-      run: npm test
+      run: pnpm test
     - name: Try to package code
-      run: npm run pack
+      run: pnpm build
     - name: Ensure packaged code is committed
       run: git diff --exit-code
 

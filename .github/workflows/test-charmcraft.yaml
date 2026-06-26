@@ -22,7 +22,7 @@ jobs:
             revision: 5303
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
       - uses: ./charmcraft/setup
         id: setup
         with:
@@ -50,8 +50,8 @@ jobs:
             revision: 5303
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
         with:
           repository: juju/juju
           path: juju
@@ -64,7 +64,7 @@ jobs:
           channel: ${{ matrix.channel }}
           revision: ${{ matrix.revision }}
       - name: Upload charm
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: test-charm-${{ matrix.os }}-${{ steps.charmcraft.outputs.charmcraft-revision }}
           path: juju/testcharms/charms/lxd-profile/*.charm

@@ -1,6 +1,6 @@
- {
+{
   // Configuration file for RenovateBot: https://docs.renovatebot.com/configuration-options
-  extends: ["config:base"],
+  extends: ["config:recommended"],
   labels: ["dependencies"],  // For convenient searching in GitHub
   packageRules: [
     {
@@ -46,5 +46,5 @@
   prCreation: "not-pending", // Wait until status checks have completed before raising the PR
   prNotPendingHours: 4, // ...unless the status checks have been running for 4+ hours.
   prHourlyLimit: 1, // No more than 1 PR per hour.
-  stabilityDays: 2 // Wait 2 days from release before updating.
+  minimumReleaseAge: "2 days" // Wait 2 days from release before updating.
 }

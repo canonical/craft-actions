@@ -85,4 +85,44 @@ jobs:
           name: test-snap-${{ matrix.os }}-${{ steps.snapcraft.outputs.snapcraft-revision }}
           path: test-repo/tests/spread/core22/clean/snaps/clean/*.snap
           overwrite: true
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-22.04
+          - ubuntu-24.04
+          - ubuntu-22.04-arm
+          - ubuntu-24.04-arm
+          - self-hosted-linux-amd64-focal-medium
+          - self-hosted-linux-ppc64el-noble-edge
+          - self-hosted-linux-s390x-noble-edge
+        channel: [latest/candidate, latest/edge, 8.x/candidate]
+        parameters: ['', '--help']
+        include:
+          - os: ubuntu-24.04
+            channel: ''
+            revision: 16570  # 8.13.2, but really here to test the revision field.
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/checkout@v5
+        with:
+          repository: lengau/astral-ty
+          path: test-repo
+          ref: main
+      - name: Test snap
+        id: snapcraft
+        uses: ./snapcraft/test
+        with:
+          path: test-repo
+          channel: ${{ matrix.channel }}
+          revision: ${{ matrix.revision }}
+      - name: Upload snap
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-snap-${{ matrix.os }}-${{ steps.snapcraft.outputs.snapcraft-revision }}
+          path: test-repo/*.snap
+          overwrite: true
 

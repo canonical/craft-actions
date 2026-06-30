@@ -1,0 +1,117 @@
+name: 'Test a snap'
+description: 'Test a snap with Snapcraft 8 or higher'
+author: Canonical
+
+inputs:
+  path:
+    description: >
+      The location of the Snapcraft project.
+
+      Defaults to the root of the repository.
+    default: '.'
+  verbosity:
+    description: >
+      The build verbosity level, which can be set to "quiet", "brief", "verbose", "debug",
+      or "trace".
+
+      The default is "trace".
+    default: 'trace'
+  parameters:
+    description: >
+      Additional parameters to pass to snapcraft test.
+    default: ''
+  channel:
+    description: >
+      The channel to install Snapcraft from.
+
+      Defaults to the latest stable release.
+    default: 'latest/stable'
+  revision:
+    description: >
+      The revision of Snapcraft to install.
+
+      Defaults to the latest stable revision.
+
+      Overrides the `channel` option.
+    default: ''
+  lxd-channel:
+    description: >
+      The channel to install LXD from.
+
+      Defaults to the recommended channel for Snapcraft.
+    default: '5.21/stable'
+
+outputs:
+  lxd-revision:
+    description: The LXD revision used.
+    value: ${{ steps.setup.outputs.lxd-revision }}
+  snapcraft-revision:
+    description: The Snapcraft revision used.
+    value: ${{ steps.setup.outputs.snapcraft-revision }}
+  snap:
+    description: The packed snap artifact.
+    value: ${{ steps.test.outputs.snap }}
+  components:
+    description: The packed components.
+    value: ${{ steps.test.outputs.components }}
+
+runs:
+  using: 'composite'
+  steps:
+    # This action is necessary as a workaround for https://github.com/actions/runner/issues/895.
+    # Since contexts cannot be used in the `uses:` key, we can't guarantee that this action will
+    # use the same branch of craft-actions to call other craft-actions workflows without just
+    # making our own local copy of the repository. See https://github.com/canonical/craft-actions/pull/45#discussion_r2586507869
+    # for a full explanation.
+    - uses: actions/checkout@v6
+      env:
+        GITHUB_REF: ${{ github.action_ref }}
+      with:
+        repository: 'canonical/craft-actions'
+        ref: ${{ env.GITHUB_REF }}
+        path: _tmp_craft-actions
+        sparse-checkout: |
+          snapcraft/
+
+    - uses: ./_tmp_craft-actions/snapcraft/setup
+      id: setup
+      with:
+        channel: ${{ inputs.channel }}
+        revision: ${{ inputs.revision }}
+        lxd-channel: ${{ inputs.lxd-channel }}
+
+    - shell: bash
+      run: |
+        rm -rf ./_tmp_craft-actions
+
+    - shell: bash
+      id: test
+      env:
+        CRAFT_VERBOSITY_LEVEL: ${{ inputs.verbosity }}
+      working-directory: ${{ inputs.path }}
+      run: |
+        # Snapcraft < 8 doesn't support `snapcraft test`.
+        # Examples of running `snapcraft --version`:
+        #   snapcraft 8.14.0.post57+dirty
+        #   snapcraft 8.14.2
+        #   snapcraft 7.5.9
+        #   snapcraft, version 6.1
+        SNAPCRAFT_VERSION=$(snapcraft --version | awk '{print $NF}')
+        MAJOR_VERSION=$(echo "$SNAPCRAFT_VERSION" | cut -d'.' -f1)
+        if [[ "$MAJOR_VERSION" =~ ^[0-9]+$ ]] && [ "$MAJOR_VERSION" -lt 8 ]; then
+          echo "Snapcraft 8 needed for the test command" >> /dev/stderr
+          exit 1
+        else
+          snapcraft test ${{ inputs.parameters }}
+        fi
+        echo "snap=$(ls *.snap)" >> "$GITHUB_OUTPUT"
+        components=( *.comp )
+        if [ -e "${components[0]}" ]; then
+          echo "components=${components[*]}" >> "$GITHUB_OUTPUT"
+        else
+          echo "components=" >> "$GITHUB_OUTPUT"
+        fi
+
+branding:
+  icon: package
+  color: orange

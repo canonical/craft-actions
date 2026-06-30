@@ -5,6 +5,10 @@ on:
   push:
     branches:
       - main
+      - "feature/*"
+      - "hotfix/*"
+      - "release/*"
+      - "renovate/*"
 
 jobs:
   test-action-code:

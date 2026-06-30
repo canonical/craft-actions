@@ -8,6 +8,14 @@ on:
   push:
     branches:
       - main
+      - "feature/*"
+      - "hotfix/*"
+      - "release/*"
+      - "renovate/*"
+    paths:
+      - ".github/workflows/*charmcraft*"
+      - "charmcraft**"
+      - "_common/**"  # A change to a common action could affect this action.
 
 jobs:
   setup:

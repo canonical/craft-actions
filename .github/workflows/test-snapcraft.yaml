@@ -18,8 +18,10 @@ jobs:
         os:
           - ubuntu-22.04
           - ubuntu-24.04
+          - ubuntu-26.04
           - ubuntu-22.04-arm
           - ubuntu-24.04-arm
+          - ubuntu-26.04-arm
           - self-hosted-linux-amd64-focal-medium
           - self-hosted-linux-ppc64el-noble-edge
           - self-hosted-linux-s390x-noble-edge
@@ -53,8 +55,10 @@ jobs:
         os:
           - ubuntu-22.04
           - ubuntu-24.04
+          - ubuntu-26.04
           - ubuntu-22.04-arm
           - ubuntu-24.04-arm
+          - ubuntu-26.04-arm
           - self-hosted-linux-amd64-focal-medium
           - self-hosted-linux-ppc64el-noble-edge
           - self-hosted-linux-s390x-noble-edge

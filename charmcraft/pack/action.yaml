@@ -65,6 +65,10 @@ runs:
         channel: ${{ inputs.channel }}
         revision: ${{ inputs.revision }}
         lxd-channel: ${{ inputs.lxd-channel }}
+    - shell: bash
+      if: always()
+      run: |
+        rm -rf ./_tmp_charmcraft-pack-actions
     - uses: actions/cache@v6
       with:
         path: ${{ runner.temp }}/charmcraft_cache

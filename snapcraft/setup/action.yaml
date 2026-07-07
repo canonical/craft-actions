@@ -96,6 +96,7 @@ runs:
         snap: 'lxd'
 
     - shell: bash
+      if: always()
       run: |
         rm -rf ./_tmp_snapcraft-setup-actions
 

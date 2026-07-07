@@ -59,17 +59,16 @@ runs:
     # use the same branch of craft-actions to call other craft-actions workflows without just
     # making our own local copy of the repository. See https://github.com/canonical/craft-actions/pull/45#discussion_r2586507869
     # for a full explanation.
-    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+    - name: Stage actions from adjacent action directory
+      shell: bash
       env:
-        GITHUB_REF: ${{ github.action_ref }}
-      with:
-        repository: 'canonical/craft-actions'
-        ref: ${{ env.GITHUB_REF }}
-        path: _tmp_craft-actions
-        sparse-checkout: |
-          snapcraft/
+        ACTION_PATH: ${{ github.action_path }}
+      run: |
+        mkdir -p _tmp_snapcraft-pack-actions
+        cp -r "$ACTION_PATH"/../../{snapcraft,_common} \
+          _tmp_snapcraft-pack-actions/
 
-    - uses: ./_tmp_craft-actions/snapcraft/setup
+    - uses: ./_tmp_snapcraft-pack-actions/snapcraft/setup
       id: setup
       with:
         channel: ${{ inputs.channel }}
@@ -78,7 +77,7 @@ runs:
 
     - shell: bash
       run: |
-        rm -rf ./_tmp_craft-actions
+        rm -rf ./_tmp_snapcraft-pack-actions
 
     - shell: bash
       id: pack

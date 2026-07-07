@@ -52,15 +52,14 @@ runs:
     # use the same branch of craft-actions to call other craft-actions workflows without just
     # making our own local copy of the repository. See https://github.com/canonical/craft-actions/pull/45#discussion_r2586507869
     # for a full explanation.
-    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+    - name: Stage actions from adjacent action directory
+      shell: bash
       env:
-        GITHUB_REF: ${{ github.action_ref }}
-      with:
-        repository: 'canonical/craft-actions'
-        ref: ${{ env.GITHUB_REF }}
-        path: _tmp_craft-actions
-        sparse-checkout: |
-          _common/
+        ACTION_PATH: ${{ github.action_path }}
+      run: |
+        mkdir -p _tmp_snapcraft-setup-actions
+        cp -r "$ACTION_PATH"/../../_common \
+          _tmp_snapcraft-setup-actions/
 
     - uses: canonical/setup-lxd@da2ac84e727dc534215fd14cd088b9209d65893b # main as of 6-4-26
       with:
@@ -84,13 +83,13 @@ runs:
           sudo snap $ACTION --channel=${{ inputs.channel }} --classic snapcraft
         fi
 
-    - uses: ./_tmp_craft-actions/_common/get-snap-revision
+    - uses: ./_tmp_snapcraft-setup-actions/_common/get-snap-revision
       name: Get Snapcraft revision
       id: snapcraft-revision
       with:
         snap: 'snapcraft'
 
-    - uses: ./_tmp_craft-actions/_common/get-snap-revision
+    - uses: ./_tmp_snapcraft-setup-actions/_common/get-snap-revision
       name: Get LXD revision
       id: lxd-revision
       with:
@@ -98,7 +97,7 @@ runs:
 
     - shell: bash
       run: |
-        rm -rf ./_tmp_craft-actions
+        rm -rf ./_tmp_snapcraft-setup-actions
 
 branding:
   icon: package

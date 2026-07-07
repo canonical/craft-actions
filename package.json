@@ -8,8 +8,8 @@
     "test": "tests"
   },
   "scripts": {
-    "build": "pnpm node build.js src/rockcraft-pack.ts dist/rockcraft-pack/index.js",
-    "test": "vitest run",
+    "build": "pnpm -r run build",
+    "test": "pnpm -r run test",
     "format": "prettier --write **/*.ts",
     "format-check": "prettier --check **/*.ts",
     "lint": "eslint .; ESLINT=$?; tsc --noEmit; TSC=$?; exit $((ESLINT | TSC))",

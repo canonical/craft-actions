@@ -1,0 +1,58 @@
+name: 'Build a rock'
+description: 'Pack an OCI image with Rockcraft'
+author: 'Canonical'
+inputs:
+  path:
+    description: >
+      The location of the Rockcraft project.
+
+      Defaults to the base of the repository.
+    default: '.'
+  verbosity:
+    description: >
+      Set the build verbosity level to 'quiet', 'brief', 'verbose', 'debug' or
+      'trace'.
+
+      The default is 'trace'.
+    default: 'trace'
+  rockcraft-channel:
+    description: >
+      Install the snap from a specific channel
+
+      If not provided, it defaults to stable.
+    default: 'stable'
+  revision:
+    description: >
+      Pin the snap revision to install.
+
+      If not provided, it defaults to whatever revision is in latest/stable.
+    default: ''
+  test:
+    description: >
+      Run rockcraft test when packing the rock.
+
+      If not provided, it defaults to false.
+    default: 'false'
+  pro:
+    description: >
+      The Ubuntu Pro services to enable when packing the rock.
+
+      If not provided, no Ubuntu Pro services will be enabled.
+    default: ''
+  ignore:
+    description: >
+      Bypass a restriction to use an unsupported feature.
+
+      For example, 'unmaintained' will ignore that the base is unmaintained.
+
+      If not provided, it defaults to empty.
+    default: ''
+outputs:
+  rock:
+    description: 'The file name of the resulting rock.'
+runs:
+  using: 'node24'
+  main: 'dist/index.js'
+branding:
+  icon: layers
+  color: orange

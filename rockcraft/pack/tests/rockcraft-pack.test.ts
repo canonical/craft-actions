@@ -1,7 +1,7 @@
 import { vi, afterEach, test, expect } from "vitest";
 import * as exec from "@actions/exec";
-import * as build from "../src/rockcraft-pack.ts";
-import * as tools from "../src/tools.ts";
+import * as build from "../src/index.ts";
+import * as tools from "@craft-actions/common/tools.ts";
 
 afterEach(() => {
   vi.restoreAllMocks();

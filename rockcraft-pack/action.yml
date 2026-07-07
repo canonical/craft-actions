@@ -50,9 +50,39 @@ inputs:
 outputs:
   rock:
     description: 'The file name of the resulting rock.'
+    value: ${{ steps.pack.outputs.rock }}
 runs:
-  using: 'node24'
-  main: '../dist/rockcraft-pack/index.js'
+  using: 'composite'
+  steps:
+    # This action is necessary as a workaround for https://github.com/actions/runner/issues/895.
+    # Since contexts cannot be used in the `uses:` key, we can't guarantee that this action will
+    # use the same branch of craft-actions to call other craft-actions workflows without just
+    # making our own local copy of the repository. See https://github.com/canonical/craft-actions/pull/45#discussion_r2586507869
+    # for a full explanation.
+    - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      env:
+        GITHUB_REF: ${{ github.action_ref }}
+      with:
+        repository: 'canonical/craft-actions'
+        ref: ${{ env.GITHUB_REF }}
+        path: _tmp_craft-actions
+        sparse-checkout: |
+          rockcraft/
+
+    - uses: ./_tmp_craft-actions/rockcraft/pack
+      id: pack
+      with:
+        path: ${{ inputs.path }}
+        verbosity: ${{ inputs.verbosity }}
+        rockcraft-channel: ${{ inputs.rockcraft-channel }}
+        revision: ${{ inputs.revision }}
+        test: ${{ inputs.test }}
+        pro: ${{ inputs.pro }}
+        ignore: ${{ inputs.ignore }}
+
+    - shell: bash
+      run: |
+        rm -rf ./_tmp_craft-actions
 branding:
   icon: layers
   color: orange

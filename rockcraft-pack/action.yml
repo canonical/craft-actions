@@ -81,6 +81,7 @@ runs:
         ignore: ${{ inputs.ignore }}
 
     - shell: bash
+      if: always()
       run: |
         rm -rf ./_tmp_craft-actions
 branding:

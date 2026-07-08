@@ -1,3 +1,5 @@
+# This file exists as a compatibility shim since this repository was not being versioned to allow breakages.
+
 name: 'Build a rock'
 description: 'Pack an OCI image with Rockcraft'
 author: 'Canonical'
@@ -54,6 +56,10 @@ outputs:
 runs:
   using: 'composite'
   steps:
+    - name: Deprecation notice
+      shell: bash
+      run: |
+          echo "::warning::rockcraft-pack is deprecated and will be removed in a future release. Please migrate to rockcraft/pack instead."
     # This action is necessary as a workaround for https://github.com/actions/runner/issues/895.
     # Since contexts cannot be used in the `uses:` key, we can't guarantee that this action will
     # use the same branch of craft-actions to call other craft-actions workflows without just

@@ -1,0 +1,18 @@
+{
+  "name": "@craft-actions/common",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "exports": {
+    "./craft-builder.ts": "./src/craft-builder.ts",
+    "./pack-action.ts": "./src/pack-action.ts",
+    "./tools.ts": "./src/tools.ts"
+  },
+  "dependencies": {
+    "@actions/core": "^1.10.1",
+    "@actions/exec": "^1.1.1"
+  }
+}

@@ -46,12 +46,29 @@ outputs:
 runs:
   using: 'composite'
   steps:
-    - uses: canonical/craft-actions/charmcraft/setup@main
+    # This action is necessary as a workaround for https://github.com/actions/runner/issues/895.
+    # Since contexts cannot be used in the `uses:` key, we can't guarantee that this action will
+    # use the same branch of craft-actions to call other craft-actions workflows without just
+    # making our own local copy of the repository. See https://github.com/canonical/craft-actions/pull/45#discussion_r2586507869
+    # for a full explanation.
+    - name: Stage actions from adjacent action directory
+      shell: bash
+      env:
+        ACTION_PATH: ${{ github.action_path }}
+      run: |
+        mkdir -p _tmp_charmcraft-pack-actions
+        cp -r "$ACTION_PATH"/../../charmcraft \
+          _tmp_charmcraft-pack-actions/
+    - uses: ./_tmp_charmcraft-pack-actions/charmcraft/setup
       id: setup
       with:
         channel: ${{ inputs.channel }}
         revision: ${{ inputs.revision }}
         lxd-channel: ${{ inputs.lxd-channel }}
+    - shell: bash
+      if: always()
+      run: |
+        rm -rf ./_tmp_charmcraft-pack-actions
     - uses: actions/cache@v6
       with:
         path: ${{ runner.temp }}/charmcraft_cache

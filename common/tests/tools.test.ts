@@ -101,7 +101,12 @@ test("ensureLXD installs the snap version of LXD if needed", async () => {
     });
   const execMock = vi
     .spyOn(exec, "exec")
-    .mockImplementation(async (): Promise<number> => 0);
+    .mockImplementation(
+      async (_cmd: string, args?: string[]): Promise<number> => {
+        if (args?.[1] === "storage") return 1;
+        return 0;
+      },
+    );
 
   await tools.ensureLXD("5.21/stable");
 
@@ -128,7 +133,7 @@ test("ensureLXD installs the snap version of LXD if needed", async () => {
     "--cohort",
     "+",
   ]);
-  expect(execMock).toHaveBeenNthCalledWith(4, "sudo", [
+  expect(execMock).toHaveBeenNthCalledWith(5, "sudo", [
     "lxd",
     "init",
     "--auto",
@@ -248,7 +253,12 @@ test('ensureLXD still calls "lxd init" if LXD is installed', async () => {
     });
   const execMock = vi
     .spyOn(exec, "exec")
-    .mockImplementation(async (): Promise<number> => 0);
+    .mockImplementation(
+      async (_cmd: string, args?: string[]): Promise<number> => {
+        if (args?.[1] === "storage") return 1;
+        return 0;
+      },
+    );
 
   await tools.ensureLXD("5.21/stable");
 
@@ -266,11 +276,28 @@ test('ensureLXD still calls "lxd init" if LXD is installed', async () => {
     "lxd",
     os.userInfo().username,
   ]);
-  expect(execMock).toHaveBeenNthCalledWith(3, "sudo", [
+  expect(execMock).toHaveBeenNthCalledWith(4, "sudo", [
     "lxd",
     "init",
     "--auto",
   ]);
+});
+
+test("ensureLXD skips lxd init if already initialized", async () => {
+  expect.assertions(1);
+
+  vi.spyOn(fs.promises, "access").mockImplementation(
+    async (): Promise<void> => {
+      throw new Error("not found");
+    },
+  );
+  const execMock = vi
+    .spyOn(exec, "exec")
+    .mockImplementation(async (): Promise<number> => 0);
+
+  await tools.ensureLXD("5.21/stable");
+
+  expect(execMock).not.toHaveBeenCalledWith("sudo", ["lxd", "init", "--auto"]);
 });
 
 test("ensureCraftTool installs a craft tool if needed", async () => {

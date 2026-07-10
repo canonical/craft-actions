@@ -109,8 +109,17 @@ export async function ensureLXD(lxdChannel: string): Promise<void> {
     ]);
   }
 
-  core.info("Initialising LXD...");
-  await exec.exec("sudo", ["lxd", "init", "--auto"]);
+  // Don't double-init LXD. Everything else in setup is reasonably idempotent,
+  // but `lxd init` does extra work.
+  const isInitialized =
+    (await exec.exec("sudo", ["lxc", "storage", "show", "default"], {
+      ignoreReturnCode: true,
+      silent: true,
+    })) === 0;
+  if (!isInitialized) {
+    core.info("Initialising LXD...");
+    await exec.exec("sudo", ["lxd", "init", "--auto"]);
+  }
   await ensureLXDNetwork();
 }
 

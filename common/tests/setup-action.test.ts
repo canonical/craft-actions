@@ -11,7 +11,7 @@ import {
 vi.mock("node:http", () => ({ get: vi.fn() }));
 
 afterEach(() => {
-  vi.restoreAllMocks();
+  vi.resetAllMocks();
 });
 
 function mockInputs(inputs: Record<string, string>) {
@@ -42,6 +42,7 @@ function mockHttpGet(revision: string) {
         Buffer.from(JSON.stringify({ result: { revision } })),
       ];
       cb({
+        statusCode: 200,
         on: (event: string, handler: (...args: unknown[]) => void) => {
           if (event === "data") chunks.forEach((c) => handler(c));
           if (event === "end") handler();
@@ -135,7 +136,7 @@ test("runSetupAction sets lxd-revision and tool revision outputs", async () => {
 });
 
 test("runSetupAction calls setFailed on error", async () => {
-  expect.assertions(1);
+  expect.assertions(2);
 
   mockInputs({});
   vi.spyOn(core, "startGroup").mockImplementation(() => {});
@@ -146,13 +147,13 @@ test("runSetupAction calls setFailed on error", async () => {
     throw new Error("snapd failed");
   });
 
-  await runSetupAction("rockcraft");
+  await expect(runSetupAction("rockcraft")).rejects.toThrow("snapd failed");
 
   expect(setFailed).toHaveBeenCalledWith("snapd failed");
 });
 
 test("runSetupAction calls endGroup even on error", async () => {
-  expect.assertions(1);
+  expect.assertions(2);
 
   mockInputs({});
   vi.spyOn(core, "startGroup").mockImplementation(() => {});
@@ -163,7 +164,7 @@ test("runSetupAction calls endGroup even on error", async () => {
     throw new Error("snapd failed");
   });
 
-  await runSetupAction("rockcraft");
+  await expect(runSetupAction("rockcraft")).rejects.toThrow("snapd failed");
 
   expect(endGroup).toHaveBeenCalled();
 });

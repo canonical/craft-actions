@@ -26,6 +26,8 @@ export async function runSetupAction(toolName: string): Promise<void> {
     await setOutputs(toolName);
   } catch (error) {
     core.setFailed((error as Error)?.message);
+    // Re-throw the error so it can bubble up from actions that depend on this setup
+    throw error;
   } finally {
     core.endGroup();
   }
@@ -49,7 +51,13 @@ export async function getSnapRevision(snap: string): Promise<string> {
         res.on("end", () => {
           try {
             const body = JSON.parse(Buffer.concat(chunks).toString());
-            resolve(body.result.revision);
+            const rev = body.result.revision;
+            if (res.statusCode !== 200 || rev === undefined) {
+              reject(
+                new Error(`Unable to locate installation of snap ${snap}.`),
+              );
+            }
+            resolve(rev);
           } catch {
             reject(new Error("Unable to communicate with SnapD"));
           }

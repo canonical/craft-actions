@@ -19898,8 +19898,14 @@ async function ensureLXD(lxdChannel) {
       "+"
     ]);
   }
-  core.info("Initialising LXD...");
-  await exec.exec("sudo", ["lxd", "init", "--auto"]);
+  const isInitialized = await exec.exec("sudo", ["lxc", "storage", "show", "default"], {
+    ignoreReturnCode: true,
+    silent: true
+  }) === 0;
+  if (!isInitialized) {
+    core.info("Initialising LXD...");
+    await exec.exec("sudo", ["lxd", "init", "--auto"]);
+  }
   await ensureLXDNetwork();
 }
 async function ensureCraftTool(name, channel, revision) {
@@ -19934,6 +19940,7 @@ async function runSetupAction(toolName) {
     await setOutputs(toolName);
   } catch (error) {
     core2.setFailed(error?.message);
+    throw error;
   } finally {
     core2.endGroup();
   }
@@ -19956,7 +19963,13 @@ async function getSnapRevision(snap) {
         res.on("end", () => {
           try {
             const body = JSON.parse(Buffer.concat(chunks).toString());
-            resolve(body.result.revision);
+            const rev = body.result.revision;
+            if (res.statusCode !== 200 || rev === void 0) {
+              reject(
+                new Error(`Unable to locate installation of snap ${snap}.`)
+              );
+            }
+            resolve(rev);
           } catch {
             reject(new Error("Unable to communicate with SnapD"));
           }

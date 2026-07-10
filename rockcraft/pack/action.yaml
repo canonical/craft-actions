@@ -15,12 +15,18 @@ inputs:
 
       The default is 'trace'.
     default: 'trace'
-  rockcraft-channel:
+  channel:
     description: >
-      Install the snap from a specific channel
+      The channel to install Rockcraft from.
 
       If not provided, it defaults to stable.
     default: 'stable'
+  lxd-channel:
+    description: >
+      The channel to install LXD from.
+
+      Defaults to the recommended channel for Rockcraft.
+    default: '5.21/stable'
   revision:
     description: >
       Pin the snap revision to install.
@@ -50,6 +56,10 @@ inputs:
 outputs:
   rock:
     description: 'The file name of the resulting rock.'
+  rockcraft-revision:
+    description: 'The Rockcraft revision used.'
+  lxd-revision:
+    description: 'The LXD revision used.'
 runs:
   using: 'node24'
   main: 'dist/index.js'

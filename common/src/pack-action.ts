@@ -1,5 +1,6 @@
 import * as core from "@actions/core";
 import { CraftBuilder, CraftBuilderOptions } from "./craft-builder.ts";
+import { runSetupAction } from "./setup-action.ts";
 
 export function readBaseInputs(channelInput = "channel"): CraftBuilderOptions {
   return {
@@ -17,11 +18,7 @@ export async function runPackAction(
   outputName: string,
 ): Promise<void> {
   try {
-    if (!builder.revision) {
-      core.info(
-        `${builder.toolName} revision not provided. Installing from ${builder.channel}`,
-      );
-    }
+    await runSetupAction(builder.toolName);
     await builder.pack();
     const artifacts = await builder.findArtifacts(builder.artifactType);
     if (artifacts.length > 1) {

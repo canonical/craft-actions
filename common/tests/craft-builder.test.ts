@@ -25,14 +25,8 @@ function makeBuilder(
 
 function mockSetup(user = "ubuntu") {
   return {
-    ensureSnapd: vi
-      .spyOn(tools, "ensureSnapd")
-      .mockImplementation(async (): Promise<void> => {}),
-    ensureLXD: vi
-      .spyOn(tools, "ensureLXD")
-      .mockImplementation(async (): Promise<void> => {}),
-    ensureCraftTool: vi
-      .spyOn(tools, "ensureCraftTool")
+    configureProLXD: vi
+      .spyOn(tools, "configureProLXD")
       .mockImplementation(async (): Promise<void> => {}),
     shellUser: vi
       .spyOn(tools, "shellUser")
@@ -58,55 +52,10 @@ test("CraftBuilder allows empty verbosity", () => {
   expect(() => makeBuilder({ verbosity: "" })).not.toThrow();
 });
 
-test("CraftBuilder.pack calls ensureSnapd, ensureLXD, and ensureCraftTool", async () => {
-  expect.assertions(3);
-
-  const { ensureSnapd, ensureLXD, ensureCraftTool } = mockSetup();
-
-  await makeBuilder().pack();
-
-  expect(ensureSnapd).toHaveBeenCalled();
-  expect(ensureLXD).toHaveBeenCalled();
-  expect(ensureCraftTool).toHaveBeenCalled();
-});
-
-test("CraftBuilder.pack passes channel to ensureCraftTool", async () => {
-  expect.assertions(1);
-
-  const { ensureCraftTool } = mockSetup();
-
-  await makeBuilder({ channel: "test-channel", revision: "" }).pack();
-
-  expect(ensureCraftTool).toHaveBeenCalledWith("test-tool", "test-channel", "");
-});
-
-test("CraftBuilder.pack passes revision to ensureCraftTool", async () => {
-  expect.assertions(1);
-
-  const { ensureCraftTool } = mockSetup();
-
-  await makeBuilder({ revision: "42" }).pack();
-
-  expect(ensureCraftTool).toHaveBeenCalledWith("test-tool", "stable", "42");
-});
-
-test("CraftBuilder.pack calls ensureLXD with the hardcoded channel", async () => {
-  expect.assertions(1);
-
-  const { ensureLXD } = mockSetup();
-
-  await makeBuilder().pack();
-
-  expect(ensureLXD).toHaveBeenCalledWith("5.21/stable");
-});
-
 test("CraftBuilder.pack calls configureProLXD when pro is set", async () => {
   expect.assertions(1);
 
-  mockSetup();
-  const configureProLXD = vi
-    .spyOn(tools, "configureProLXD")
-    .mockImplementation(async (): Promise<void> => {});
+  const { configureProLXD } = mockSetup();
 
   await makeBuilder({ pro: "esm-apps" }).pack();
 
@@ -116,10 +65,7 @@ test("CraftBuilder.pack calls configureProLXD when pro is set", async () => {
 test("CraftBuilder.pack does not call configureProLXD when pro is not set", async () => {
   expect.assertions(1);
 
-  mockSetup();
-  const configureProLXD = vi
-    .spyOn(tools, "configureProLXD")
-    .mockImplementation(async (): Promise<void> => {});
+  const { configureProLXD } = mockSetup();
 
   await makeBuilder().pack();
 

@@ -1,6 +1,7 @@
 import { vi, afterEach, test, expect } from "vitest";
 import * as core from "@actions/core";
 import { readBaseInputs, runPackAction } from "../src/pack-action.ts";
+import * as setupAction from "../src/setup-action.ts";
 import { CraftBuilder } from "../src/craft-builder.ts";
 
 afterEach(() => {
@@ -11,6 +12,12 @@ function mockInputs(inputs: Record<string, string>) {
   vi.spyOn(core, "getInput").mockImplementation((name: string) => {
     return inputs[name] ?? "";
   });
+}
+
+function mockSetupAction() {
+  return vi
+    .spyOn(setupAction, "runSetupAction")
+    .mockImplementation(async (): Promise<void> => {});
 }
 
 // Minimal stub matching the CraftBuilder interface needed by runPackAction.
@@ -81,9 +88,23 @@ test('readBaseInputs parses runTests as false when input is not "true"', () => {
 
 // runPackAction
 
+test("runPackAction calls runSetupAction with the tool name", async () => {
+  expect.assertions(1);
+
+  const runSetup = mockSetupAction();
+  vi.spyOn(core, "setOutput").mockImplementation(() => {});
+  vi.spyOn(core, "info").mockImplementation(() => {});
+  const builder = makeStubBuilder({ revision: "1" });
+
+  await runPackAction(builder, "charm");
+
+  expect(runSetup).toHaveBeenCalledWith("test-tool");
+});
+
 test("runPackAction calls pack and sets output", async () => {
   expect.assertions(2);
 
+  mockSetupAction();
   const setOutput = vi.spyOn(core, "setOutput").mockImplementation(() => {});
   vi.spyOn(core, "info").mockImplementation(() => {});
   const builder = makeStubBuilder({ revision: "1" });
@@ -94,21 +115,10 @@ test("runPackAction calls pack and sets output", async () => {
   expect(setOutput).toHaveBeenCalledWith("charm", "project-root/output.charm");
 });
 
-test("runPackAction logs info when revision is not set", async () => {
-  expect.assertions(1);
-
-  const info = vi.spyOn(core, "info").mockImplementation(() => {});
-  vi.spyOn(core, "setOutput").mockImplementation(() => {});
-  const builder = makeStubBuilder({ revision: "" });
-
-  await runPackAction(builder, "charm");
-
-  expect(info).toHaveBeenCalled();
-});
-
 test("runPackAction does not log info when revision is set", async () => {
   expect.assertions(1);
 
+  mockSetupAction();
   const info = vi.spyOn(core, "info").mockImplementation(() => {});
   vi.spyOn(core, "setOutput").mockImplementation(() => {});
   const builder = makeStubBuilder({ revision: "42" });
@@ -121,6 +131,7 @@ test("runPackAction does not log info when revision is set", async () => {
 test("runPackAction calls setFailed on error", async () => {
   expect.assertions(1);
 
+  mockSetupAction();
   const setFailed = vi.spyOn(core, "setFailed").mockImplementation(() => {});
   vi.spyOn(core, "info").mockImplementation(() => {});
   const builder = makeStubBuilder({
@@ -138,6 +149,7 @@ test("runPackAction calls setFailed on error", async () => {
 test("runPackAction warns when multiple artifacts are found", async () => {
   expect.assertions(1);
 
+  mockSetupAction();
   vi.spyOn(core, "setOutput").mockImplementation(() => {});
   vi.spyOn(core, "info").mockImplementation(() => {});
   const warning = vi.spyOn(core, "warning").mockImplementation(() => {});
@@ -157,6 +169,7 @@ test("runPackAction warns when multiple artifacts are found", async () => {
 test("runPackAction does not warn when only one artifact is found", async () => {
   expect.assertions(1);
 
+  mockSetupAction();
   vi.spyOn(core, "setOutput").mockImplementation(() => {});
   vi.spyOn(core, "info").mockImplementation(() => {});
   const warning = vi.spyOn(core, "warning").mockImplementation(() => {});

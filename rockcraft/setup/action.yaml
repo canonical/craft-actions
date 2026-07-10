@@ -22,6 +22,13 @@ inputs:
 
       Defaults to the recommended channel for Rockcraft.
     default: '5.21/stable'
+
+outputs:
+  lxd-revision:
+    description: The LXD revision used.
+  rockcraft-revision:
+    description: The Rockcraft revision used.
+
 runs:
   using: 'node24'
   main: 'dist/index.js'

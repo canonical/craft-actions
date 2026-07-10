@@ -10,6 +10,6 @@
     "skipLibCheck": true,
     "types": ["node"]
   },
-  "include": ["common/**/*.ts", "rockcraft/pack/**/*.ts"],
+  "include": ["common/**/*.ts", "rockcraft/pack/**/*.ts", "rockcraft/setup/**/*.ts"],
   "exclude": ["**/dist/**"]
 }

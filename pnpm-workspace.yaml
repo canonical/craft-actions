@@ -1,6 +1,7 @@
 packages:
   - "common"
   - "rockcraft/pack"
+  - "rockcraft/setup"
 
 allowBuilds:
   esbuild: true

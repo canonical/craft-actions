@@ -26,80 +26,12 @@ inputs:
 outputs:
   lxd-revision:
     description: The LXD revision used.
-    value: ${{ steps.lxd-revision.outputs.revision }}
   snapcraft-revision:
     description: The Snapcraft revision used.
-    value: ${{ steps.snapcraft-revision.outputs.revision }}
 
 runs:
-  using: 'composite'
-  steps:
-    - shell: bash
-      name: Check system compatibility
-      run: |
-        if [[ $(uname -s) != Linux ]]; then
-          echo "::error::This action only works on Linux-based runners."
-          exit 1
-        fi
-
-        if ! which snap; then
-          echo "::error::This action requires snapd"
-          exit 1
-        fi
-
-    # This action is necessary as a workaround for https://github.com/actions/runner/issues/895.
-    # Since contexts cannot be used in the `uses:` key, we can't guarantee that this action will
-    # use the same branch of craft-actions to call other craft-actions workflows without just
-    # making our own local copy of the repository. See https://github.com/canonical/craft-actions/pull/45#discussion_r2586507869
-    # for a full explanation.
-    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-      env:
-        GITHUB_REF: ${{ github.action_ref }}
-      with:
-        repository: 'canonical/craft-actions'
-        ref: ${{ env.GITHUB_REF }}
-        path: _tmp_craft-actions
-        sparse-checkout: |
-          _common/
-
-    - uses: canonical/setup-lxd@da2ac84e727dc534215fd14cd088b9209d65893b # main as of 6-4-26
-      with:
-        channel: ${{ inputs.lxd-channel }}
-
-    - shell: bash
-      name: Install Snapcraft
-      id: install
-      run: |
-        if [ -x /snap/bin/snapcraft ]; then
-          ACTION=refresh
-        else
-          ACTION=install
-        fi
-
-        if [ -n "${{ inputs.revision }}" ]; then
-          echo "::notice::Installing Snapcraft revision \"${{ inputs.revision }}\""
-          sudo snap $ACTION --revision=${{ inputs.revision }} --classic snapcraft
-        else
-          echo "::notice::Installing Snapcraft from channel \"${{inputs.channel}}\""
-          sudo snap $ACTION --channel=${{ inputs.channel }} --classic snapcraft
-        fi
-
-    - uses: ./_tmp_craft-actions/_common/get-snap-revision
-      name: Get Snapcraft revision
-      id: snapcraft-revision
-      with:
-        snap: 'snapcraft'
-
-    - uses: ./_tmp_craft-actions/_common/get-snap-revision
-      name: Get LXD revision
-      id: lxd-revision
-      with:
-        snap: 'lxd'
-
-    - shell: bash
-      run: |
-        rm -rf ./_tmp_craft-actions
-
+  using: 'node24'
+  main: 'dist/index.js'
 branding:
   icon: package
   color: orange

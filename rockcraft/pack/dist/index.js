@@ -306,7 +306,7 @@ var require_tunnel = __commonJS({
     "use strict";
     var net = __require("net");
     var tls = __require("tls");
-    var http = __require("http");
+    var http2 = __require("http");
     var https = __require("https");
     var events = __require("events");
     var assert = __require("assert");
@@ -317,12 +317,12 @@ var require_tunnel = __commonJS({
     exports.httpsOverHttps = httpsOverHttps;
     function httpOverHttp(options) {
       var agent = new TunnelingAgent(options);
-      agent.request = http.request;
+      agent.request = http2.request;
       return agent;
     }
     function httpsOverHttp(options) {
       var agent = new TunnelingAgent(options);
-      agent.request = http.request;
+      agent.request = http2.request;
       agent.createSocket = createSecureSocket;
       agent.defaultPort = 443;
       return agent;
@@ -343,7 +343,7 @@ var require_tunnel = __commonJS({
       var self = this;
       self.options = options || {};
       self.proxyOptions = self.options.proxy || {};
-      self.maxSockets = self.options.maxSockets || http.Agent.defaultMaxSockets;
+      self.maxSockets = self.options.maxSockets || http2.Agent.defaultMaxSockets;
       self.requests = [];
       self.sockets = [];
       self.on("free", function onFree(socket, host, port, localAddress) {
@@ -6874,7 +6874,7 @@ var require_client = __commonJS({
     "use strict";
     var assert = __require("assert");
     var net = __require("net");
-    var http = __require("http");
+    var http2 = __require("http");
     var { pipeline } = __require("stream");
     var util = require_util();
     var timers = require_timers();
@@ -6947,11 +6947,11 @@ var require_client = __commonJS({
       kHTTP2CopyHeaders,
       kHTTP1BuildRequest
     } = require_symbols();
-    var http2;
+    var http22;
     try {
-      http2 = __require("http2");
+      http22 = __require("http2");
     } catch {
-      http2 = { constants: {} };
+      http22 = { constants: {} };
     }
     var {
       constants: {
@@ -6963,7 +6963,7 @@ var require_client = __commonJS({
         HTTP2_HEADER_EXPECT,
         HTTP2_HEADER_STATUS
       }
-    } = http2;
+    } = http22;
     var h2ExperimentalWarned = false;
     var FastBuffer = Buffer[Symbol.species];
     var kClosedResolve = /* @__PURE__ */ Symbol("kClosedResolve");
@@ -7096,7 +7096,7 @@ var require_client = __commonJS({
         this[kConnector] = connect2;
         this[kSocket] = null;
         this[kPipelining] = pipelining != null ? pipelining : 1;
-        this[kMaxHeadersSize] = maxHeaderSize || http.maxHeaderSize;
+        this[kMaxHeadersSize] = maxHeaderSize || http2.maxHeaderSize;
         this[kKeepAliveDefaultTimeout] = keepAliveTimeout == null ? 4e3 : keepAliveTimeout;
         this[kKeepAliveMaxTimeout] = keepAliveMaxTimeout == null ? 6e5 : keepAliveMaxTimeout;
         this[kKeepAliveTimeoutThreshold] = keepAliveTimeoutThreshold == null ? 1e3 : keepAliveTimeoutThreshold;
@@ -7804,7 +7804,7 @@ var require_client = __commonJS({
               code: "UNDICI-H2"
             });
           }
-          const session = http2.connect(client[kUrl], {
+          const session = http22.connect(client[kUrl], {
             createConnection: () => socket,
             peerMaxConcurrentStreams: client[kHTTP2SessionState].maxConcurrentStreams
           });
@@ -17354,7 +17354,7 @@ var require_lib = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.HttpClient = exports.isHttps = exports.HttpClientResponse = exports.HttpClientError = exports.getProxyUrl = exports.MediaTypes = exports.Headers = exports.HttpCodes = void 0;
-    var http = __importStar(__require("http"));
+    var http2 = __importStar(__require("http"));
     var https = __importStar(__require("https"));
     var pm = __importStar(require_proxy());
     var tunnel = __importStar(require_tunnel2());
@@ -17591,12 +17591,12 @@ var require_lib = __commonJS({
             throw new Error("Client has already been disposed.");
           }
           const parsedUrl = new URL(requestUrl);
-          let info3 = this._prepareRequest(verb, parsedUrl, headers);
+          let info2 = this._prepareRequest(verb, parsedUrl, headers);
           const maxTries = this._allowRetries && RetryableHttpVerbs.includes(verb) ? this._maxRetries + 1 : 1;
           let numTries = 0;
           let response;
           do {
-            response = yield this.requestRaw(info3, data);
+            response = yield this.requestRaw(info2, data);
             if (response && response.message && response.message.statusCode === HttpCodes.Unauthorized) {
               let authenticationHandler;
               for (const handler of this.handlers) {
@@ -17606,7 +17606,7 @@ var require_lib = __commonJS({
                 }
               }
               if (authenticationHandler) {
-                return authenticationHandler.handleAuthentication(this, info3, data);
+                return authenticationHandler.handleAuthentication(this, info2, data);
               } else {
                 return response;
               }
@@ -17629,8 +17629,8 @@ var require_lib = __commonJS({
                   }
                 }
               }
-              info3 = this._prepareRequest(verb, parsedRedirectUrl, headers);
-              response = yield this.requestRaw(info3, data);
+              info2 = this._prepareRequest(verb, parsedRedirectUrl, headers);
+              response = yield this.requestRaw(info2, data);
               redirectsRemaining--;
             }
             if (!response.message.statusCode || !HttpResponseRetryCodes.includes(response.message.statusCode)) {
@@ -17659,7 +17659,7 @@ var require_lib = __commonJS({
        * @param info
        * @param data
        */
-      requestRaw(info3, data) {
+      requestRaw(info2, data) {
         return __awaiter(this, void 0, void 0, function* () {
           return new Promise((resolve, reject) => {
             function callbackForResult(err, res) {
@@ -17671,7 +17671,7 @@ var require_lib = __commonJS({
                 resolve(res);
               }
             }
-            this.requestRawWithCallback(info3, data, callbackForResult);
+            this.requestRawWithCallback(info2, data, callbackForResult);
           });
         });
       }
@@ -17681,12 +17681,12 @@ var require_lib = __commonJS({
        * @param data
        * @param onResult
        */
-      requestRawWithCallback(info3, data, onResult) {
+      requestRawWithCallback(info2, data, onResult) {
         if (typeof data === "string") {
-          if (!info3.options.headers) {
-            info3.options.headers = {};
+          if (!info2.options.headers) {
+            info2.options.headers = {};
           }
-          info3.options.headers["Content-Length"] = Buffer.byteLength(data, "utf8");
+          info2.options.headers["Content-Length"] = Buffer.byteLength(data, "utf8");
         }
         let callbackCalled = false;
         function handleResult(err, res) {
@@ -17695,7 +17695,7 @@ var require_lib = __commonJS({
             onResult(err, res);
           }
         }
-        const req = info3.httpModule.request(info3.options, (msg) => {
+        const req = info2.httpModule.request(info2.options, (msg) => {
           const res = new HttpClientResponse(msg);
           handleResult(void 0, res);
         });
@@ -17707,7 +17707,7 @@ var require_lib = __commonJS({
           if (socket) {
             socket.end();
           }
-          handleResult(new Error(`Request timeout: ${info3.options.path}`));
+          handleResult(new Error(`Request timeout: ${info2.options.path}`));
         });
         req.on("error", function(err) {
           handleResult(err);
@@ -17743,27 +17743,27 @@ var require_lib = __commonJS({
         return this._getProxyAgentDispatcher(parsedUrl, proxyUrl);
       }
       _prepareRequest(method, requestUrl, headers) {
-        const info3 = {};
-        info3.parsedUrl = requestUrl;
-        const usingSsl = info3.parsedUrl.protocol === "https:";
-        info3.httpModule = usingSsl ? https : http;
+        const info2 = {};
+        info2.parsedUrl = requestUrl;
+        const usingSsl = info2.parsedUrl.protocol === "https:";
+        info2.httpModule = usingSsl ? https : http2;
         const defaultPort = usingSsl ? 443 : 80;
-        info3.options = {};
-        info3.options.host = info3.parsedUrl.hostname;
-        info3.options.port = info3.parsedUrl.port ? parseInt(info3.parsedUrl.port) : defaultPort;
-        info3.options.path = (info3.parsedUrl.pathname || "") + (info3.parsedUrl.search || "");
-        info3.options.method = method;
-        info3.options.headers = this._mergeHeaders(headers);
+        info2.options = {};
+        info2.options.host = info2.parsedUrl.hostname;
+        info2.options.port = info2.parsedUrl.port ? parseInt(info2.parsedUrl.port) : defaultPort;
+        info2.options.path = (info2.parsedUrl.pathname || "") + (info2.parsedUrl.search || "");
+        info2.options.method = method;
+        info2.options.headers = this._mergeHeaders(headers);
         if (this.userAgent != null) {
-          info3.options.headers["user-agent"] = this.userAgent;
+          info2.options.headers["user-agent"] = this.userAgent;
         }
-        info3.options.agent = this._getAgent(info3.parsedUrl);
+        info2.options.agent = this._getAgent(info2.parsedUrl);
         if (this.handlers) {
           for (const handler of this.handlers) {
-            handler.prepareRequest(info3.options);
+            handler.prepareRequest(info2.options);
           }
         }
-        return info3;
+        return info2;
       }
       _mergeHeaders(headers) {
         if (this.requestOptions && this.requestOptions.headers) {
@@ -17794,7 +17794,7 @@ var require_lib = __commonJS({
         const usingSsl = parsedUrl.protocol === "https:";
         let maxSockets = 100;
         if (this.requestOptions) {
-          maxSockets = this.requestOptions.maxSockets || http.globalAgent.maxSockets;
+          maxSockets = this.requestOptions.maxSockets || http2.globalAgent.maxSockets;
         }
         if (proxyUrl && proxyUrl.hostname) {
           const agentOptions = {
@@ -17816,7 +17816,7 @@ var require_lib = __commonJS({
         }
         if (!agent) {
           const options = { keepAlive: this._keepAlive, maxSockets };
-          agent = usingSsl ? new https.Agent(options) : new http.Agent(options);
+          agent = usingSsl ? new https.Agent(options) : new http2.Agent(options);
           this._agent = agent;
         }
         if (usingSsl && this._ignoreSslError) {
@@ -19684,7 +19684,7 @@ var require_core = __commonJS({
       process.env["PATH"] = `${inputPath}${path2.delimiter}${process.env["PATH"]}`;
     }
     exports.addPath = addPath;
-    function getInput3(name, options) {
+    function getInput4(name, options) {
       const val = process.env[`INPUT_${name.replace(/ /g, "_").toUpperCase()}`] || "";
       if (options && options.required && !val) {
         throw new Error(`Input required and not supplied: ${name}`);
@@ -19694,9 +19694,9 @@ var require_core = __commonJS({
       }
       return val.trim();
     }
-    exports.getInput = getInput3;
+    exports.getInput = getInput4;
     function getMultilineInput(name, options) {
-      const inputs = getInput3(name, options).split("\n").filter((x) => x !== "");
+      const inputs = getInput4(name, options).split("\n").filter((x) => x !== "");
       if (options && options.trimWhitespace === false) {
         return inputs;
       }
@@ -19706,7 +19706,7 @@ var require_core = __commonJS({
     function getBooleanInput(name, options) {
       const trueValue = ["true", "True", "TRUE"];
       const falseValue = ["false", "False", "FALSE"];
-      const val = getInput3(name, options);
+      const val = getInput4(name, options);
       if (trueValue.includes(val))
         return true;
       if (falseValue.includes(val))
@@ -19715,7 +19715,7 @@ var require_core = __commonJS({
 Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
     }
     exports.getBooleanInput = getBooleanInput;
-    function setOutput2(name, value) {
+    function setOutput3(name, value) {
       const filePath = process.env["GITHUB_OUTPUT"] || "";
       if (filePath) {
         return (0, file_command_1.issueFileCommand)("OUTPUT", (0, file_command_1.prepareKeyValueMessage)(name, value));
@@ -19723,16 +19723,16 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
       process.stdout.write(os2.EOL);
       (0, command_1.issueCommand)("set-output", { name }, (0, utils_1.toCommandValue)(value));
     }
-    exports.setOutput = setOutput2;
+    exports.setOutput = setOutput3;
     function setCommandEcho(enabled) {
       (0, command_1.issue)("echo", enabled ? "on" : "off");
     }
     exports.setCommandEcho = setCommandEcho;
-    function setFailed2(message) {
+    function setFailed3(message) {
       process.exitCode = ExitCode.Failure;
       error(message);
     }
-    exports.setFailed = setFailed2;
+    exports.setFailed = setFailed3;
     function isDebug() {
       return process.env["RUNNER_DEBUG"] === "1";
     }
@@ -19753,10 +19753,10 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
       (0, command_1.issueCommand)("notice", (0, utils_1.toCommandProperties)(properties), message instanceof Error ? message.toString() : message);
     }
     exports.notice = notice;
-    function info3(message) {
+    function info2(message) {
       process.stdout.write(message + os2.EOL);
     }
-    exports.info = info3;
+    exports.info = info2;
     function startGroup2(name) {
       (0, command_1.issue)("group", name);
     }
@@ -19822,7 +19822,6 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
 var core4 = __toESM(require_core(), 1);
 
 // ../../common/src/craft-builder.ts
-var core2 = __toESM(require_core(), 1);
 var exec3 = __toESM(require_exec(), 1);
 import * as fs2 from "fs";
 import * as path from "path";
@@ -19979,11 +19978,6 @@ var CraftBuilder = class {
     );
   }
   async pack() {
-    core2.startGroup(`Installing ${this.toolName} plus dependencies`);
-    await ensureSnapd();
-    await ensureLXD("5.21/stable");
-    await ensureCraftTool(this.toolName, this.channel, this.revision);
-    core2.endGroup();
     if (this.pro) {
       await configureProLXD();
     }
@@ -20004,7 +19998,65 @@ var CraftBuilder = class {
 
 // ../../common/src/pack-action.ts
 var core3 = __toESM(require_core(), 1);
-function readBaseInputs(channelInput = "channel") {
+
+// ../../common/src/setup-action.ts
+var core2 = __toESM(require_core(), 1);
+import * as http from "node:http";
+function readBaseInputs() {
+  return {
+    channel: core2.getInput("channel") || "latest/stable",
+    revision: core2.getInput("revision"),
+    lxdChannel: core2.getInput("lxd-channel") || "5.21/stable"
+  };
+}
+async function runSetupAction(toolName) {
+  const options = readBaseInputs();
+  try {
+    core2.startGroup(`Installing ${toolName} and its dependencies`);
+    await ensureSnapd();
+    await ensureLXD(options.lxdChannel);
+    await ensureCraftTool(toolName, options.channel, options.revision);
+    await setOutputs(toolName);
+  } catch (error) {
+    core2.setFailed(error?.message);
+  } finally {
+    core2.endGroup();
+  }
+}
+async function setOutputs(toolName) {
+  core2.setOutput("lxd-revision", await getSnapRevision("lxd"));
+  core2.setOutput(`${toolName}-revision`, await getSnapRevision(toolName));
+}
+async function getSnapRevision(snap) {
+  return new Promise((resolve, reject) => {
+    const req = http.get(
+      { socketPath: "/run/snapd.socket", path: `/v2/snaps/${snap}` },
+      (res) => {
+        const chunks = [];
+        res.on(
+          "error",
+          () => reject(new Error("Unable to communicate with SnapD"))
+        );
+        res.on("data", (chunk) => chunks.push(chunk));
+        res.on("end", () => {
+          try {
+            const body = JSON.parse(Buffer.concat(chunks).toString());
+            resolve(body.result.revision);
+          } catch {
+            reject(new Error("Unable to communicate with SnapD"));
+          }
+        });
+      }
+    );
+    req.on(
+      "error",
+      () => reject(new Error("Unable to communicate with SnapD"))
+    );
+  });
+}
+
+// ../../common/src/pack-action.ts
+function readBaseInputs2(channelInput = "channel") {
   return {
     projectRoot: core3.getInput("path"),
     channel: core3.getInput(channelInput) || "stable",
@@ -20016,11 +20068,7 @@ function readBaseInputs(channelInput = "channel") {
 }
 async function runPackAction(builder, outputName) {
   try {
-    if (!builder.revision) {
-      core3.info(
-        `${builder.toolName} revision not provided. Installing from ${builder.channel}`
-      );
-    }
+    await runSetupAction(builder.toolName);
     await builder.pack();
     const artifacts = await builder.findArtifacts(builder.artifactType);
     if (artifacts.length > 1) {
@@ -20053,7 +20101,7 @@ var RockcraftBuilder = class extends CraftBuilder {
 };
 if (import.meta.url === `file://${process.argv[1]}`) {
   const builder = new RockcraftBuilder({
-    ...readBaseInputs("rockcraft-channel"),
+    ...readBaseInputs2(),
     ignore: core4.getInput("ignore")
   });
   void runPackAction(builder, "rock");

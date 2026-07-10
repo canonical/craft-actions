@@ -239,6 +239,15 @@ importers:
         specifier: ^4.1.9
         version: 4.1.9(@types/node@26.1.0)(vite@8.1.0(@types/node@26.1.0)(esbuild@0.28.1))
 
+  charmcraft/setup:
+    dependencies:
+      '@actions/core':
+        specifier: ^1.10.1
+        version: 1.11.1
+      '@craft-actions/common':
+        specifier: workspace:*
+        version: link:../../common
+
   common:
     dependencies:
       '@actions/core':
@@ -258,6 +267,15 @@ importers:
         version: link:../../common
 
   rockcraft/setup:
+    dependencies:
+      '@actions/core':
+        specifier: ^1.10.1
+        version: 1.11.1
+      '@craft-actions/common':
+        specifier: workspace:*
+        version: link:../../common
+
+  snapcraft/setup:
     dependencies:
       '@actions/core':
         specifier: ^1.10.1

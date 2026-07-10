@@ -1,7 +1,9 @@
 packages:
   - "common"
+  - "charmcraft/setup"
   - "rockcraft/pack"
   - "rockcraft/setup"
+  - "snapcraft/setup"
 
 allowBuilds:
   esbuild: true

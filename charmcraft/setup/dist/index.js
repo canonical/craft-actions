@@ -19972,7 +19972,7 @@ async function getSnapRevision(snap) {
 
 // src/index.ts
 if (import.meta.url === `file://${process.argv[1]}`) {
-  void runSetupAction("rockcraft");
+  void runSetupAction("charmcraft");
 }
 /*! Bundled license information:
 

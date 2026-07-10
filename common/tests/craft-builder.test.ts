@@ -90,24 +90,40 @@ test("CraftBuilder.pack passes revision to ensureCraftTool", async () => {
   expect(ensureCraftTool).toHaveBeenCalledWith("test-tool", "stable", "42");
 });
 
-test("CraftBuilder.pack calls ensureLXD without pro when pro is not set", async () => {
+test("CraftBuilder.pack calls ensureLXD with the hardcoded channel", async () => {
   expect.assertions(1);
 
   const { ensureLXD } = mockSetup();
 
   await makeBuilder().pack();
 
-  expect(ensureLXD).toHaveBeenCalledWith(false);
+  expect(ensureLXD).toHaveBeenCalledWith("5.21/stable");
 });
 
-test("CraftBuilder.pack calls ensureLXD with pro when pro is set", async () => {
+test("CraftBuilder.pack calls configureProLXD when pro is set", async () => {
   expect.assertions(1);
 
-  const { ensureLXD } = mockSetup();
+  mockSetup();
+  const configureProLXD = vi
+    .spyOn(tools, "configureProLXD")
+    .mockImplementation(async (): Promise<void> => {});
 
   await makeBuilder({ pro: "esm-apps" }).pack();
 
-  expect(ensureLXD).toHaveBeenCalledWith(true);
+  expect(configureProLXD).toHaveBeenCalled();
+});
+
+test("CraftBuilder.pack does not call configureProLXD when pro is not set", async () => {
+  expect.assertions(1);
+
+  mockSetup();
+  const configureProLXD = vi
+    .spyOn(tools, "configureProLXD")
+    .mockImplementation(async (): Promise<void> => {});
+
+  await makeBuilder().pack();
+
+  expect(configureProLXD).not.toHaveBeenCalled();
 });
 
 test("CraftBuilder.pack executes the correct base command", async () => {

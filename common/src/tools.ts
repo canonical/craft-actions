@@ -77,7 +77,7 @@ export async function ensureLXDNetwork(): Promise<void> {
   await exec.exec("sudo", ["iptables", "-P", "FORWARD", "ACCEPT"]);
 }
 
-export async function ensureLXD(configurePro: boolean): Promise<void> {
+export async function ensureLXD(lxdChannel: string): Promise<void> {
   const haveDebLXD = await haveExecutable("/usr/bin/lxd");
   if (haveDebLXD) {
     core.info("Removing legacy .deb packaged LXD...");
@@ -94,8 +94,7 @@ export async function ensureLXD(configurePro: boolean): Promise<void> {
     shellUser(),
   ]);
 
-  // Install a specific version of LXD that we know works well with Rockcraft
-  // (latest LTS release, tracked in 5.21/stable)
+  // Install the requested version of LXD
   const haveSnapLXD = await haveExecutable("/snap/bin/lxd");
   if (!haveSnapLXD) {
     core.info("Installing LXD...");
@@ -104,7 +103,7 @@ export async function ensureLXD(configurePro: boolean): Promise<void> {
       "install",
       "lxd",
       "--channel",
-      "5.21/stable",
+      lxdChannel,
       "--cohort",
       "+",
     ]);
@@ -112,17 +111,18 @@ export async function ensureLXD(configurePro: boolean): Promise<void> {
 
   core.info("Initialising LXD...");
   await exec.exec("sudo", ["lxd", "init", "--auto"]);
-  if (configurePro) {
-    core.info("Configuring LXD for pro rockcraft builds...");
-    await exec.exec("sudo", [
-      "pro",
-      "config",
-      "set",
-      "lxd_guest_attach=available",
-    ]);
-    await exec.exec("sudo", ["snap", "restart", "lxd"]);
-  }
   await ensureLXDNetwork();
+}
+
+export async function configureProLXD(): Promise<void> {
+  core.info("Configuring LXD for pro builds");
+  await exec.exec("sudo", [
+    "pro",
+    "config",
+    "set",
+    "lxd_guest_attach=available",
+  ]);
+  await exec.exec("sudo", ["snap", "restart", "lxd"]);
 }
 
 export async function ensureCraftTool(

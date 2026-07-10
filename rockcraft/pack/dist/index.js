@@ -19882,7 +19882,7 @@ async function ensureLXDNetwork() {
   );
   await exec.exec("sudo", ["iptables", "-P", "FORWARD", "ACCEPT"]);
 }
-async function ensureLXD(configurePro) {
+async function ensureLXD(lxdChannel) {
   const haveDebLXD = await haveExecutable("/usr/bin/lxd");
   if (haveDebLXD) {
     core.info("Removing legacy .deb packaged LXD...");
@@ -19905,24 +19905,24 @@ async function ensureLXD(configurePro) {
       "install",
       "lxd",
       "--channel",
-      "5.21/stable",
+      lxdChannel,
       "--cohort",
       "+"
     ]);
   }
   core.info("Initialising LXD...");
   await exec.exec("sudo", ["lxd", "init", "--auto"]);
-  if (configurePro) {
-    core.info("Configuring LXD for pro rockcraft builds...");
-    await exec.exec("sudo", [
-      "pro",
-      "config",
-      "set",
-      "lxd_guest_attach=available"
-    ]);
-    await exec.exec("sudo", ["snap", "restart", "lxd"]);
-  }
   await ensureLXDNetwork();
+}
+async function configureProLXD() {
+  core.info("Configuring LXD for pro builds");
+  await exec.exec("sudo", [
+    "pro",
+    "config",
+    "set",
+    "lxd_guest_attach=available"
+  ]);
+  await exec.exec("sudo", ["snap", "restart", "lxd"]);
 }
 async function ensureCraftTool(name, channel, revision) {
   const haveSnap = await haveExecutable(`/snap/bin/${name}`);
@@ -19981,9 +19981,12 @@ var CraftBuilder = class {
   async pack() {
     core2.startGroup(`Installing ${this.toolName} plus dependencies`);
     await ensureSnapd();
-    await ensureLXD(!!this.pro);
+    await ensureLXD("5.21/stable");
     await ensureCraftTool(this.toolName, this.channel, this.revision);
     core2.endGroup();
+    if (this.pro) {
+      await configureProLXD();
+    }
     await this.doPack(this.runTests ? "test" : "pack");
   }
   async #readdir(dir) {

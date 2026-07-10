@@ -103,7 +103,7 @@ test("ensureLXD installs the snap version of LXD if needed", async () => {
     .spyOn(exec, "exec")
     .mockImplementation(async (): Promise<number> => 0);
 
-  await tools.ensureLXD(false);
+  await tools.ensureLXD("5.21/stable");
 
   expect(execMock).toHaveBeenNthCalledWith(1, "sudo", [
     "groupadd",
@@ -135,56 +135,47 @@ test("ensureLXD installs the snap version of LXD if needed", async () => {
   ]);
 });
 
-test("ensureLXD configures lxd_guest_attach if needed", async () => {
-  expect.assertions(7);
+test("ensureLXD installs from the requested channel", async () => {
+  expect.assertions(1);
 
-  const accessMock = vi
-    .spyOn(fs.promises, "access")
-    .mockImplementation(async (): Promise<void> => {
+  vi.spyOn(fs.promises, "access").mockImplementation(
+    async (): Promise<void> => {
       throw new Error("not found");
-    });
+    },
+  );
   const execMock = vi
     .spyOn(exec, "exec")
     .mockImplementation(async (): Promise<number> => 0);
 
-  await tools.ensureLXD(true);
+  await tools.ensureLXD("latest/edge");
 
-  expect(execMock).toHaveBeenNthCalledWith(1, "sudo", [
-    "groupadd",
-    "--force",
-    "--system",
-    "lxd",
-  ]);
-  expect(execMock).toHaveBeenNthCalledWith(2, "sudo", [
-    "usermod",
-    "--append",
-    "--groups",
-    "lxd",
-    os.userInfo().username,
-  ]);
-  expect(accessMock).toHaveBeenCalled();
-  expect(execMock).toHaveBeenNthCalledWith(3, "sudo", [
+  expect(execMock).toHaveBeenCalledWith("sudo", [
     "snap",
     "install",
     "lxd",
     "--channel",
-    "5.21/stable",
+    "latest/edge",
     "--cohort",
     "+",
   ]);
-  expect(execMock).toHaveBeenNthCalledWith(4, "sudo", [
-    "lxd",
-    "init",
-    "--auto",
-  ]);
+});
 
-  expect(execMock).toHaveBeenNthCalledWith(5, "sudo", [
+test("configureProLXD configures lxd_guest_attach", async () => {
+  expect.assertions(2);
+
+  const execMock = vi
+    .spyOn(exec, "exec")
+    .mockImplementation(async (): Promise<number> => 0);
+
+  await tools.configureProLXD();
+
+  expect(execMock).toHaveBeenNthCalledWith(1, "sudo", [
     "pro",
     "config",
     "set",
     "lxd_guest_attach=available",
   ]);
-  expect(execMock).toHaveBeenNthCalledWith(6, "sudo", [
+  expect(execMock).toHaveBeenNthCalledWith(2, "sudo", [
     "snap",
     "restart",
     "lxd",
@@ -203,7 +194,7 @@ test("ensureLXD removes the apt version of LXD", async () => {
     .spyOn(exec, "exec")
     .mockImplementation(async (): Promise<number> => 0);
 
-  await tools.ensureLXD(false);
+  await tools.ensureLXD("5.21/stable");
 
   expect(accessMock).toHaveBeenCalled();
   expect(execMock).toHaveBeenNthCalledWith(1, "sudo", [
@@ -230,7 +221,7 @@ test("ensureLXD is not refreshed if LXD is installed", async () => {
     .spyOn(exec, "exec")
     .mockImplementation(async (): Promise<number> => 0);
 
-  await tools.ensureLXD(false);
+  await tools.ensureLXD("5.21/stable");
 
   expect(accessMock).toHaveBeenCalled();
   expect(execMock).not.toHaveBeenNthCalledWith(3, "sudo", [
@@ -259,7 +250,7 @@ test('ensureLXD still calls "lxd init" if LXD is installed', async () => {
     .spyOn(exec, "exec")
     .mockImplementation(async (): Promise<number> => 0);
 
-  await tools.ensureLXD(false);
+  await tools.ensureLXD("5.21/stable");
 
   expect(accessMock).toHaveBeenCalled();
   expect(execMock).toHaveBeenNthCalledWith(1, "sudo", [

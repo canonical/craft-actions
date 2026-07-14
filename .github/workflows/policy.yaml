@@ -10,13 +10,17 @@ on:
 jobs:
   policy:
     uses: canonical/starflow/.github/workflows/policy.yaml@main
-  python-scans:
-    name: Security scan
-    uses: canonical/starflow/.github/workflows/scan-python.yaml@main
-    with:
-      osv-extra-args: "--config=osv-scanner.toml"
-      osv-exclude-paths: |
-        docs
-      uv-export-no-groups: |
-        docs
-        docs-sphinx-stack
+  osv-scanner:
+    name: Security scan / OSV-scanner
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - name: Install OSV scanner
+        run: sudo snap install osv-scanner
+      - name: Scan source
+        run: |
+          osv-scanner scan --recursive --allow-no-lockfiles \
+            --config=osv-scanner.toml \
+            --experimental-exclude docs \
+            .

@@ -19887,15 +19887,6 @@ async function ensureLXD(lxdChannel) {
     core.info("Removing legacy .deb packaged LXD...");
     await exec.exec("sudo", ["apt-get", "remove", "-qy", "lxd", "lxd-client"]);
   }
-  core.info(`Ensuring ${shellUser()} is in the lxd group...`);
-  await exec.exec("sudo", ["groupadd", "--force", "--system", "lxd"]);
-  await exec.exec("sudo", [
-    "usermod",
-    "--append",
-    "--groups",
-    "lxd",
-    shellUser()
-  ]);
   const haveSnapLXD = await haveExecutable("/snap/bin/lxd");
   if (!haveSnapLXD) {
     core.info("Installing LXD...");
@@ -19909,6 +19900,8 @@ async function ensureLXD(lxdChannel) {
       "+"
     ]);
   }
+  core.info("Setting daemon group on LXD snap to adm...");
+  await exec.exec("sudo", ["snap", "set", "lxd", "daemon.group=adm"]);
   const isInitialized = await exec.exec("sudo", ["lxc", "storage", "show", "default"], {
     ignoreReturnCode: true,
     silent: true

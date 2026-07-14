@@ -1,6 +1,5 @@
 import { vi, afterEach, test, expect } from "vitest";
 import * as fs from "fs";
-import * as os from "os";
 import * as core from "@actions/core";
 import * as exec from "@actions/exec";
 import * as tools from "../src/tools.ts";
@@ -92,7 +91,7 @@ test("ensureSnapd fixes permissions on the root directory", async () => {
 });
 
 test("ensureLXD installs the snap version of LXD if needed", async () => {
-  expect.assertions(5);
+  expect.assertions(4);
 
   const accessMock = vi
     .spyOn(fs.promises, "access")
@@ -110,21 +109,8 @@ test("ensureLXD installs the snap version of LXD if needed", async () => {
 
   await tools.ensureLXD("5.21/stable");
 
-  expect(execMock).toHaveBeenNthCalledWith(1, "sudo", [
-    "groupadd",
-    "--force",
-    "--system",
-    "lxd",
-  ]);
-  expect(execMock).toHaveBeenNthCalledWith(2, "sudo", [
-    "usermod",
-    "--append",
-    "--groups",
-    "lxd",
-    os.userInfo().username,
-  ]);
   expect(accessMock).toHaveBeenCalled();
-  expect(execMock).toHaveBeenNthCalledWith(3, "sudo", [
+  expect(execMock).toHaveBeenNthCalledWith(1, "sudo", [
     "snap",
     "install",
     "lxd",
@@ -133,7 +119,13 @@ test("ensureLXD installs the snap version of LXD if needed", async () => {
     "--cohort",
     "+",
   ]);
-  expect(execMock).toHaveBeenNthCalledWith(5, "sudo", [
+  expect(execMock).toHaveBeenNthCalledWith(2, "sudo", [
+    "snap",
+    "set",
+    "lxd",
+    "daemon.group=adm",
+  ]);
+  expect(execMock).toHaveBeenNthCalledWith(4, "sudo", [
     "lxd",
     "init",
     "--auto",
@@ -241,7 +233,7 @@ test("ensureLXD is not refreshed if LXD is installed", async () => {
 });
 
 test('ensureLXD still calls "lxd init" if LXD is installed', async () => {
-  expect.assertions(4);
+  expect.assertions(3);
 
   const accessMock = vi
     .spyOn(fs.promises, "access")
@@ -264,19 +256,12 @@ test('ensureLXD still calls "lxd init" if LXD is installed', async () => {
 
   expect(accessMock).toHaveBeenCalled();
   expect(execMock).toHaveBeenNthCalledWith(1, "sudo", [
-    "groupadd",
-    "--force",
-    "--system",
+    "snap",
+    "set",
     "lxd",
+    "daemon.group=adm",
   ]);
-  expect(execMock).toHaveBeenNthCalledWith(2, "sudo", [
-    "usermod",
-    "--append",
-    "--groups",
-    "lxd",
-    os.userInfo().username,
-  ]);
-  expect(execMock).toHaveBeenNthCalledWith(4, "sudo", [
+  expect(execMock).toHaveBeenNthCalledWith(3, "sudo", [
     "lxd",
     "init",
     "--auto",

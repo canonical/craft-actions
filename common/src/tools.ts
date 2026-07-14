@@ -84,16 +84,6 @@ export async function ensureLXD(lxdChannel: string): Promise<void> {
     await exec.exec("sudo", ["apt-get", "remove", "-qy", "lxd", "lxd-client"]);
   }
 
-  core.info(`Ensuring ${shellUser()} is in the lxd group...`);
-  await exec.exec("sudo", ["groupadd", "--force", "--system", "lxd"]);
-  await exec.exec("sudo", [
-    "usermod",
-    "--append",
-    "--groups",
-    "lxd",
-    shellUser(),
-  ]);
-
   // Install the requested version of LXD
   const haveSnapLXD = await haveExecutable("/snap/bin/lxd");
   if (!haveSnapLXD) {
@@ -108,6 +98,11 @@ export async function ensureLXD(lxdChannel: string): Promise<void> {
       "+",
     ]);
   }
+
+  // `usermod` would require a new user session to take effect, but the runner
+  // user is already a member of "adm".
+  core.info("Setting daemon group on LXD snap to adm...");
+  await exec.exec("sudo", ["snap", "set", "lxd", "daemon.group=adm"]);
 
   // Don't double-init LXD. Everything else in setup is reasonably idempotent,
   // but `lxd init` does extra work.

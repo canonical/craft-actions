@@ -10,6 +10,12 @@
     "skipLibCheck": true,
     "types": ["node"]
   },
-  "include": ["charmcraft/setup/**/*.ts", "common/**/*.ts", "rockcraft/pack/**/*.ts", "rockcraft/setup/**/*.ts", "snapcraft/setup/**/*.ts"],
+  "include": [
+    "charmcraft/setup/**/*.ts",
+    "common/**/*.ts",
+    "imagecraft/setup/**/*.ts",
+    "rockcraft/pack/**/*.ts",
+    "rockcraft/setup/**/*.ts",
+    "snapcraft/setup/**/*.ts"],
   "exclude": ["**/dist/**"]
 }

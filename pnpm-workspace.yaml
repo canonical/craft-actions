@@ -1,6 +1,7 @@
 packages:
   - "common"
   - "charmcraft/setup"
+  - "imagecraft/setup"
   - "rockcraft/pack"
   - "rockcraft/setup"
   - "snapcraft/setup"

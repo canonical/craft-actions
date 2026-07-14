@@ -20046,6 +20046,7 @@ async function getSnapRevision(snap) {
               reject(
                 new Error(`Unable to locate installation of snap ${snap}.`)
               );
+              return;
             }
             resolve(rev);
           } catch {

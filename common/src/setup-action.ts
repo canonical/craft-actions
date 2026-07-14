@@ -56,6 +56,7 @@ export async function getSnapRevision(snap: string): Promise<string> {
               reject(
                 new Error(`Unable to locate installation of snap ${snap}.`),
               );
+              return;
             }
             resolve(rev);
           } catch {

@@ -35,7 +35,7 @@ export class RockcraftBuilder extends CraftBuilder {
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   const builder = new RockcraftBuilder({
-    ...readBaseInputs("rockcraft-channel"),
+    ...readBaseInputs(),
     ignore: core.getInput("ignore"),
   });
 

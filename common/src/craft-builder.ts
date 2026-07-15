@@ -1,4 +1,3 @@
-import * as core from "@actions/core";
 import * as exec from "@actions/exec";
 import * as fs from "fs";
 import * as path from "path";
@@ -64,11 +63,9 @@ export abstract class CraftBuilder {
   }
 
   async pack(): Promise<void> {
-    core.startGroup(`Installing ${this.toolName} plus dependencies`);
-    await tools.ensureSnapd();
-    await tools.ensureLXD(!!this.pro);
-    await tools.ensureCraftTool(this.toolName, this.channel, this.revision);
-    core.endGroup();
+    if (this.pro) {
+      await tools.configureProLXD();
+    }
     await this.doPack(this.runTests ? "test" : "pack");
   }
 

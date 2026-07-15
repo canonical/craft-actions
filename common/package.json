@@ -9,6 +9,7 @@
   "exports": {
     "./craft-builder.ts": "./src/craft-builder.ts",
     "./pack-action.ts": "./src/pack-action.ts",
+    "./setup-action.ts": "./src/setup-action.ts",
     "./tools.ts": "./src/tools.ts"
   },
   "dependencies": {

@@ -77,25 +77,14 @@ export async function ensureLXDNetwork(): Promise<void> {
   await exec.exec("sudo", ["iptables", "-P", "FORWARD", "ACCEPT"]);
 }
 
-export async function ensureLXD(configurePro: boolean): Promise<void> {
+export async function ensureLXD(lxdChannel: string): Promise<void> {
   const haveDebLXD = await haveExecutable("/usr/bin/lxd");
   if (haveDebLXD) {
     core.info("Removing legacy .deb packaged LXD...");
     await exec.exec("sudo", ["apt-get", "remove", "-qy", "lxd", "lxd-client"]);
   }
 
-  core.info(`Ensuring ${shellUser()} is in the lxd group...`);
-  await exec.exec("sudo", ["groupadd", "--force", "--system", "lxd"]);
-  await exec.exec("sudo", [
-    "usermod",
-    "--append",
-    "--groups",
-    "lxd",
-    shellUser(),
-  ]);
-
-  // Install a specific version of LXD that we know works well with Rockcraft
-  // (latest LTS release, tracked in 5.21/stable)
+  // Install the requested version of LXD
   const haveSnapLXD = await haveExecutable("/snap/bin/lxd");
   if (!haveSnapLXD) {
     core.info("Installing LXD...");
@@ -104,25 +93,40 @@ export async function ensureLXD(configurePro: boolean): Promise<void> {
       "install",
       "lxd",
       "--channel",
-      "5.21/stable",
+      lxdChannel,
       "--cohort",
       "+",
     ]);
   }
 
-  core.info("Initialising LXD...");
-  await exec.exec("sudo", ["lxd", "init", "--auto"]);
-  if (configurePro) {
-    core.info("Configuring LXD for pro rockcraft builds...");
-    await exec.exec("sudo", [
-      "pro",
-      "config",
-      "set",
-      "lxd_guest_attach=available",
-    ]);
-    await exec.exec("sudo", ["snap", "restart", "lxd"]);
+  // `usermod` would require a new user session to take effect, but the runner
+  // user is already a member of "adm".
+  core.info("Setting daemon group on LXD snap to adm...");
+  await exec.exec("sudo", ["snap", "set", "lxd", "daemon.group=adm"]);
+
+  // Don't double-init LXD. Everything else in setup is reasonably idempotent,
+  // but `lxd init` does extra work.
+  const isInitialized =
+    (await exec.exec("sudo", ["lxc", "storage", "show", "default"], {
+      ignoreReturnCode: true,
+      silent: true,
+    })) === 0;
+  if (!isInitialized) {
+    core.info("Initialising LXD...");
+    await exec.exec("sudo", ["lxd", "init", "--auto"]);
   }
   await ensureLXDNetwork();
+}
+
+export async function configureProLXD(): Promise<void> {
+  core.info("Configuring LXD for pro builds");
+  await exec.exec("sudo", [
+    "pro",
+    "config",
+    "set",
+    "lxd_guest_attach=available",
+  ]);
+  await exec.exec("sudo", ["snap", "restart", "lxd"]);
 }
 
 export async function ensureCraftTool(

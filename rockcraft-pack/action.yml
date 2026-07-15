@@ -80,7 +80,7 @@ runs:
       with:
         path: ${{ inputs.path }}
         verbosity: ${{ inputs.verbosity }}
-        rockcraft-channel: ${{ inputs.rockcraft-channel }}
+        channel: ${{ inputs.rockcraft-channel }}
         revision: ${{ inputs.revision }}
         test: ${{ inputs.test }}
         pro: ${{ inputs.pro }}

@@ -65,7 +65,7 @@ runs:
     # use the same branch of craft-actions to call other craft-actions workflows without just
     # making our own local copy of the repository. See https://github.com/canonical/craft-actions/pull/45#discussion_r2586507869
     # for a full explanation.
-    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       env:
         GITHUB_REF: ${{ github.action_ref }}
       with:

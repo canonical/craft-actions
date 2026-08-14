@@ -1,4 +1,3 @@
-import * as exec from "@actions/exec";
 import * as fs from "fs";
 import * as path from "path";
 import * as tools from "./tools.ts";
@@ -48,9 +47,9 @@ export abstract class CraftBuilder {
 
   protected async doPack(subcommand: "pack" | "test"): Promise<void> {
     const packArgs = await this.buildPackArgs();
-    await exec.exec(
-      "sudo",
+    await tools.runCommand(
       [
+        "sudo",
         "--preserve-env",
         "--user",
         tools.shellUser(),

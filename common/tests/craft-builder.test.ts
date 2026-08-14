@@ -2,7 +2,6 @@ import { vi, afterEach, test, expect } from "vitest";
 import * as os from "os";
 import * as path from "path";
 import * as fs from "fs";
-import * as exec from "@actions/exec";
 import { CraftBuilder, CraftBuilderOptions } from "../src/craft-builder.ts";
 import * as tools from "../src/tools.ts";
 
@@ -32,7 +31,7 @@ function mockSetup(user = "ubuntu") {
       .spyOn(tools, "shellUser")
       .mockImplementation((): string => user),
     execMock: vi
-      .spyOn(exec, "exec")
+      .spyOn(tools, "runCommand")
       .mockImplementation(async (): Promise<number> => 0),
   };
 }
@@ -80,8 +79,7 @@ test("CraftBuilder.pack executes the correct base command", async () => {
   await makeBuilder({ projectRoot: "my-dir" }).pack();
 
   expect(execMock).toHaveBeenCalledWith(
-    "sudo",
-    ["--preserve-env", "--user", "ubuntu", "test-tool", "pack"],
+    ["sudo", "--preserve-env", "--user", "ubuntu", "test-tool", "pack"],
     { cwd: "my-dir" },
   );
 });
@@ -94,8 +92,7 @@ test("CraftBuilder.pack executes test subcommand when runTests is true", async (
   await makeBuilder({ projectRoot: "my-dir", runTests: true }).pack();
 
   expect(execMock).toHaveBeenCalledWith(
-    "sudo",
-    ["--preserve-env", "--user", "ubuntu", "test-tool", "test"],
+    ["sudo", "--preserve-env", "--user", "ubuntu", "test-tool", "test"],
     { cwd: "my-dir" },
   );
 });
@@ -108,7 +105,6 @@ test("CraftBuilder.pack includes --verbosity flag when verbosity is set", async 
   await makeBuilder({ verbosity: "debug" }).pack();
 
   expect(execMock).toHaveBeenCalledWith(
-    "sudo",
     expect.arrayContaining(["--verbosity", "debug"]),
     expect.anything(),
   );
@@ -122,7 +118,6 @@ test("CraftBuilder.pack omits --verbosity flag when verbosity is empty", async (
   await makeBuilder({ verbosity: "" }).pack();
 
   expect(execMock).toHaveBeenCalledWith(
-    "sudo",
     expect.not.arrayContaining(["--verbosity"]),
     expect.anything(),
   );
@@ -136,7 +131,6 @@ test("CraftBuilder.pack includes --pro flag when pro is set", async () => {
   await makeBuilder({ pro: "esm-apps,esm-infra" }).pack();
 
   expect(execMock).toHaveBeenCalledWith(
-    "sudo",
     expect.arrayContaining(["--pro=esm-apps,esm-infra"]),
     expect.anything(),
   );

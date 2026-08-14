@@ -1,11 +1,11 @@
 import { vi, afterEach, test, expect } from "vitest";
 import * as fs from "fs";
 import * as core from "@actions/core";
-import * as exec from "@actions/exec";
 import * as tools from "../src/tools.ts";
 
 afterEach(() => {
   vi.restoreAllMocks();
+  vi.resetAllMocks();
 });
 
 test("ensureSnapd installs snapd if needed", async () => {
@@ -22,7 +22,7 @@ test("ensureSnapd installs snapd if needed", async () => {
       return { uid: 0, gid: 0 } as unknown as fs.Stats;
     });
   const execMock = vi
-    .spyOn(exec, "exec")
+    .spyOn(tools, "runCommand")
     .mockImplementation(async (): Promise<number> => {
       return 0;
     });
@@ -31,12 +31,14 @@ test("ensureSnapd installs snapd if needed", async () => {
 
   expect(accessMock).toHaveBeenCalled();
   expect(statMock).toHaveBeenCalled();
-  expect(execMock).toHaveBeenNthCalledWith(1, "sudo", [
+  expect(execMock).toHaveBeenNthCalledWith(1, [
+    "sudo",
     "apt-get",
     "update",
     "-q",
   ]);
-  expect(execMock).toHaveBeenNthCalledWith(2, "sudo", [
+  expect(execMock).toHaveBeenNthCalledWith(2, [
+    "sudo",
     "apt-get",
     "install",
     "-qy",
@@ -56,7 +58,7 @@ test("ensureSnapd is a no-op if snapd is installed", async () => {
       return { uid: 0, gid: 0 } as unknown as fs.Stats;
     });
   const execMock = vi
-    .spyOn(exec, "exec")
+    .spyOn(tools, "runCommand")
     .mockImplementation(async (): Promise<number> => {
       return 0;
     });
@@ -80,14 +82,14 @@ test("ensureSnapd fixes permissions on the root directory", async () => {
       return { uid: 500, gid: 0 } as unknown as fs.Stats;
     });
   const execMock = vi
-    .spyOn(exec, "exec")
+    .spyOn(tools, "runCommand")
     .mockImplementation(async (): Promise<number> => 0);
 
   await tools.ensureSnapd();
 
   expect(accessMock).toHaveBeenCalled();
   expect(statMock).toHaveBeenCalled();
-  expect(execMock).toHaveBeenCalledWith("sudo", ["chown", "root:root", "/"]);
+  expect(execMock).toHaveBeenCalledWith(["sudo", "chown", "root:root", "/"]);
 });
 
 test("ensureLXD installs the snap version of LXD if needed", async () => {
@@ -99,18 +101,17 @@ test("ensureLXD installs the snap version of LXD if needed", async () => {
       throw new Error("not found");
     });
   const execMock = vi
-    .spyOn(exec, "exec")
-    .mockImplementation(
-      async (_cmd: string, args?: string[]): Promise<number> => {
-        if (args?.[1] === "storage") return 1;
-        return 0;
-      },
-    );
+    .spyOn(tools, "runCommand")
+    .mockImplementation(async (command: string[]): Promise<number> => {
+      if (command?.[2] === "storage") return 1;
+      return 0;
+    });
 
   await tools.ensureLXD("5.21/stable");
 
   expect(accessMock).toHaveBeenCalled();
-  expect(execMock).toHaveBeenNthCalledWith(1, "sudo", [
+  expect(execMock).toHaveBeenNthCalledWith(1, [
+    "sudo",
     "snap",
     "install",
     "lxd",
@@ -119,13 +120,15 @@ test("ensureLXD installs the snap version of LXD if needed", async () => {
     "--cohort",
     "+",
   ]);
-  expect(execMock).toHaveBeenNthCalledWith(2, "sudo", [
+  expect(execMock).toHaveBeenNthCalledWith(2, [
+    "sudo",
     "snap",
     "set",
     "lxd",
     "daemon.group=adm",
   ]);
-  expect(execMock).toHaveBeenNthCalledWith(4, "sudo", [
+  expect(execMock).toHaveBeenNthCalledWith(4, [
+    "sudo",
     "lxd",
     "init",
     "--auto",
@@ -141,12 +144,13 @@ test("ensureLXD installs from the requested channel", async () => {
     },
   );
   const execMock = vi
-    .spyOn(exec, "exec")
+    .spyOn(tools, "runCommand")
     .mockImplementation(async (): Promise<number> => 0);
 
   await tools.ensureLXD("latest/edge");
 
-  expect(execMock).toHaveBeenCalledWith("sudo", [
+  expect(execMock).toHaveBeenCalledWith([
+    "sudo",
     "snap",
     "install",
     "lxd",
@@ -161,18 +165,20 @@ test("configureProLXD configures lxd_guest_attach", async () => {
   expect.assertions(2);
 
   const execMock = vi
-    .spyOn(exec, "exec")
+    .spyOn(tools, "runCommand")
     .mockImplementation(async (): Promise<number> => 0);
 
   await tools.configureProLXD();
 
-  expect(execMock).toHaveBeenNthCalledWith(1, "sudo", [
+  expect(execMock).toHaveBeenNthCalledWith(1, [
+    "sudo",
     "pro",
     "config",
     "set",
     "lxd_guest_attach=available",
   ]);
-  expect(execMock).toHaveBeenNthCalledWith(2, "sudo", [
+  expect(execMock).toHaveBeenNthCalledWith(2, [
+    "sudo",
     "snap",
     "restart",
     "lxd",
@@ -188,13 +194,14 @@ test("ensureLXD removes the apt version of LXD", async () => {
       return;
     });
   const execMock = vi
-    .spyOn(exec, "exec")
+    .spyOn(tools, "runCommand")
     .mockImplementation(async (): Promise<number> => 0);
 
   await tools.ensureLXD("5.21/stable");
 
   expect(accessMock).toHaveBeenCalled();
-  expect(execMock).toHaveBeenNthCalledWith(1, "sudo", [
+  expect(execMock).toHaveBeenNthCalledWith(1, [
+    "sudo",
     "apt-get",
     "remove",
     "-qy",
@@ -215,13 +222,14 @@ test("ensureLXD is not refreshed if LXD is installed", async () => {
       throw new Error("not found");
     });
   const execMock = vi
-    .spyOn(exec, "exec")
+    .spyOn(tools, "runCommand")
     .mockImplementation(async (): Promise<number> => 0);
 
   await tools.ensureLXD("5.21/stable");
 
   expect(accessMock).toHaveBeenCalled();
-  expect(execMock).not.toHaveBeenNthCalledWith(3, "sudo", [
+  expect(execMock).not.toHaveBeenNthCalledWith(3, [
+    "sudo",
     "snap",
     "install",
     "lxd",
@@ -244,24 +252,24 @@ test('ensureLXD still calls "lxd init" if LXD is installed', async () => {
       throw new Error("not found");
     });
   const execMock = vi
-    .spyOn(exec, "exec")
-    .mockImplementation(
-      async (_cmd: string, args?: string[]): Promise<number> => {
-        if (args?.[1] === "storage") return 1;
-        return 0;
-      },
-    );
+    .spyOn(tools, "runCommand")
+    .mockImplementation(async (command: string[]): Promise<number> => {
+      if (command?.[2] === "storage") return 1;
+      return 0;
+    });
 
   await tools.ensureLXD("5.21/stable");
 
   expect(accessMock).toHaveBeenCalled();
-  expect(execMock).toHaveBeenNthCalledWith(1, "sudo", [
+  expect(execMock).toHaveBeenNthCalledWith(1, [
+    "sudo",
     "snap",
     "set",
     "lxd",
     "daemon.group=adm",
   ]);
-  expect(execMock).toHaveBeenNthCalledWith(3, "sudo", [
+  expect(execMock).toHaveBeenNthCalledWith(3, [
+    "sudo",
     "lxd",
     "init",
     "--auto",
@@ -277,12 +285,12 @@ test("ensureLXD skips lxd init if already initialized", async () => {
     },
   );
   const execMock = vi
-    .spyOn(exec, "exec")
+    .spyOn(tools, "runCommand")
     .mockImplementation(async (): Promise<number> => 0);
 
   await tools.ensureLXD("5.21/stable");
 
-  expect(execMock).not.toHaveBeenCalledWith("sudo", ["lxd", "init", "--auto"]);
+  expect(execMock).not.toHaveBeenCalledWith(["sudo", "lxd", "init", "--auto"]);
 });
 
 test("ensureCraftTool installs a craft tool if needed", async () => {
@@ -294,13 +302,14 @@ test("ensureCraftTool installs a craft tool if needed", async () => {
       throw new Error("not found");
     });
   const execMock = vi
-    .spyOn(exec, "exec")
+    .spyOn(tools, "runCommand")
     .mockImplementation(async (): Promise<number> => 0);
 
   await tools.ensureCraftTool("rockcraft", "edge", "");
 
   expect(accessMock).toHaveBeenCalled();
-  expect(execMock).toHaveBeenNthCalledWith(1, "sudo", [
+  expect(execMock).toHaveBeenNthCalledWith(1, [
+    "sudo",
     "snap",
     "install",
     "--channel",
@@ -312,7 +321,8 @@ test("ensureCraftTool installs a craft tool if needed", async () => {
   await tools.ensureCraftTool("snapcraft", "stable", "1234");
 
   expect(accessMock).toHaveBeenCalled();
-  expect(execMock).toHaveBeenNthCalledWith(2, "sudo", [
+  expect(execMock).toHaveBeenNthCalledWith(2, [
+    "sudo",
     "snap",
     "install",
     "--revision",
@@ -331,13 +341,14 @@ test("ensureCraftTool refreshes if the tool is already installed", async () => {
       return;
     });
   const execMock = vi
-    .spyOn(exec, "exec")
+    .spyOn(tools, "runCommand")
     .mockImplementation(async (): Promise<number> => 0);
 
   await tools.ensureCraftTool("rockcraft", "edge", "");
 
   expect(accessMock).toHaveBeenCalled();
-  expect(execMock).toHaveBeenNthCalledWith(1, "sudo", [
+  expect(execMock).toHaveBeenNthCalledWith(1, [
+    "sudo",
     "snap",
     "refresh",
     "--channel",
@@ -353,9 +364,9 @@ test("ensureLXDNetwork sets up iptables and warns about Docker", async () => {
   const infoMock = vi.spyOn(core, "info").mockImplementation(() => {});
 
   const execMock = vi
-    .spyOn(exec, "exec")
-    .mockImplementation(async (_: string, args?: string[]): Promise<number> => {
-      if (args != undefined && args[1] == "moby-runc") {
+    .spyOn(tools, "runCommand")
+    .mockImplementation(async (command: string[]): Promise<number> => {
+      if (command != undefined && command[2] == "moby-runc") {
         return 0;
       } else {
         return 1;
@@ -367,33 +378,33 @@ test("ensureLXDNetwork sets up iptables and warns about Docker", async () => {
   expect(infoMock).toHaveBeenCalledWith(
     "Installed docker related packages might interfere with LXD networking: moby-runc",
   );
-  expect(execMock).toHaveBeenNthCalledWith(1, "dpkg", ["-l", "moby-buildx"], {
+  expect(execMock).toHaveBeenNthCalledWith(1, ["dpkg", "-l", "moby-buildx"], {
     ignoreReturnCode: true,
     silent: true,
   });
-  expect(execMock).toHaveBeenNthCalledWith(2, "dpkg", ["-l", "moby-engine"], {
+  expect(execMock).toHaveBeenNthCalledWith(2, ["dpkg", "-l", "moby-engine"], {
     ignoreReturnCode: true,
     silent: true,
   });
-  expect(execMock).toHaveBeenNthCalledWith(3, "dpkg", ["-l", "moby-cli"], {
+  expect(execMock).toHaveBeenNthCalledWith(3, ["dpkg", "-l", "moby-cli"], {
     ignoreReturnCode: true,
     silent: true,
   });
-  expect(execMock).toHaveBeenNthCalledWith(4, "dpkg", ["-l", "moby-compose"], {
+  expect(execMock).toHaveBeenNthCalledWith(4, ["dpkg", "-l", "moby-compose"], {
     ignoreReturnCode: true,
     silent: true,
   });
   expect(execMock).toHaveBeenNthCalledWith(
     5,
-    "dpkg",
-    ["-l", "moby-containerd"],
+    ["dpkg", "-l", "moby-containerd"],
     { ignoreReturnCode: true, silent: true },
   );
-  expect(execMock).toHaveBeenNthCalledWith(6, "dpkg", ["-l", "moby-runc"], {
+  expect(execMock).toHaveBeenNthCalledWith(6, ["dpkg", "-l", "moby-runc"], {
     ignoreReturnCode: true,
     silent: true,
   });
-  expect(execMock).toHaveBeenNthCalledWith(7, "sudo", [
+  expect(execMock).toHaveBeenNthCalledWith(7, [
+    "sudo",
     "iptables",
     "-P",
     "FORWARD",
@@ -406,7 +417,7 @@ test("ensureLXDNetwork sets up iptables and warns only about installed packages"
 
   const infoMock = vi.spyOn(core, "info").mockImplementation(() => {});
   const execMock = vi
-    .spyOn(exec, "exec")
+    .spyOn(tools, "runCommand")
     .mockImplementation(async (): Promise<number> => 0);
 
   await tools.ensureLXDNetwork();
@@ -415,33 +426,33 @@ test("ensureLXDNetwork sets up iptables and warns only about installed packages"
     "Installed docker related packages might interfere with LXD networking: " +
       "moby-buildx,moby-engine,moby-cli,moby-compose,moby-containerd,moby-runc",
   );
-  expect(execMock).toHaveBeenNthCalledWith(1, "dpkg", ["-l", "moby-buildx"], {
+  expect(execMock).toHaveBeenNthCalledWith(1, ["dpkg", "-l", "moby-buildx"], {
     ignoreReturnCode: true,
     silent: true,
   });
-  expect(execMock).toHaveBeenNthCalledWith(2, "dpkg", ["-l", "moby-engine"], {
+  expect(execMock).toHaveBeenNthCalledWith(2, ["dpkg", "-l", "moby-engine"], {
     ignoreReturnCode: true,
     silent: true,
   });
-  expect(execMock).toHaveBeenNthCalledWith(3, "dpkg", ["-l", "moby-cli"], {
+  expect(execMock).toHaveBeenNthCalledWith(3, ["dpkg", "-l", "moby-cli"], {
     ignoreReturnCode: true,
     silent: true,
   });
-  expect(execMock).toHaveBeenNthCalledWith(4, "dpkg", ["-l", "moby-compose"], {
+  expect(execMock).toHaveBeenNthCalledWith(4, ["dpkg", "-l", "moby-compose"], {
     ignoreReturnCode: true,
     silent: true,
   });
   expect(execMock).toHaveBeenNthCalledWith(
     5,
-    "dpkg",
-    ["-l", "moby-containerd"],
+    ["dpkg", "-l", "moby-containerd"],
     { ignoreReturnCode: true, silent: true },
   );
-  expect(execMock).toHaveBeenNthCalledWith(6, "dpkg", ["-l", "moby-runc"], {
+  expect(execMock).toHaveBeenNthCalledWith(6, ["dpkg", "-l", "moby-runc"], {
     ignoreReturnCode: true,
     silent: true,
   });
-  expect(execMock).toHaveBeenNthCalledWith(7, "sudo", [
+  expect(execMock).toHaveBeenNthCalledWith(7, [
+    "sudo",
     "iptables",
     "-P",
     "FORWARD",
@@ -453,11 +464,11 @@ test("haveSubcommand returns true if the subcommand is available", async () => {
   expect.assertions(2);
 
   const execMock = vi
-    .spyOn(exec, "exec")
+    .spyOn(tools, "runCommand")
     .mockImplementation(async (): Promise<number> => 0);
 
   await expect(tools.haveSubcommand("rockcraft", "test")).resolves.toBe(true);
-  expect(execMock).toHaveBeenCalledWith("rockcraft", ["test", "-h"], {
+  expect(execMock).toHaveBeenCalledWith(["rockcraft", "test", "-h"], {
     ignoreReturnCode: true,
   });
 });
@@ -465,7 +476,9 @@ test("haveSubcommand returns true if the subcommand is available", async () => {
 test("haveSubcommand returns false if the subcommand is not available", async () => {
   expect.assertions(1);
 
-  vi.spyOn(exec, "exec").mockImplementation(async (): Promise<number> => 1);
+  vi.spyOn(tools, "runCommand").mockImplementation(
+    async (): Promise<number> => 1,
+  );
 
   await expect(tools.haveSubcommand("rockcraft", "test")).resolves.toBe(false);
 });

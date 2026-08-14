@@ -2,6 +2,8 @@ import * as core from "@actions/core";
 import * as exec from "@actions/exec";
 import * as fs from "fs";
 import * as os from "os";
+// Necessary for proper testing -- otherwise mocks ignored.
+import * as self from "./tools.ts";
 
 export function expandHome(p: string): string {
   if (p === "~" || p.startsWith("~/")) {
@@ -32,8 +34,9 @@ export async function haveSubcommand(
   subcommand: string,
 ): Promise<boolean> {
   return (
-    (await exec.exec(tool, [subcommand, "-h"], { ignoreReturnCode: true })) ===
-    0
+    (await self.runCommand([tool, subcommand, "-h"], {
+      ignoreReturnCode: true,
+    })) === 0
   );
 }
 
@@ -41,14 +44,14 @@ export async function ensureSnapd(): Promise<void> {
   const haveSnapd = await haveExecutable("/usr/bin/snap");
   if (!haveSnapd) {
     core.info("Installing snapd...");
-    await exec.exec("sudo", ["apt-get", "update", "-q"]);
-    await exec.exec("sudo", ["apt-get", "install", "-qy", "snapd"]);
+    await self.runCommand(["sudo", "apt-get", "update", "-q"]);
+    await self.runCommand(["sudo", "apt-get", "install", "-qy", "snapd"]);
   }
   // The Github worker environment has weird permissions on the root,
   // which trip up snap-confine.
   const root = await fs.promises.stat("/");
   if (root.uid !== 0 || root.gid !== 0) {
-    await exec.exec("sudo", ["chown", "root:root", "/"]);
+    await self.runCommand(["sudo", "chown", "root:root", "/"]);
   }
 }
 
@@ -64,7 +67,7 @@ export async function ensureLXDNetwork(): Promise<void> {
   const installedPackages: string[] = [];
   const options = { silent: true, ignoreReturnCode: true };
   for (const mobyPackage of mobyPackages) {
-    if ((await exec.exec("dpkg", ["-l", mobyPackage], options)) === 0) {
+    if ((await self.runCommand(["dpkg", "-l", mobyPackage], options)) === 0) {
       installedPackages.push(mobyPackage);
     }
   }
@@ -74,21 +77,29 @@ export async function ensureLXDNetwork(): Promise<void> {
   // Removing docker is the best option, but some pipelines depend on it.
   // https://linuxcontainers.org/lxd/docs/master/howto/network_bridge_firewalld/#prevent-issues-with-lxd-and-docker
   // https://github.com/canonical/lxd-cloud/blob/f20a64a8af42485440dcbfd370faf14137d2f349/test/includes/lxd.sh#L13-L23
-  await exec.exec("sudo", ["iptables", "-P", "FORWARD", "ACCEPT"]);
+  await self.runCommand(["sudo", "iptables", "-P", "FORWARD", "ACCEPT"]);
 }
 
 export async function ensureLXD(lxdChannel: string): Promise<void> {
   const haveDebLXD = await haveExecutable("/usr/bin/lxd");
   if (haveDebLXD) {
     core.info("Removing legacy .deb packaged LXD...");
-    await exec.exec("sudo", ["apt-get", "remove", "-qy", "lxd", "lxd-client"]);
+    await self.runCommand([
+      "sudo",
+      "apt-get",
+      "remove",
+      "-qy",
+      "lxd",
+      "lxd-client",
+    ]);
   }
 
   // Install the requested version of LXD
   const haveSnapLXD = await haveExecutable("/snap/bin/lxd");
   if (!haveSnapLXD) {
     core.info("Installing LXD...");
-    await exec.exec("sudo", [
+    await self.runCommand([
+      "sudo",
       "snap",
       "install",
       "lxd",
@@ -102,31 +113,32 @@ export async function ensureLXD(lxdChannel: string): Promise<void> {
   // `usermod` would require a new user session to take effect, but the runner
   // user is already a member of "adm".
   core.info("Setting daemon group on LXD snap to adm...");
-  await exec.exec("sudo", ["snap", "set", "lxd", "daemon.group=adm"]);
+  await self.runCommand(["sudo", "snap", "set", "lxd", "daemon.group=adm"]);
 
   // Don't double-init LXD. Everything else in setup is reasonably idempotent,
   // but `lxd init` does extra work.
   const isInitialized =
-    (await exec.exec("sudo", ["lxc", "storage", "show", "default"], {
+    (await self.runCommand(["sudo", "lxc", "storage", "show", "default"], {
       ignoreReturnCode: true,
       silent: true,
     })) === 0;
   if (!isInitialized) {
     core.info("Initialising LXD...");
-    await exec.exec("sudo", ["lxd", "init", "--auto"]);
+    await self.runCommand(["sudo", "lxd", "init", "--auto"]);
   }
   await ensureLXDNetwork();
 }
 
 export async function configureProLXD(): Promise<void> {
   core.info("Configuring LXD for pro builds");
-  await exec.exec("sudo", [
+  await self.runCommand([
+    "sudo",
     "pro",
     "config",
     "set",
     "lxd_guest_attach=available",
   ]);
-  await exec.exec("sudo", ["snap", "restart", "lxd"]);
+  await self.runCommand(["sudo", "snap", "restart", "lxd"]);
 }
 
 export async function ensureCraftTool(
@@ -136,7 +148,8 @@ export async function ensureCraftTool(
 ): Promise<void> {
   const haveSnap = await haveExecutable(`/snap/bin/${name}`);
   core.info(`Installing ${name}...`);
-  await exec.exec("sudo", [
+  await self.runCommand([
+    "sudo",
     "snap",
     haveSnap ? "refresh" : "install",
     revision.length > 0 ? "--revision" : "--channel",
@@ -144,4 +157,11 @@ export async function ensureCraftTool(
     "--classic",
     name,
   ]);
+}
+
+export async function runCommand(
+  command: string[],
+  options?: exec.ExecOptions,
+): Promise<number> {
+  return exec.exec(command[0], command.slice(1), options);
 }

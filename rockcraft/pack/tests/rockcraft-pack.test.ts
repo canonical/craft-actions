@@ -1,5 +1,4 @@
 import { vi, afterEach, test, expect } from "vitest";
-import * as exec from "@actions/exec";
 import * as build from "../src/index.ts";
 import * as tools from "@craft-actions/common/tools.ts";
 
@@ -22,7 +21,7 @@ function mockSetup(user = "ubuntu") {
       .spyOn(tools, "shellUser")
       .mockImplementation((): string => user),
     execMock: vi
-      .spyOn(exec, "exec")
+      .spyOn(tools, "runCommand")
       .mockImplementation(async (): Promise<number> => 0),
   };
 }
@@ -50,8 +49,8 @@ test("RockcraftBuilder.build can ignore unmaintained", async () => {
   await makeBuilder({ ignore: "unmaintained", verbosity: "trace" }).pack();
 
   expect(execMock).toHaveBeenCalledWith(
-    "sudo",
     [
+      "sudo",
       "--preserve-env",
       "--user",
       "ubuntu",

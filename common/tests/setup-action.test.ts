@@ -12,12 +12,13 @@ vi.mock("node:http", () => ({ get: vi.fn() }));
 
 afterEach(() => {
   vi.resetAllMocks();
+  vi.unstubAllEnvs();
 });
 
 function mockInputs(inputs: Record<string, string>) {
-  vi.spyOn(core, "getInput").mockImplementation((name: string) => {
-    return inputs[name] ?? "";
-  });
+  for (const [key, value] of Object.entries(inputs)) {
+    vi.stubEnv(`INPUT_${key.toUpperCase()}`, value);
+  }
 }
 
 function mockToolFunctions() {

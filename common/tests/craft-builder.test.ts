@@ -36,8 +36,23 @@ function mockSetup(user = "ubuntu") {
   };
 }
 
+let tempDirs: string[] = [];
+
+function createTempProject(files: string[]): string {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "craft-builder-test-"));
+  tempDirs.push(dir);
+  for (const file of files) {
+    fs.writeFileSync(path.join(dir, file), "");
+  }
+  return dir;
+}
+
 afterEach(() => {
   vi.restoreAllMocks();
+  for (const dir of tempDirs) {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+  tempDirs = [];
 });
 
 test("CraftBuilder expands tilde in project root", () => {
@@ -139,25 +154,22 @@ test("CraftBuilder.pack includes --pro flag when pro is set", async () => {
 test("CraftBuilder.findArtifacts throws when no matching files are found", async () => {
   expect.assertions(1);
 
-  vi.spyOn(fs.promises, "readdir").mockResolvedValue([
-    "other-file.txt",
-  ] as never);
+  const tempDir = createTempProject(["other-file.txt"]);
 
-  await expect(makeBuilder().findArtifacts(".charm")).rejects.toThrow(
-    "No .charm files produced by build",
-  );
+  await expect(
+    makeBuilder({ projectRoot: tempDir }).findArtifacts(".charm"),
+  ).rejects.toThrow("No .charm files produced by build");
 });
 
 test("CraftBuilder.findArtifacts returns all matching files", async () => {
   expect.assertions(1);
 
-  vi.spyOn(fs.promises, "readdir").mockResolvedValue([
-    "a.charm",
-    "b.charm",
-    "readme.txt",
-  ] as never);
+  const tempDir = createTempProject(["a.charm", "b.charm", "readme.txt"]);
 
   await expect(
-    makeBuilder({ projectRoot: "project-root" }).findArtifacts(".charm"),
-  ).resolves.toEqual(["project-root/a.charm", "project-root/b.charm"]);
+    makeBuilder({ projectRoot: tempDir }).findArtifacts(".charm"),
+  ).resolves.toEqual([
+    path.join(tempDir, "a.charm"),
+    path.join(tempDir, "b.charm"),
+  ]);
 });

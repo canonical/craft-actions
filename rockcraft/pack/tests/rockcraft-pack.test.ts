@@ -8,15 +8,6 @@ afterEach(() => {
 
 function mockSetup(user = "ubuntu") {
   return {
-    ensureSnapd: vi
-      .spyOn(tools, "ensureSnapd")
-      .mockImplementation(async (): Promise<void> => {}),
-    ensureLXD: vi
-      .spyOn(tools, "ensureLXD")
-      .mockImplementation(async (): Promise<void> => {}),
-    ensureCraftTool: vi
-      .spyOn(tools, "ensureCraftTool")
-      .mockImplementation(async (): Promise<void> => {}),
     shellUser: vi
       .spyOn(tools, "shellUser")
       .mockImplementation((): string => user),

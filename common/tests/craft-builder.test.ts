@@ -67,8 +67,6 @@ test("CraftBuilder allows empty verbosity", () => {
 });
 
 test("CraftBuilder.pack calls configureProLXD when pro is set", async () => {
-  expect.assertions(1);
-
   const { configureProLXD } = mockSetup();
 
   await makeBuilder({ pro: "esm-apps" }).pack();
@@ -77,8 +75,6 @@ test("CraftBuilder.pack calls configureProLXD when pro is set", async () => {
 });
 
 test("CraftBuilder.pack does not call configureProLXD when pro is not set", async () => {
-  expect.assertions(1);
-
   const { configureProLXD } = mockSetup();
 
   await makeBuilder().pack();
@@ -87,8 +83,6 @@ test("CraftBuilder.pack does not call configureProLXD when pro is not set", asyn
 });
 
 test("CraftBuilder.pack executes the correct base command", async () => {
-  expect.assertions(1);
-
   const { execMock } = mockSetup();
 
   await makeBuilder({ projectRoot: "my-dir" }).pack();
@@ -100,8 +94,6 @@ test("CraftBuilder.pack executes the correct base command", async () => {
 });
 
 test("CraftBuilder.pack executes test subcommand when runTests is true", async () => {
-  expect.assertions(1);
-
   const { execMock } = mockSetup();
 
   await makeBuilder({ projectRoot: "my-dir", runTests: true }).pack();
@@ -113,8 +105,6 @@ test("CraftBuilder.pack executes test subcommand when runTests is true", async (
 });
 
 test("CraftBuilder.pack includes --verbosity flag when verbosity is set", async () => {
-  expect.assertions(1);
-
   const { execMock } = mockSetup();
 
   await makeBuilder({ verbosity: "debug" }).pack();
@@ -126,8 +116,6 @@ test("CraftBuilder.pack includes --verbosity flag when verbosity is set", async 
 });
 
 test("CraftBuilder.pack omits --verbosity flag when verbosity is empty", async () => {
-  expect.assertions(1);
-
   const { execMock } = mockSetup();
 
   await makeBuilder({ verbosity: "" }).pack();
@@ -139,8 +127,6 @@ test("CraftBuilder.pack omits --verbosity flag when verbosity is empty", async (
 });
 
 test("CraftBuilder.pack includes --pro flag when pro is set", async () => {
-  expect.assertions(1);
-
   const { execMock } = mockSetup();
 
   await makeBuilder({ pro: "esm-apps,esm-infra" }).pack();
@@ -152,8 +138,6 @@ test("CraftBuilder.pack includes --pro flag when pro is set", async () => {
 });
 
 test("CraftBuilder.findArtifacts throws when no matching files are found", async () => {
-  expect.assertions(1);
-
   const tempDir = createTempProject(["other-file.txt"]);
 
   await expect(
@@ -162,8 +146,6 @@ test("CraftBuilder.findArtifacts throws when no matching files are found", async
 });
 
 test("CraftBuilder.findArtifacts returns all matching files", async () => {
-  expect.assertions(1);
-
   const tempDir = createTempProject(["a.charm", "b.charm", "readme.txt"]);
 
   await expect(

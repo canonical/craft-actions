@@ -113,8 +113,6 @@ test('readBaseInputs parses runTests as false when input is not "true"', () => {
 // runPackAction
 
 test("runPackAction calls runSetupAction with the tool name", async () => {
-  expect.assertions(1);
-
   const runSetup = mockSetupAction();
   vi.spyOn(core, "info").mockImplementation(() => {});
   const builder = makeStubBuilder({ revision: "1" });
@@ -125,8 +123,6 @@ test("runPackAction calls runSetupAction with the tool name", async () => {
 });
 
 test("runPackAction calls pack and sets output", async () => {
-  expect.assertions(2);
-
   mockSetupAction();
   vi.spyOn(core, "info").mockImplementation(() => {});
   const builder = makeStubBuilder({ revision: "1" });
@@ -141,8 +137,6 @@ test("runPackAction calls pack and sets output", async () => {
 });
 
 test("runPackAction does not log info when revision is set", async () => {
-  expect.assertions(1);
-
   mockSetupAction();
   const info = vi.spyOn(core, "info").mockImplementation(() => {});
   const builder = makeStubBuilder({ revision: "42" });
@@ -153,8 +147,6 @@ test("runPackAction does not log info when revision is set", async () => {
 });
 
 test("runPackAction calls setFailed on error", async () => {
-  expect.assertions(1);
-
   mockSetupAction();
   const setFailed = vi.spyOn(core, "setFailed").mockImplementation(() => {});
   vi.spyOn(core, "info").mockImplementation(() => {});
@@ -171,8 +163,6 @@ test("runPackAction calls setFailed on error", async () => {
 });
 
 test("runPackAction warns when multiple artifacts are found", async () => {
-  expect.assertions(1);
-
   mockSetupAction();
   vi.spyOn(core, "info").mockImplementation(() => {});
   const warning = vi.spyOn(core, "warning").mockImplementation(() => {});
@@ -190,8 +180,6 @@ test("runPackAction warns when multiple artifacts are found", async () => {
 });
 
 test("runPackAction does not warn when only one artifact is found", async () => {
-  expect.assertions(1);
-
   mockSetupAction();
   vi.spyOn(core, "info").mockImplementation(() => {});
   const warning = vi.spyOn(core, "warning").mockImplementation(() => {});

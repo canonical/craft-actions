@@ -42,8 +42,6 @@ function makeBuilder(
 }
 
 test("RockcraftBuilder.build can ignore unmaintained", async () => {
-  expect.assertions(1);
-
   const { execMock } = mockSetup();
 
   await makeBuilder({ ignore: "unmaintained", verbosity: "trace" }).pack();

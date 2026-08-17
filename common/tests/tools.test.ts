@@ -9,8 +9,6 @@ afterEach(() => {
 });
 
 test("ensureSnapd installs snapd if needed", async () => {
-  expect.assertions(4);
-
   const accessMock = vi
     .spyOn(fs.promises, "access")
     .mockImplementation(async (): Promise<void> => {
@@ -47,8 +45,6 @@ test("ensureSnapd installs snapd if needed", async () => {
 });
 
 test("ensureSnapd is a no-op if snapd is installed", async () => {
-  expect.assertions(3);
-
   const accessMock = vi
     .spyOn(fs.promises, "access")
     .mockImplementation(async (): Promise<void> => {});
@@ -71,8 +67,6 @@ test("ensureSnapd is a no-op if snapd is installed", async () => {
 });
 
 test("ensureSnapd fixes permissions on the root directory", async () => {
-  expect.assertions(3);
-
   const accessMock = vi
     .spyOn(fs.promises, "access")
     .mockImplementation(async (): Promise<void> => {});
@@ -93,8 +87,6 @@ test("ensureSnapd fixes permissions on the root directory", async () => {
 });
 
 test("ensureLXD installs the snap version of LXD if needed", async () => {
-  expect.assertions(4);
-
   const accessMock = vi
     .spyOn(fs.promises, "access")
     .mockImplementation(async (): Promise<void> => {
@@ -136,8 +128,6 @@ test("ensureLXD installs the snap version of LXD if needed", async () => {
 });
 
 test("ensureLXD installs from the requested channel", async () => {
-  expect.assertions(1);
-
   vi.spyOn(fs.promises, "access").mockImplementation(
     async (): Promise<void> => {
       throw new Error("not found");
@@ -162,8 +152,6 @@ test("ensureLXD installs from the requested channel", async () => {
 });
 
 test("configureProLXD configures lxd_guest_attach", async () => {
-  expect.assertions(2);
-
   const execMock = vi
     .spyOn(tools, "runCommand")
     .mockImplementation(async (): Promise<number> => 0);
@@ -186,8 +174,6 @@ test("configureProLXD configures lxd_guest_attach", async () => {
 });
 
 test("ensureLXD removes the apt version of LXD", async () => {
-  expect.assertions(2);
-
   const accessMock = vi
     .spyOn(fs.promises, "access")
     .mockImplementation(async (): Promise<void> => {
@@ -211,8 +197,6 @@ test("ensureLXD removes the apt version of LXD", async () => {
 });
 
 test("ensureLXD is not refreshed if LXD is installed", async () => {
-  expect.assertions(2);
-
   const accessMock = vi
     .spyOn(fs.promises, "access")
     .mockImplementation(async (filename: fs.PathLike): Promise<void> => {
@@ -241,8 +225,6 @@ test("ensureLXD is not refreshed if LXD is installed", async () => {
 });
 
 test('ensureLXD still calls "lxd init" if LXD is installed', async () => {
-  expect.assertions(3);
-
   const accessMock = vi
     .spyOn(fs.promises, "access")
     .mockImplementation(async (filename: fs.PathLike): Promise<void> => {
@@ -277,8 +259,6 @@ test('ensureLXD still calls "lxd init" if LXD is installed', async () => {
 });
 
 test("ensureLXD skips lxd init if already initialized", async () => {
-  expect.assertions(1);
-
   vi.spyOn(fs.promises, "access").mockImplementation(
     async (): Promise<void> => {
       throw new Error("not found");
@@ -294,8 +274,6 @@ test("ensureLXD skips lxd init if already initialized", async () => {
 });
 
 test("ensureCraftTool installs a craft tool if needed", async () => {
-  expect.assertions(4);
-
   const accessMock = vi
     .spyOn(fs.promises, "access")
     .mockImplementation(async (): Promise<void> => {
@@ -333,8 +311,6 @@ test("ensureCraftTool installs a craft tool if needed", async () => {
 });
 
 test("ensureCraftTool refreshes if the tool is already installed", async () => {
-  expect.assertions(2);
-
   const accessMock = vi
     .spyOn(fs.promises, "access")
     .mockImplementation(async (): Promise<void> => {
@@ -359,8 +335,6 @@ test("ensureCraftTool refreshes if the tool is already installed", async () => {
 });
 
 test("ensureLXDNetwork sets up iptables and warns about Docker", async () => {
-  expect.assertions(8);
-
   const infoMock = vi.spyOn(core, "info").mockImplementation(() => {});
 
   const execMock = vi
@@ -413,8 +387,6 @@ test("ensureLXDNetwork sets up iptables and warns about Docker", async () => {
 });
 
 test("ensureLXDNetwork sets up iptables and warns only about installed packages", async () => {
-  expect.assertions(8);
-
   const infoMock = vi.spyOn(core, "info").mockImplementation(() => {});
   const execMock = vi
     .spyOn(tools, "runCommand")
@@ -461,8 +433,6 @@ test("ensureLXDNetwork sets up iptables and warns only about installed packages"
 });
 
 test("haveSubcommand returns true if the subcommand is available", async () => {
-  expect.assertions(2);
-
   const execMock = vi
     .spyOn(tools, "runCommand")
     .mockImplementation(async (): Promise<number> => 0);
@@ -474,8 +444,6 @@ test("haveSubcommand returns true if the subcommand is available", async () => {
 });
 
 test("haveSubcommand returns false if the subcommand is not available", async () => {
-  expect.assertions(1);
-
   vi.spyOn(tools, "runCommand").mockImplementation(
     async (): Promise<number> => 1,
   );

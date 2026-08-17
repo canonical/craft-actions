@@ -114,7 +114,6 @@ test('readBaseInputs parses runTests as false when input is not "true"', () => {
 
 test("runPackAction calls runSetupAction with the tool name", async () => {
   const runSetup = mockSetupAction();
-  vi.spyOn(core, "info").mockImplementation(() => {});
   const builder = makeStubBuilder({ revision: "1" });
 
   await runPackAction(builder, "charm");
@@ -124,7 +123,6 @@ test("runPackAction calls runSetupAction with the tool name", async () => {
 
 test("runPackAction calls pack and sets output", async () => {
   mockSetupAction();
-  vi.spyOn(core, "info").mockImplementation(() => {});
   const builder = makeStubBuilder({ revision: "1" });
 
   await runPackAction(builder, "charm");
@@ -136,20 +134,9 @@ test("runPackAction calls pack and sets output", async () => {
   ]);
 });
 
-test("runPackAction does not log info when revision is set", async () => {
-  mockSetupAction();
-  const info = vi.spyOn(core, "info").mockImplementation(() => {});
-  const builder = makeStubBuilder({ revision: "42" });
-
-  await runPackAction(builder, "charm");
-
-  expect(info).not.toHaveBeenCalled();
-});
-
 test("runPackAction calls setFailed on error", async () => {
   mockSetupAction();
   const setFailed = vi.spyOn(core, "setFailed").mockImplementation(() => {});
-  vi.spyOn(core, "info").mockImplementation(() => {});
   const builder = makeStubBuilder({
     revision: "1",
     pack: vi.fn(async () => {
@@ -164,7 +151,6 @@ test("runPackAction calls setFailed on error", async () => {
 
 test("runPackAction warns when multiple artifacts are found", async () => {
   mockSetupAction();
-  vi.spyOn(core, "info").mockImplementation(() => {});
   const warning = vi.spyOn(core, "warning").mockImplementation(() => {});
   const builder = makeStubBuilder({
     revision: "1",
@@ -181,7 +167,6 @@ test("runPackAction warns when multiple artifacts are found", async () => {
 
 test("runPackAction does not warn when only one artifact is found", async () => {
   mockSetupAction();
-  vi.spyOn(core, "info").mockImplementation(() => {});
   const warning = vi.spyOn(core, "warning").mockImplementation(() => {});
   const builder = makeStubBuilder({ revision: "1" });
 

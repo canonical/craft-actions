@@ -1,6 +1,8 @@
 {
   // Configuration file for RenovateBot: https://docs.renovatebot.com/configuration-options
   extends: ["config:recommended"],
+  // This makes Renovate continue to patch PRs that have been modified by the GitHub Actions bot
+  gitIgnoredAuthors: ["github-actions[bot]@users.noreply.github.com"],
   labels: ["dependencies"],  // For convenient searching in GitHub
   packageRules: [
     {

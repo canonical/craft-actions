@@ -2,7 +2,6 @@ import { vi, afterEach, test, expect } from "vitest";
 import * as os from "os";
 import * as path from "path";
 import * as fs from "fs";
-import * as exec from "@actions/exec";
 import { CraftBuilder, CraftBuilderOptions } from "../src/craft-builder.ts";
 import * as tools from "../src/tools.ts";
 
@@ -32,13 +31,28 @@ function mockSetup(user = "ubuntu") {
       .spyOn(tools, "shellUser")
       .mockImplementation((): string => user),
     execMock: vi
-      .spyOn(exec, "exec")
+      .spyOn(tools, "runCommand")
       .mockImplementation(async (): Promise<number> => 0),
   };
 }
 
+let tempDirs: string[] = [];
+
+function createTempProject(files: string[]): string {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "craft-builder-test-"));
+  tempDirs.push(dir);
+  for (const file of files) {
+    fs.writeFileSync(path.join(dir, file), "");
+  }
+  return dir;
+}
+
 afterEach(() => {
   vi.restoreAllMocks();
+  for (const dir of tempDirs) {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+  tempDirs = [];
 });
 
 test("CraftBuilder expands tilde in project root", () => {
@@ -53,8 +67,6 @@ test("CraftBuilder allows empty verbosity", () => {
 });
 
 test("CraftBuilder.pack calls configureProLXD when pro is set", async () => {
-  expect.assertions(1);
-
   const { configureProLXD } = mockSetup();
 
   await makeBuilder({ pro: "esm-apps" }).pack();
@@ -63,8 +75,6 @@ test("CraftBuilder.pack calls configureProLXD when pro is set", async () => {
 });
 
 test("CraftBuilder.pack does not call configureProLXD when pro is not set", async () => {
-  expect.assertions(1);
-
   const { configureProLXD } = mockSetup();
 
   await makeBuilder().pack();
@@ -73,97 +83,75 @@ test("CraftBuilder.pack does not call configureProLXD when pro is not set", asyn
 });
 
 test("CraftBuilder.pack executes the correct base command", async () => {
-  expect.assertions(1);
-
   const { execMock } = mockSetup();
 
   await makeBuilder({ projectRoot: "my-dir" }).pack();
 
   expect(execMock).toHaveBeenCalledWith(
-    "sudo",
-    ["--preserve-env", "--user", "ubuntu", "test-tool", "pack"],
+    ["sudo", "--preserve-env", "--user", "ubuntu", "test-tool", "pack"],
     { cwd: "my-dir" },
   );
 });
 
 test("CraftBuilder.pack executes test subcommand when runTests is true", async () => {
-  expect.assertions(1);
-
   const { execMock } = mockSetup();
 
   await makeBuilder({ projectRoot: "my-dir", runTests: true }).pack();
 
   expect(execMock).toHaveBeenCalledWith(
-    "sudo",
-    ["--preserve-env", "--user", "ubuntu", "test-tool", "test"],
+    ["sudo", "--preserve-env", "--user", "ubuntu", "test-tool", "test"],
     { cwd: "my-dir" },
   );
 });
 
 test("CraftBuilder.pack includes --verbosity flag when verbosity is set", async () => {
-  expect.assertions(1);
-
   const { execMock } = mockSetup();
 
   await makeBuilder({ verbosity: "debug" }).pack();
 
   expect(execMock).toHaveBeenCalledWith(
-    "sudo",
     expect.arrayContaining(["--verbosity", "debug"]),
     expect.anything(),
   );
 });
 
 test("CraftBuilder.pack omits --verbosity flag when verbosity is empty", async () => {
-  expect.assertions(1);
-
   const { execMock } = mockSetup();
 
   await makeBuilder({ verbosity: "" }).pack();
 
   expect(execMock).toHaveBeenCalledWith(
-    "sudo",
     expect.not.arrayContaining(["--verbosity"]),
     expect.anything(),
   );
 });
 
 test("CraftBuilder.pack includes --pro flag when pro is set", async () => {
-  expect.assertions(1);
-
   const { execMock } = mockSetup();
 
   await makeBuilder({ pro: "esm-apps,esm-infra" }).pack();
 
   expect(execMock).toHaveBeenCalledWith(
-    "sudo",
     expect.arrayContaining(["--pro=esm-apps,esm-infra"]),
     expect.anything(),
   );
 });
 
 test("CraftBuilder.findArtifacts throws when no matching files are found", async () => {
-  expect.assertions(1);
+  const tempDir = createTempProject(["other-file.txt"]);
 
-  vi.spyOn(fs.promises, "readdir").mockResolvedValue([
-    "other-file.txt",
-  ] as never);
-
-  await expect(makeBuilder().findArtifacts(".charm")).rejects.toThrow(
-    "No .charm files produced by build",
-  );
+  await expect(
+    makeBuilder({ projectRoot: tempDir }).findArtifacts(".charm"),
+  ).rejects.toThrow("No .charm files produced by build");
 });
 
 test("CraftBuilder.findArtifacts returns all matching files", async () => {
-  expect.assertions(1);
-
-  vi.spyOn(fs.promises, "readdir").mockResolvedValue([
-    "a.charm",
-    "b.charm",
-    "readme.txt",
-  ] as never);
+  const tempDir = createTempProject(["a.charm", "b.charm", "readme.txt"]);
 
   await expect(
-    makeBuilder({ projectRoot: "project-root" }).findArtifacts(".charm"),
-  ).resolves.toEqual(["project-root/a.charm", "project-root/b.charm"]);
+    makeBuilder({ projectRoot: tempDir }).findArtifacts(".charm"),
+  ).resolves.toEqual([
+    path.join(tempDir, "a.charm"),
+    path.join(tempDir, "b.charm"),
+  ]);
 });

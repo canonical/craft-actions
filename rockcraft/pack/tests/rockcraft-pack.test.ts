@@ -1,5 +1,4 @@
 import { vi, afterEach, test, expect } from "vitest";
-import * as exec from "@actions/exec";
 import * as build from "../src/index.ts";
 import * as tools from "@craft-actions/common/tools.ts";
 
@@ -9,20 +8,11 @@ afterEach(() => {
 
 function mockSetup(user = "ubuntu") {
   return {
-    ensureSnapd: vi
-      .spyOn(tools, "ensureSnapd")
-      .mockImplementation(async (): Promise<void> => {}),
-    ensureLXD: vi
-      .spyOn(tools, "ensureLXD")
-      .mockImplementation(async (): Promise<void> => {}),
-    ensureCraftTool: vi
-      .spyOn(tools, "ensureCraftTool")
-      .mockImplementation(async (): Promise<void> => {}),
     shellUser: vi
       .spyOn(tools, "shellUser")
       .mockImplementation((): string => user),
     execMock: vi
-      .spyOn(exec, "exec")
+      .spyOn(tools, "runCommand")
       .mockImplementation(async (): Promise<number> => 0),
   };
 }
@@ -43,15 +33,13 @@ function makeBuilder(
 }
 
 test("RockcraftBuilder.build can ignore unmaintained", async () => {
-  expect.assertions(1);
-
   const { execMock } = mockSetup();
 
   await makeBuilder({ ignore: "unmaintained", verbosity: "trace" }).pack();
 
   expect(execMock).toHaveBeenCalledWith(
-    "sudo",
     [
+      "sudo",
       "--preserve-env",
       "--user",
       "ubuntu",

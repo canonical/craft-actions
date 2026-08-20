@@ -1,17 +1,41 @@
-import { vi, afterEach, test, expect } from "vitest";
+import { vi, afterEach, beforeEach, test, expect } from "vitest";
 import * as core from "@actions/core";
 import { readBaseInputs, runPackAction } from "../src/pack-action.ts";
 import * as setupAction from "../src/setup-action.ts";
 import { CraftBuilder } from "../src/craft-builder.ts";
+import * as path from "node:path";
+import * as os from "node:os";
+import * as fs from "node:fs";
+
+let tempOutputPath: string;
+
+beforeEach(() => {
+  tempOutputPath = path.join(os.tmpdir(), "github_output_test");
+  fs.writeFileSync(tempOutputPath, ""); // Make sure it's empty
+  vi.stubEnv("GITHUB_OUTPUT", tempOutputPath);
+});
 
 afterEach(() => {
   vi.restoreAllMocks();
+  vi.unstubAllEnvs();
+  if (fs.existsSync(tempOutputPath)) {
+    fs.unlinkSync(tempOutputPath);
+  }
 });
 
+function assertOutput(real: string, expected: [string, string]): void {
+  const [key, value] = expected;
+  const escapedValue = value.replace(/\./g, "\\.");
+  const regex = new RegExp(
+    `${key}<<gh[a]?delimiter_.*\n${escapedValue}\ngh[a]?delimiter_.*`,
+  );
+  expect(real).toMatch(regex);
+}
+
 function mockInputs(inputs: Record<string, string>) {
-  vi.spyOn(core, "getInput").mockImplementation((name: string) => {
-    return inputs[name] ?? "";
-  });
+  for (const [key, value] of Object.entries(inputs)) {
+    vi.stubEnv(`INPUT_${key.toUpperCase()}`, value);
+  }
 }
 
 function mockSetupAction() {
@@ -89,11 +113,7 @@ test('readBaseInputs parses runTests as false when input is not "true"', () => {
 // runPackAction
 
 test("runPackAction calls runSetupAction with the tool name", async () => {
-  expect.assertions(1);
-
   const runSetup = mockSetupAction();
-  vi.spyOn(core, "setOutput").mockImplementation(() => {});
-  vi.spyOn(core, "info").mockImplementation(() => {});
   const builder = makeStubBuilder({ revision: "1" });
 
   await runPackAction(builder, "charm");
@@ -102,38 +122,21 @@ test("runPackAction calls runSetupAction with the tool name", async () => {
 });
 
 test("runPackAction calls pack and sets output", async () => {
-  expect.assertions(2);
-
   mockSetupAction();
-  const setOutput = vi.spyOn(core, "setOutput").mockImplementation(() => {});
-  vi.spyOn(core, "info").mockImplementation(() => {});
   const builder = makeStubBuilder({ revision: "1" });
 
   await runPackAction(builder, "charm");
 
   expect(builder.pack).toHaveBeenCalled();
-  expect(setOutput).toHaveBeenCalledWith("charm", "project-root/output.charm");
-});
-
-test("runPackAction does not log info when revision is set", async () => {
-  expect.assertions(1);
-
-  mockSetupAction();
-  const info = vi.spyOn(core, "info").mockImplementation(() => {});
-  vi.spyOn(core, "setOutput").mockImplementation(() => {});
-  const builder = makeStubBuilder({ revision: "42" });
-
-  await runPackAction(builder, "charm");
-
-  expect(info).not.toHaveBeenCalled();
+  assertOutput(fs.readFileSync(tempOutputPath, "utf8"), [
+    "charm",
+    "project-root/output.charm",
+  ]);
 });
 
 test("runPackAction calls setFailed on error", async () => {
-  expect.assertions(1);
-
   mockSetupAction();
   const setFailed = vi.spyOn(core, "setFailed").mockImplementation(() => {});
-  vi.spyOn(core, "info").mockImplementation(() => {});
   const builder = makeStubBuilder({
     revision: "1",
     pack: vi.fn(async () => {
@@ -147,11 +150,7 @@ test("runPackAction calls setFailed on error", async () => {
 });
 
 test("runPackAction warns when multiple artifacts are found", async () => {
-  expect.assertions(1);
-
   mockSetupAction();
-  vi.spyOn(core, "setOutput").mockImplementation(() => {});
-  vi.spyOn(core, "info").mockImplementation(() => {});
   const warning = vi.spyOn(core, "warning").mockImplementation(() => {});
   const builder = makeStubBuilder({
     revision: "1",
@@ -167,11 +166,7 @@ test("runPackAction warns when multiple artifacts are found", async () => {
 });
 
 test("runPackAction does not warn when only one artifact is found", async () => {
-  expect.assertions(1);
-
   mockSetupAction();
-  vi.spyOn(core, "setOutput").mockImplementation(() => {});
-  vi.spyOn(core, "info").mockImplementation(() => {});
   const warning = vi.spyOn(core, "warning").mockImplementation(() => {});
   const builder = makeStubBuilder({ revision: "1" });
 

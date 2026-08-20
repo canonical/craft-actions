@@ -1,7 +1,10 @@
-import { vi, afterEach, test, expect } from "vitest";
+import { vi, afterEach, beforeEach, test, expect } from "vitest";
 import * as core from "@actions/core";
 import * as http from "node:http";
 import * as tools from "../src/tools.ts";
+import * as path from "node:path";
+import * as os from "node:os";
+import * as fs from "node:fs";
 import {
   readBaseInputs,
   runSetupAction,
@@ -10,14 +13,35 @@ import {
 
 vi.mock("node:http", () => ({ get: vi.fn() }));
 
-afterEach(() => {
-  vi.resetAllMocks();
+let tempOutputPath: string;
+
+beforeEach(() => {
+  tempOutputPath = path.join(os.tmpdir(), "github_output_test_setup");
+  fs.writeFileSync(tempOutputPath, "");
+  vi.stubEnv("GITHUB_OUTPUT", tempOutputPath);
 });
 
+afterEach(() => {
+  vi.resetAllMocks();
+  vi.unstubAllEnvs();
+  if (fs.existsSync(tempOutputPath)) {
+    fs.unlinkSync(tempOutputPath);
+  }
+});
+
+function assertOutput(real: string, expected: [string, string]): void {
+  const [key, value] = expected;
+  const escapedValue = value.replace(/\./g, "\\.");
+  const regex = new RegExp(
+    `${key}<<gh[a]?delimiter_.*\n${escapedValue}\ngh[a]?delimiter_.*`,
+  );
+  expect(real).toMatch(regex);
+}
+
 function mockInputs(inputs: Record<string, string>) {
-  vi.spyOn(core, "getInput").mockImplementation((name: string) => {
-    return inputs[name] ?? "";
-  });
+  for (const [key, value] of Object.entries(inputs)) {
+    vi.stubEnv(`INPUT_${key.toUpperCase()}`, value);
+  }
 }
 
 function mockToolFunctions() {
@@ -88,12 +112,9 @@ test("readBaseInputs defaults lxd-channel to 5.21/stable when empty", () => {
 // runSetupAction
 
 test("runSetupAction calls ensureSnapd, ensureLXD, and ensureCraftTool", async () => {
-  expect.assertions(3);
-
   mockInputs({ channel: "stable", "lxd-channel": "5.21/stable", revision: "" });
   vi.spyOn(core, "startGroup").mockImplementation(() => {});
   vi.spyOn(core, "endGroup").mockImplementation(() => {});
-  vi.spyOn(core, "setOutput").mockImplementation(() => {});
   mockHttpGet("123");
   const { ensureSnapd, ensureLXD, ensureCraftTool } = mockToolFunctions();
 
@@ -105,12 +126,9 @@ test("runSetupAction calls ensureSnapd, ensureLXD, and ensureCraftTool", async (
 });
 
 test("runSetupAction passes lxd-channel to ensureLXD", async () => {
-  expect.assertions(1);
-
   mockInputs({ "lxd-channel": "latest/edge" });
   vi.spyOn(core, "startGroup").mockImplementation(() => {});
   vi.spyOn(core, "endGroup").mockImplementation(() => {});
-  vi.spyOn(core, "setOutput").mockImplementation(() => {});
   mockHttpGet("123");
   const { ensureLXD } = mockToolFunctions();
 
@@ -120,24 +138,20 @@ test("runSetupAction passes lxd-channel to ensureLXD", async () => {
 });
 
 test("runSetupAction sets lxd-revision and tool revision outputs", async () => {
-  expect.assertions(2);
-
   mockInputs({});
   vi.spyOn(core, "startGroup").mockImplementation(() => {});
   vi.spyOn(core, "endGroup").mockImplementation(() => {});
-  const setOutput = vi.spyOn(core, "setOutput").mockImplementation(() => {});
   mockHttpGet("123");
   mockToolFunctions();
 
   await runSetupAction("rockcraft");
 
-  expect(setOutput).toHaveBeenCalledWith("lxd-revision", "123");
-  expect(setOutput).toHaveBeenCalledWith("rockcraft-revision", "123");
+  const realOutput = fs.readFileSync(tempOutputPath, "utf8");
+  assertOutput(realOutput, ["lxd-revision", "123"]);
+  assertOutput(realOutput, ["rockcraft-revision", "123"]);
 });
 
 test("runSetupAction calls setFailed on error", async () => {
-  expect.assertions(2);
-
   mockInputs({});
   vi.spyOn(core, "startGroup").mockImplementation(() => {});
   vi.spyOn(core, "endGroup").mockImplementation(() => {});
@@ -153,8 +167,6 @@ test("runSetupAction calls setFailed on error", async () => {
 });
 
 test("runSetupAction calls endGroup even on error", async () => {
-  expect.assertions(2);
-
   mockInputs({});
   vi.spyOn(core, "startGroup").mockImplementation(() => {});
   const endGroup = vi.spyOn(core, "endGroup").mockImplementation(() => {});
@@ -172,16 +184,12 @@ test("runSetupAction calls endGroup even on error", async () => {
 // getSnapRevision
 
 test("getSnapRevision returns the revision from snapd", async () => {
-  expect.assertions(1);
-
   mockHttpGet("4813");
 
   await expect(getSnapRevision("rockcraft")).resolves.toBe("4813");
 });
 
 test("getSnapRevision rejects on malformed JSON", async () => {
-  expect.assertions(1);
-
   vi.mocked(http.get).mockImplementation(
     (_options: unknown, callback?: unknown) => {
       const cb = callback as (res: object) => void;
@@ -202,8 +210,6 @@ test("getSnapRevision rejects on malformed JSON", async () => {
 });
 
 test("getSnapRevision rejects on response stream error", async () => {
-  expect.assertions(1);
-
   vi.mocked(http.get).mockImplementation(
     (_options: unknown, callback?: unknown) => {
       const cb = callback as (res: object) => void;
@@ -223,8 +229,6 @@ test("getSnapRevision rejects on response stream error", async () => {
 });
 
 test("getSnapRevision rejects on connection error", async () => {
-  expect.assertions(1);
-
   vi.mocked(http.get).mockImplementation(() => {
     const req = {
       on: (event: string, handler: (...args: unknown[]) => void) => {

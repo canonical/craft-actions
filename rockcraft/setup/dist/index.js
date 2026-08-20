@@ -19837,12 +19837,12 @@ async function ensureSnapd() {
   const haveSnapd = await haveExecutable("/usr/bin/snap");
   if (!haveSnapd) {
     core.info("Installing snapd...");
-    await exec.exec("sudo", ["apt-get", "update", "-q"]);
-    await exec.exec("sudo", ["apt-get", "install", "-qy", "snapd"]);
+    await runCommand(["sudo", "apt-get", "update", "-q"]);
+    await runCommand(["sudo", "apt-get", "install", "-qy", "snapd"]);
   }
   const root = await fs.promises.stat("/");
   if (root.uid !== 0 || root.gid !== 0) {
-    await exec.exec("sudo", ["chown", "root:root", "/"]);
+    await runCommand(["sudo", "chown", "root:root", "/"]);
   }
 }
 async function ensureLXDNetwork() {
@@ -19857,25 +19857,33 @@ async function ensureLXDNetwork() {
   const installedPackages = [];
   const options = { silent: true, ignoreReturnCode: true };
   for (const mobyPackage of mobyPackages) {
-    if (await exec.exec("dpkg", ["-l", mobyPackage], options) === 0) {
+    if (await runCommand(["dpkg", "-l", mobyPackage], options) === 0) {
       installedPackages.push(mobyPackage);
     }
   }
   core.info(
     `Installed docker related packages might interfere with LXD networking: ${installedPackages}`
   );
-  await exec.exec("sudo", ["iptables", "-P", "FORWARD", "ACCEPT"]);
+  await runCommand(["sudo", "iptables", "-P", "FORWARD", "ACCEPT"]);
 }
 async function ensureLXD(lxdChannel) {
   const haveDebLXD = await haveExecutable("/usr/bin/lxd");
   if (haveDebLXD) {
     core.info("Removing legacy .deb packaged LXD...");
-    await exec.exec("sudo", ["apt-get", "remove", "-qy", "lxd", "lxd-client"]);
+    await runCommand([
+      "sudo",
+      "apt-get",
+      "remove",
+      "-qy",
+      "lxd",
+      "lxd-client"
+    ]);
   }
   const haveSnapLXD = await haveExecutable("/snap/bin/lxd");
   if (!haveSnapLXD) {
     core.info("Installing LXD...");
-    await exec.exec("sudo", [
+    await runCommand([
+      "sudo",
       "snap",
       "install",
       "lxd",
@@ -19886,21 +19894,22 @@ async function ensureLXD(lxdChannel) {
     ]);
   }
   core.info("Setting daemon group on LXD snap to adm...");
-  await exec.exec("sudo", ["snap", "set", "lxd", "daemon.group=adm"]);
-  const isInitialized = await exec.exec("sudo", ["lxc", "storage", "show", "default"], {
+  await runCommand(["sudo", "snap", "set", "lxd", "daemon.group=adm"]);
+  const isInitialized = await runCommand(["sudo", "lxc", "storage", "show", "default"], {
     ignoreReturnCode: true,
     silent: true
   }) === 0;
   if (!isInitialized) {
     core.info("Initialising LXD...");
-    await exec.exec("sudo", ["lxd", "init", "--auto"]);
+    await runCommand(["sudo", "lxd", "init", "--auto"]);
   }
   await ensureLXDNetwork();
 }
 async function ensureCraftTool(name, channel, revision) {
   const haveSnap = await haveExecutable(`/snap/bin/${name}`);
   core.info(`Installing ${name}...`);
-  await exec.exec("sudo", [
+  await runCommand([
+    "sudo",
     "snap",
     haveSnap ? "refresh" : "install",
     revision.length > 0 ? "--revision" : "--channel",
@@ -19908,6 +19917,9 @@ async function ensureCraftTool(name, channel, revision) {
     "--classic",
     name
   ]);
+}
+async function runCommand(command, options) {
+  return exec.exec(command[0], command.slice(1), options);
 }
 
 // ../../common/src/setup-action.ts

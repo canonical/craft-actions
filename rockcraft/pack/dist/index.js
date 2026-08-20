@@ -19421,7 +19421,7 @@ var require_exec = __commonJS({
     exports.getExecOutput = exports.exec = void 0;
     var string_decoder_1 = __require("string_decoder");
     var tr = __importStar(require_toolrunner());
-    function exec5(commandLine, args, options) {
+    function exec3(commandLine, args, options) {
       return __awaiter(this, void 0, void 0, function* () {
         const commandArgs = tr.argStringToArray(commandLine);
         if (commandArgs.length === 0) {
@@ -19433,7 +19433,7 @@ var require_exec = __commonJS({
         return runner.exec();
       });
     }
-    exports.exec = exec5;
+    exports.exec = exec3;
     function getExecOutput(commandLine, args, options) {
       var _a, _b;
       return __awaiter(this, void 0, void 0, function* () {
@@ -19456,7 +19456,7 @@ var require_exec = __commonJS({
           }
         };
         const listeners = Object.assign(Object.assign({}, options === null || options === void 0 ? void 0 : options.listeners), { stdout: stdOutListener, stderr: stdErrListener });
-        const exitCode = yield exec5(commandLine, args, Object.assign(Object.assign({}, options), { listeners }));
+        const exitCode = yield exec3(commandLine, args, Object.assign(Object.assign({}, options), { listeners }));
         stdout += stdoutDecoder.end();
         stderr += stderrDecoder.end();
         return {
@@ -19534,12 +19534,12 @@ var require_platform = __commonJS({
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.getDetails = exports.isLinux = exports.isMacOS = exports.isWindows = exports.arch = exports.platform = void 0;
     var os_1 = __importDefault(__require("os"));
-    var exec5 = __importStar(require_exec());
+    var exec3 = __importStar(require_exec());
     var getWindowsInfo = () => __awaiter(void 0, void 0, void 0, function* () {
-      const { stdout: version } = yield exec5.getExecOutput('powershell -command "(Get-CimInstance -ClassName Win32_OperatingSystem).Version"', void 0, {
+      const { stdout: version } = yield exec3.getExecOutput('powershell -command "(Get-CimInstance -ClassName Win32_OperatingSystem).Version"', void 0, {
         silent: true
       });
-      const { stdout: name } = yield exec5.getExecOutput('powershell -command "(Get-CimInstance -ClassName Win32_OperatingSystem).Caption"', void 0, {
+      const { stdout: name } = yield exec3.getExecOutput('powershell -command "(Get-CimInstance -ClassName Win32_OperatingSystem).Caption"', void 0, {
         silent: true
       });
       return {
@@ -19549,7 +19549,7 @@ var require_platform = __commonJS({
     });
     var getMacOsInfo = () => __awaiter(void 0, void 0, void 0, function* () {
       var _a, _b, _c, _d;
-      const { stdout } = yield exec5.getExecOutput("sw_vers", void 0, {
+      const { stdout } = yield exec3.getExecOutput("sw_vers", void 0, {
         silent: true
       });
       const version = (_b = (_a = stdout.match(/ProductVersion:\s*(.+)/)) === null || _a === void 0 ? void 0 : _a[1]) !== null && _b !== void 0 ? _b : "";
@@ -19560,7 +19560,7 @@ var require_platform = __commonJS({
       };
     });
     var getLinuxInfo = () => __awaiter(void 0, void 0, void 0, function* () {
-      const { stdout } = yield exec5.getExecOutput("lsb_release", ["-i", "-r", "-s"], {
+      const { stdout } = yield exec3.getExecOutput("lsb_release", ["-i", "-r", "-s"], {
         silent: true
       });
       const [name, version] = stdout.trim().split("\n");
@@ -19822,7 +19822,6 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
 var core4 = __toESM(require_core(), 1);
 
 // ../../common/src/craft-builder.ts
-var exec3 = __toESM(require_exec(), 1);
 import * as fs2 from "fs";
 import * as path from "path";
 
@@ -19852,12 +19851,12 @@ async function ensureSnapd() {
   const haveSnapd = await haveExecutable("/usr/bin/snap");
   if (!haveSnapd) {
     core.info("Installing snapd...");
-    await exec.exec("sudo", ["apt-get", "update", "-q"]);
-    await exec.exec("sudo", ["apt-get", "install", "-qy", "snapd"]);
+    await runCommand(["sudo", "apt-get", "update", "-q"]);
+    await runCommand(["sudo", "apt-get", "install", "-qy", "snapd"]);
   }
   const root = await fs.promises.stat("/");
   if (root.uid !== 0 || root.gid !== 0) {
-    await exec.exec("sudo", ["chown", "root:root", "/"]);
+    await runCommand(["sudo", "chown", "root:root", "/"]);
   }
 }
 async function ensureLXDNetwork() {
@@ -19872,25 +19871,33 @@ async function ensureLXDNetwork() {
   const installedPackages = [];
   const options = { silent: true, ignoreReturnCode: true };
   for (const mobyPackage of mobyPackages) {
-    if (await exec.exec("dpkg", ["-l", mobyPackage], options) === 0) {
+    if (await runCommand(["dpkg", "-l", mobyPackage], options) === 0) {
       installedPackages.push(mobyPackage);
     }
   }
   core.info(
     `Installed docker related packages might interfere with LXD networking: ${installedPackages}`
   );
-  await exec.exec("sudo", ["iptables", "-P", "FORWARD", "ACCEPT"]);
+  await runCommand(["sudo", "iptables", "-P", "FORWARD", "ACCEPT"]);
 }
 async function ensureLXD(lxdChannel) {
   const haveDebLXD = await haveExecutable("/usr/bin/lxd");
   if (haveDebLXD) {
     core.info("Removing legacy .deb packaged LXD...");
-    await exec.exec("sudo", ["apt-get", "remove", "-qy", "lxd", "lxd-client"]);
+    await runCommand([
+      "sudo",
+      "apt-get",
+      "remove",
+      "-qy",
+      "lxd",
+      "lxd-client"
+    ]);
   }
   const haveSnapLXD = await haveExecutable("/snap/bin/lxd");
   if (!haveSnapLXD) {
     core.info("Installing LXD...");
-    await exec.exec("sudo", [
+    await runCommand([
+      "sudo",
       "snap",
       "install",
       "lxd",
@@ -19901,31 +19908,33 @@ async function ensureLXD(lxdChannel) {
     ]);
   }
   core.info("Setting daemon group on LXD snap to adm...");
-  await exec.exec("sudo", ["snap", "set", "lxd", "daemon.group=adm"]);
-  const isInitialized = await exec.exec("sudo", ["lxc", "storage", "show", "default"], {
+  await runCommand(["sudo", "snap", "set", "lxd", "daemon.group=adm"]);
+  const isInitialized = await runCommand(["sudo", "lxc", "storage", "show", "default"], {
     ignoreReturnCode: true,
     silent: true
   }) === 0;
   if (!isInitialized) {
     core.info("Initialising LXD...");
-    await exec.exec("sudo", ["lxd", "init", "--auto"]);
+    await runCommand(["sudo", "lxd", "init", "--auto"]);
   }
   await ensureLXDNetwork();
 }
 async function configureProLXD() {
   core.info("Configuring LXD for pro builds");
-  await exec.exec("sudo", [
+  await runCommand([
+    "sudo",
     "pro",
     "config",
     "set",
     "lxd_guest_attach=available"
   ]);
-  await exec.exec("sudo", ["snap", "restart", "lxd"]);
+  await runCommand(["sudo", "snap", "restart", "lxd"]);
 }
 async function ensureCraftTool(name, channel, revision) {
   const haveSnap = await haveExecutable(`/snap/bin/${name}`);
   core.info(`Installing ${name}...`);
-  await exec.exec("sudo", [
+  await runCommand([
+    "sudo",
     "snap",
     haveSnap ? "refresh" : "install",
     revision.length > 0 ? "--revision" : "--channel",
@@ -19933,6 +19942,9 @@ async function ensureCraftTool(name, channel, revision) {
     "--classic",
     name
   ]);
+}
+async function runCommand(command, options) {
+  return exec.exec(command[0], command.slice(1), options);
 }
 
 // ../../common/src/craft-builder.ts
@@ -19963,9 +19975,9 @@ var CraftBuilder = class {
   }
   async doPack(subcommand) {
     const packArgs = await this.buildPackArgs();
-    await exec3.exec(
-      "sudo",
+    await runCommand(
       [
+        "sudo",
         "--preserve-env",
         "--user",
         shellUser(),

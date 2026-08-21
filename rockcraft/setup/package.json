@@ -8,7 +8,7 @@
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
-    "@actions/core": "^1.10.1",
+    "@actions/core": "^3.0.0",
     "@craft-actions/common": "workspace:*"
   }
 }

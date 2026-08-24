@@ -3,6 +3,11 @@ import * as fs from "fs";
 import * as core from "@actions/core";
 import * as tools from "../src/tools.ts";
 
+vi.mock("@actions/core", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@actions/core")>()),
+  info: vi.fn(),
+}));
+
 afterEach(() => {
   vi.restoreAllMocks();
   vi.resetAllMocks();
@@ -335,7 +340,7 @@ test("ensureCraftTool refreshes if the tool is already installed", async () => {
 });
 
 test("ensureLXDNetwork sets up iptables and warns about Docker", async () => {
-  const infoMock = vi.spyOn(core, "info").mockImplementation(() => {});
+  const infoMock = vi.mocked(core.info);
 
   const execMock = vi
     .spyOn(tools, "runCommand")
@@ -387,7 +392,7 @@ test("ensureLXDNetwork sets up iptables and warns about Docker", async () => {
 });
 
 test("ensureLXDNetwork sets up iptables and warns only about installed packages", async () => {
-  const infoMock = vi.spyOn(core, "info").mockImplementation(() => {});
+  const infoMock = vi.mocked(core.info);
   const execMock = vi
     .spyOn(tools, "runCommand")
     .mockImplementation(async (): Promise<number> => 0);

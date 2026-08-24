@@ -12,6 +12,12 @@ import {
 } from "../src/setup-action.ts";
 
 vi.mock("node:http", () => ({ get: vi.fn() }));
+vi.mock("@actions/core", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@actions/core")>()),
+  startGroup: vi.fn(),
+  endGroup: vi.fn(),
+  setFailed: vi.fn(),
+}));
 
 let tempOutputPath: string;
 
@@ -113,8 +119,6 @@ test("readBaseInputs defaults lxd-channel to 5.21/stable when empty", () => {
 
 test("runSetupAction calls ensureSnapd, ensureLXD, and ensureCraftTool", async () => {
   mockInputs({ channel: "stable", "lxd-channel": "5.21/stable", revision: "" });
-  vi.spyOn(core, "startGroup").mockImplementation(() => {});
-  vi.spyOn(core, "endGroup").mockImplementation(() => {});
   mockHttpGet("123");
   const { ensureSnapd, ensureLXD, ensureCraftTool } = mockToolFunctions();
 
@@ -127,8 +131,6 @@ test("runSetupAction calls ensureSnapd, ensureLXD, and ensureCraftTool", async (
 
 test("runSetupAction passes lxd-channel to ensureLXD", async () => {
   mockInputs({ "lxd-channel": "latest/edge" });
-  vi.spyOn(core, "startGroup").mockImplementation(() => {});
-  vi.spyOn(core, "endGroup").mockImplementation(() => {});
   mockHttpGet("123");
   const { ensureLXD } = mockToolFunctions();
 
@@ -139,8 +141,6 @@ test("runSetupAction passes lxd-channel to ensureLXD", async () => {
 
 test("runSetupAction sets lxd-revision and tool revision outputs", async () => {
   mockInputs({});
-  vi.spyOn(core, "startGroup").mockImplementation(() => {});
-  vi.spyOn(core, "endGroup").mockImplementation(() => {});
   mockHttpGet("123");
   mockToolFunctions();
 
@@ -153,9 +153,7 @@ test("runSetupAction sets lxd-revision and tool revision outputs", async () => {
 
 test("runSetupAction calls setFailed on error", async () => {
   mockInputs({});
-  vi.spyOn(core, "startGroup").mockImplementation(() => {});
-  vi.spyOn(core, "endGroup").mockImplementation(() => {});
-  const setFailed = vi.spyOn(core, "setFailed").mockImplementation(() => {});
+  const setFailed = vi.mocked(core.setFailed);
   mockToolFunctions();
   vi.spyOn(tools, "ensureSnapd").mockImplementation(async () => {
     throw new Error("snapd failed");
@@ -168,9 +166,7 @@ test("runSetupAction calls setFailed on error", async () => {
 
 test("runSetupAction calls endGroup even on error", async () => {
   mockInputs({});
-  vi.spyOn(core, "startGroup").mockImplementation(() => {});
-  const endGroup = vi.spyOn(core, "endGroup").mockImplementation(() => {});
-  vi.spyOn(core, "setFailed").mockImplementation(() => {});
+  const endGroup = vi.mocked(core.endGroup);
   mockToolFunctions();
   vi.spyOn(tools, "ensureSnapd").mockImplementation(async () => {
     throw new Error("snapd failed");

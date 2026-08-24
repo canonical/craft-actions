@@ -8,3 +8,7 @@ packages:
 
 allowBuilds:
   esbuild: true
+
+catalog:
+  '@actions/core': "^3.0.0"
+  '@actions/exec': "^3.0.0"

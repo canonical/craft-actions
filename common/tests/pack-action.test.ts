@@ -7,6 +7,12 @@ import * as path from "node:path";
 import * as os from "node:os";
 import * as fs from "node:fs";
 
+vi.mock("@actions/core", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@actions/core")>()),
+  setFailed: vi.fn(),
+  warning: vi.fn(),
+}));
+
 let tempOutputPath: string;
 
 beforeEach(() => {
@@ -17,6 +23,7 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.restoreAllMocks();
+  vi.resetAllMocks();
   vi.unstubAllEnvs();
   if (fs.existsSync(tempOutputPath)) {
     fs.unlinkSync(tempOutputPath);
@@ -136,7 +143,7 @@ test("runPackAction calls pack and sets output", async () => {
 
 test("runPackAction calls setFailed on error", async () => {
   mockSetupAction();
-  const setFailed = vi.spyOn(core, "setFailed").mockImplementation(() => {});
+  const setFailed = vi.mocked(core.setFailed);
   const builder = makeStubBuilder({
     revision: "1",
     pack: vi.fn(async () => {
@@ -151,7 +158,7 @@ test("runPackAction calls setFailed on error", async () => {
 
 test("runPackAction warns when multiple artifacts are found", async () => {
   mockSetupAction();
-  const warning = vi.spyOn(core, "warning").mockImplementation(() => {});
+  const warning = vi.mocked(core.warning);
   const builder = makeStubBuilder({
     revision: "1",
     findArtifacts: vi.fn(async () => [
@@ -167,7 +174,7 @@ test("runPackAction warns when multiple artifacts are found", async () => {
 
 test("runPackAction does not warn when only one artifact is found", async () => {
   mockSetupAction();
-  const warning = vi.spyOn(core, "warning").mockImplementation(() => {});
+  const warning = vi.mocked(core.warning);
   const builder = makeStubBuilder({ revision: "1" });
 
   await runPackAction(builder, "charm");

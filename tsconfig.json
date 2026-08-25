@@ -16,6 +16,8 @@
     "imagecraft/setup/**/*.ts",
     "rockcraft/pack/**/*.ts",
     "rockcraft/setup/**/*.ts",
-    "snapcraft/setup/**/*.ts"],
+    "snapcraft/setup/**/*.ts",
+    "snapcraft/pack/**/*.ts"
+  ],
   "exclude": ["**/dist/**"]
 }

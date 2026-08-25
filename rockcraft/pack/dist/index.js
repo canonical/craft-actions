@@ -20237,7 +20237,11 @@ var CraftBuilder = class {
     }
     return args;
   }
-  async doPack(subcommand) {
+  async buildCommand() {
+    return [this.toolName, this.runTests ? "test" : "pack"];
+  }
+  async doPack() {
+    const command = await this.buildCommand();
     const packArgs = await this.buildPackArgs();
     await runCommand(
       [
@@ -20245,8 +20249,7 @@ var CraftBuilder = class {
         "--preserve-env",
         "--user",
         shellUser(),
-        this.toolName,
-        subcommand,
+        ...command,
         ...packArgs
       ],
       { cwd: this.projectRoot }
@@ -20256,7 +20259,7 @@ var CraftBuilder = class {
     if (this.pro) {
       await configureProLXD();
     }
-    await this.doPack(this.runTests ? "test" : "pack");
+    await this.doPack();
   }
   async #readdir(dir) {
     return await fs4.promises.readdir(dir);

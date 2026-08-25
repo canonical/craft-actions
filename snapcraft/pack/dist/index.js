@@ -20237,7 +20237,11 @@ var CraftBuilder = class {
     }
     return args;
   }
-  async doPack(subcommand) {
+  async buildCommand() {
+    return [this.toolName, this.runTests ? "test" : "pack"];
+  }
+  async doPack() {
+    const command = await this.buildCommand();
     const packArgs = await this.buildPackArgs();
     await runCommand(
       [
@@ -20245,8 +20249,7 @@ var CraftBuilder = class {
         "--preserve-env",
         "--user",
         shellUser(),
-        this.toolName,
-        subcommand,
+        ...command,
         ...packArgs
       ],
       { cwd: this.projectRoot }
@@ -20256,7 +20259,7 @@ var CraftBuilder = class {
     if (this.pro) {
       await configureProLXD();
     }
-    await this.doPack(this.runTests ? "test" : "pack");
+    await this.doPack();
   }
   async #readdir(dir) {
     return await fs4.promises.readdir(dir);
@@ -20339,6 +20342,23 @@ var SnapcraftBuilder = class extends CraftBuilder {
   artifactType = ".snap";
   constructor(options) {
     super(options);
+  }
+  async buildCommand() {
+    if (this.runTests) {
+      return super.buildCommand();
+    }
+    const { result } = await fetchSnapd(`/v2/snaps/${this.toolName}`);
+    if (!isRecord(result) || typeof result.version !== "string") {
+      throw new Error(`Unable to locate installation of snap ${this.toolName}`);
+    }
+    const snapcraftVersion = result.version;
+    const [snapcraftMajor] = snapcraftVersion.split(".", 1);
+    if (!/^\d+$/.test(snapcraftMajor)) {
+      throw new Error(
+        `Snapd returned an invalid Snapcraft version: ${result.version}`
+      );
+    }
+    return Number(snapcraftMajor) < 8 ? [this.toolName] : super.buildCommand();
   }
 };
 if (import.meta.url === `file://${process.argv[1]}`) {

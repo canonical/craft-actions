@@ -45,7 +45,12 @@ export abstract class CraftBuilder {
     return args;
   }
 
-  protected async doPack(subcommand: "pack" | "test"): Promise<void> {
+  protected async buildCommand(): Promise<string[]> {
+    return [this.toolName, this.runTests ? "test" : "pack"];
+  }
+
+  protected async doPack(): Promise<void> {
+    const command = await this.buildCommand();
     const packArgs = await this.buildPackArgs();
     await tools.runCommand(
       [
@@ -53,8 +58,7 @@ export abstract class CraftBuilder {
         "--preserve-env",
         "--user",
         tools.shellUser(),
-        this.toolName,
-        subcommand,
+        ...command,
         ...packArgs,
       ],
       { cwd: this.projectRoot },
@@ -65,7 +69,7 @@ export abstract class CraftBuilder {
     if (this.pro) {
       await tools.configureProLXD();
     }
-    await this.doPack(this.runTests ? "test" : "pack");
+    await this.doPack();
   }
 
   async #readdir(dir: string): Promise<string[]> {

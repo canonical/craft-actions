@@ -2,6 +2,13 @@ import { vi, afterEach, test, expect } from "vitest";
 import * as fs from "fs";
 import * as core from "@actions/core";
 import * as tools from "../src/tools.ts";
+import * as http from "node:http";
+import { Readable } from "node:stream";
+
+vi.mock("node:http", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("node:http")>()),
+  get: vi.fn(),
+}));
 
 vi.mock("@actions/core", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@actions/core")>()),
@@ -454,4 +461,69 @@ test("haveSubcommand returns false if the subcommand is not available", async ()
   );
 
   await expect(tools.haveSubcommand("rockcraft", "test")).resolves.toBe(false);
+});
+
+/* Constructs a mock HTTP response with a given body and status code. */
+function mockSnapdResponse(body: string, statusCode = 200): void {
+  vi.mocked(http.get).mockImplementation(
+    (_options: unknown, callback?: unknown) => {
+      const response = Object.assign(Readable.from([Buffer.from(body)]), {
+        statusCode,
+      });
+
+      (callback as (response: http.IncomingMessage) => void)(
+        response as http.IncomingMessage,
+      );
+
+      return { on: vi.fn() } as unknown as http.ClientRequest;
+    },
+  );
+}
+
+test("fetchSnapd returns a successful result", async () => {
+  const expected = { result: { revision: "123" } };
+  mockSnapdResponse(JSON.stringify(expected));
+
+  await expect(tools.fetchSnapd("/v2/snaps/snapcraft")).resolves.toEqual(
+    expected,
+  );
+});
+
+test("fetchSnapd rejects paths without a leading slash", async () => {
+  await expect(tools.fetchSnapd("v2/snaps/snapcraft")).rejects.toThrow(
+    "API path must start with a '/'",
+  );
+
+  expect(http.get).not.toHaveBeenCalled();
+});
+
+test("fetchSnapd rejects invalid JSON", async () => {
+  mockSnapdResponse("not JSON");
+
+  await expect(tools.fetchSnapd("/v2/snaps/snapcraft")).rejects.toThrow(
+    "Invalid JSON response from Snapd API at /v2/snaps/snapcraft",
+  );
+});
+
+test("fetchSnapd rejects unsuccessful HTTP responses", async () => {
+  mockSnapdResponse(JSON.stringify({ result: {} }), 404);
+
+  await expect(tools.fetchSnapd("/v2/snaps/snapcraft")).rejects.toThrow(
+    "Snapd API request failed for /v2/snaps/snapcraft",
+  );
+});
+
+test("fetchSnapd rejects responses without a result", async () => {
+  mockSnapdResponse(JSON.stringify({ wee: "snaw" }));
+
+  await expect(tools.fetchSnapd("/v2/snaps/snapcraft")).rejects.toThrow(
+    "Snapd API request failed for /v2/snaps/snapcraft",
+  );
+});
+
+test("isRecord identifies non-null objects", () => {
+  expect(tools.isRecord({})).toBe(true);
+  expect(tools.isRecord({ one: "two" })).toBe(true);
+  expect(tools.isRecord(null)).toBe(false);
+  expect(tools.isRecord("boop")).toBe(false);
 });

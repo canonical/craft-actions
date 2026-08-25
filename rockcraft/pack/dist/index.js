@@ -20050,6 +20050,7 @@ import * as path4 from "path";
 // ../../common/src/tools.ts
 import * as fs3 from "fs";
 import * as os6 from "os";
+import * as http from "node:http";
 function expandHome(p) {
   if (p === "~" || p.startsWith("~/")) {
     p = os6.homedir() + p.slice(1);
@@ -20166,6 +20167,49 @@ async function ensureCraftTool(name, channel, revision) {
 async function runCommand(command, options) {
   return exec(command[0], command.slice(1), options);
 }
+async function fetchSnapd(path5) {
+  if (!path5.startsWith("/")) {
+    throw new Error(`API path must start with a '/', got: ${path5}.`);
+  }
+  return new Promise((resolve2, reject) => {
+    const request = http.get(
+      { socketPath: "/run/snapd.socket", path: path5 },
+      (response) => {
+        const chunks = [];
+        response.on("error", (error2) => {
+          reject(
+            new Error(`Unable to communicate with Snapd: ${error2.message}`)
+          );
+        });
+        response.on("data", (chunk) => chunks.push(chunk));
+        response.on("end", () => {
+          let body;
+          try {
+            body = JSON.parse(Buffer.concat(chunks).toString());
+          } catch (error2) {
+            reject(
+              new Error(
+                `Invalid JSON response from Snapd API at ${path5}: ${error2.message}`
+              )
+            );
+            return;
+          }
+          if (!isRecord(body) || !("result" in body) || response.statusCode !== 200) {
+            reject(new Error(`Snapd API request failed for ${path5}`));
+            return;
+          }
+          resolve2({ result: body.result });
+        });
+      }
+    );
+    request.on("error", (error2) => {
+      reject(new Error(`Unable to communicate with Snapd: ${error2.message}`));
+    });
+  });
+}
+function isRecord(value) {
+  return typeof value === "object" && value !== null;
+}
 
 // ../../common/src/craft-builder.ts
 var CraftBuilder = class {
@@ -20228,7 +20272,6 @@ var CraftBuilder = class {
 };
 
 // ../../common/src/setup-action.ts
-import * as http from "node:http";
 function readBaseInputs() {
   return {
     channel: getInput("channel") || "latest/stable",
@@ -20256,38 +20299,11 @@ async function setOutputs(toolName) {
   setOutput(`${toolName}-revision`, await getSnapRevision(toolName));
 }
 async function getSnapRevision(snap) {
-  return new Promise((resolve2, reject) => {
-    const req = http.get(
-      { socketPath: "/run/snapd.socket", path: `/v2/snaps/${snap}` },
-      (res) => {
-        const chunks = [];
-        res.on(
-          "error",
-          () => reject(new Error("Unable to communicate with SnapD"))
-        );
-        res.on("data", (chunk) => chunks.push(chunk));
-        res.on("end", () => {
-          try {
-            const body = JSON.parse(Buffer.concat(chunks).toString());
-            const rev = body.result.revision;
-            if (res.statusCode !== 200 || rev === void 0) {
-              reject(
-                new Error(`Unable to locate installation of snap ${snap}.`)
-              );
-              return;
-            }
-            resolve2(rev);
-          } catch {
-            reject(new Error("Unable to communicate with SnapD"));
-          }
-        });
-      }
-    );
-    req.on(
-      "error",
-      () => reject(new Error("Unable to communicate with SnapD"))
-    );
-  });
+  const { result } = await fetchSnapd(`/v2/snaps/${snap}`);
+  if (!isRecord(result) || typeof result.revision !== "string") {
+    throw new Error(`Unable to locate installation of snap ${snap}.`);
+  }
+  return result.revision;
 }
 
 // ../../common/src/pack-action.ts

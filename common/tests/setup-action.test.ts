@@ -1,6 +1,5 @@
 import { vi, afterEach, beforeEach, test, expect } from "vitest";
 import * as core from "@actions/core";
-import * as http from "node:http";
 import * as tools from "../src/tools.ts";
 import * as path from "node:path";
 import * as os from "node:os";
@@ -11,7 +10,6 @@ import {
   getSnapRevision,
 } from "../src/setup-action.ts";
 
-vi.mock("node:http", () => ({ get: vi.fn() }));
 vi.mock("@actions/core", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@actions/core")>()),
   startGroup: vi.fn(),
@@ -64,23 +62,8 @@ function mockToolFunctions() {
   };
 }
 
-function mockHttpGet(revision: string) {
-  vi.mocked(http.get).mockImplementation(
-    (_options: unknown, callback?: unknown) => {
-      const cb = callback as (res: object) => void;
-      const chunks: Buffer[] = [
-        Buffer.from(JSON.stringify({ result: { revision } })),
-      ];
-      cb({
-        statusCode: 200,
-        on: (event: string, handler: (...args: unknown[]) => void) => {
-          if (event === "data") chunks.forEach((c) => handler(c));
-          if (event === "end") handler();
-        },
-      });
-      return { on: () => {} } as unknown as http.ClientRequest;
-    },
-  );
+function mockSnapdRevision(revision: string): void {
+  vi.spyOn(tools, "fetchSnapd").mockResolvedValue({ result: { revision } });
 }
 
 // readBaseInputs
@@ -119,7 +102,7 @@ test("readBaseInputs defaults lxd-channel to 5.21/stable when empty", () => {
 
 test("runSetupAction calls ensureSnapd, ensureLXD, and ensureCraftTool", async () => {
   mockInputs({ channel: "stable", "lxd-channel": "5.21/stable", revision: "" });
-  mockHttpGet("123");
+  mockSnapdRevision("123");
   const { ensureSnapd, ensureLXD, ensureCraftTool } = mockToolFunctions();
 
   await runSetupAction("rockcraft");
@@ -131,7 +114,7 @@ test("runSetupAction calls ensureSnapd, ensureLXD, and ensureCraftTool", async (
 
 test("runSetupAction passes lxd-channel to ensureLXD", async () => {
   mockInputs({ "lxd-channel": "latest/edge" });
-  mockHttpGet("123");
+  mockSnapdRevision("123");
   const { ensureLXD } = mockToolFunctions();
 
   await runSetupAction("rockcraft");
@@ -141,7 +124,7 @@ test("runSetupAction passes lxd-channel to ensureLXD", async () => {
 
 test("runSetupAction sets lxd-revision and tool revision outputs", async () => {
   mockInputs({});
-  mockHttpGet("123");
+  mockSnapdRevision("123");
   mockToolFunctions();
 
   await runSetupAction("rockcraft");
@@ -179,63 +162,26 @@ test("runSetupAction calls endGroup even on error", async () => {
 
 // getSnapRevision
 
-test("getSnapRevision returns the revision from snapd", async () => {
-  mockHttpGet("4813");
+test("getSnapRevision returns the revision from Snapd", async () => {
+  mockSnapdRevision("4813");
 
   await expect(getSnapRevision("rockcraft")).resolves.toBe("4813");
 });
 
-test("getSnapRevision rejects on malformed JSON", async () => {
-  vi.mocked(http.get).mockImplementation(
-    (_options: unknown, callback?: unknown) => {
-      const cb = callback as (res: object) => void;
-      const req = { on: () => {} };
-      cb({
-        on: (event: string, handler: (...args: unknown[]) => void) => {
-          if (event === "data") handler(Buffer.from("not json"));
-          if (event === "end") handler();
-        },
-      });
-      return req as unknown as http.ClientRequest;
-    },
-  );
+test("getSnapRevision rejects when Snapd omits the revision", async () => {
+  vi.spyOn(tools, "fetchSnapd").mockResolvedValue({ result: {} });
 
   await expect(getSnapRevision("rockcraft")).rejects.toThrow(
-    "Unable to communicate with SnapD",
+    "Unable to locate installation of snap rockcraft.",
   );
 });
 
-test("getSnapRevision rejects on response stream error", async () => {
-  vi.mocked(http.get).mockImplementation(
-    (_options: unknown, callback?: unknown) => {
-      const cb = callback as (res: object) => void;
-      const req = { on: () => {} };
-      cb({
-        on: (event: string, handler: (...args: unknown[]) => void) => {
-          if (event === "error") handler(new Error("stream error"));
-        },
-      });
-      return req as unknown as http.ClientRequest;
-    },
+test("getSnapRevision propagates Snapd communication errors", async () => {
+  vi.spyOn(tools, "fetchSnapd").mockRejectedValue(
+    new Error("Unable to communicate with Snapd: ENOENT"),
   );
 
   await expect(getSnapRevision("rockcraft")).rejects.toThrow(
-    "Unable to communicate with SnapD",
-  );
-});
-
-test("getSnapRevision rejects on connection error", async () => {
-  vi.mocked(http.get).mockImplementation(() => {
-    const req = {
-      on: (event: string, handler: (...args: unknown[]) => void) => {
-        if (event === "error")
-          handler(new Error("connect ENOENT /run/snapd.socket"));
-      },
-    };
-    return req as unknown as http.ClientRequest;
-  });
-
-  await expect(getSnapRevision("rockcraft")).rejects.toThrow(
-    "Unable to communicate with SnapD",
+    "Unable to communicate with Snapd: ENOENT",
   );
 });

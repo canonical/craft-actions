@@ -80,13 +80,16 @@ jobs:
           - os: ubuntu-24.04
             channel: ''
             revision: 16570  # 8.13.2, but really here to test the revision field.
+            fixture_repo: canonical/snapcraft
+            fixture_ref: main
+            fixture_path: tests/spread/core22/clean/snaps/clean
 
           - os: ubuntu-24.04
             channel: ''
             fixture_repo: mr-cal/test-snap-with-component
             fixture_ref: c229768d8fea74707bc18666fed75f954f372d5c # main as of 26-8-2026
             fixture_path: '.'
-            components: [hello-comp1, hello-comp2]
+            components: [test-snap-with-component+comp1_0.1.comp, test-snap-with-component+2_0.1.comp]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -110,7 +113,7 @@ jobs:
           read -r -a filenames <<< "${{ join(matrix.components || '', ' ') }}"
           found_components=()
           for filename in "${filenames[@]}"; do
-            component="test-repo/${{ matrix.fixture_path }}/${filename}.comp"
+            component="test-repo/${{ matrix.fixture_path }}/${filename}"
             test -f "$component"
             found_components+=("$(realpath --relative-to="$PWD" "$component")")
           done

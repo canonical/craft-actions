@@ -89,7 +89,9 @@ jobs:
             fixture_repo: mr-cal/test-snap-with-component
             fixture_ref: c229768d8fea74707bc18666fed75f954f372d5c # main as of 26-8-2026
             fixture_path: '.'
-            components: [test-snap-with-component+comp1_0.1.comp, test-snap-with-component+2_0.1.comp]
+            components:
+              - test-snap-with-component+comp1_0.1.comp
+              - test-snap-with-component+comp2_0.1.comp
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

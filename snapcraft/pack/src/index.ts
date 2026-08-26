@@ -11,6 +11,9 @@ import * as tools from "@craft-actions/common/tools.ts";
 export class SnapcraftBuilder extends CraftBuilder {
   toolName = "snapcraft";
   artifactType = ".snap";
+  secondaryArtifactOutputs = [
+    { artifactType: ".comp", outputName: "components" },
+  ];
 
   constructor(options: CraftBuilderOptions) {
     super(options);

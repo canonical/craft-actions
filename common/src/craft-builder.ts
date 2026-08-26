@@ -11,6 +11,11 @@ export interface CraftBuilderOptions {
   runTests?: boolean;
 }
 
+export interface SecondaryArtifactOutput {
+  artifactType: string;
+  outputName: string;
+}
+
 export abstract class CraftBuilder {
   projectRoot: string;
   channel: string;
@@ -21,6 +26,8 @@ export abstract class CraftBuilder {
 
   abstract toolName: string;
   abstract artifactType: string;
+
+  secondaryArtifactOutputs: SecondaryArtifactOutput[] = [];
 
   constructor(options: CraftBuilderOptions) {
     this.projectRoot = tools.expandHome(options.projectRoot);
@@ -80,11 +87,9 @@ export abstract class CraftBuilder {
     const files = await this.#readdir(this.projectRoot);
     const artifacts = files
       .filter((name) => name.endsWith(extension))
+      .sort()
       .map((name) => path.join(this.projectRoot, name));
 
-    if (artifacts.length === 0) {
-      throw new Error(`No ${extension} files produced by build`);
-    }
     return artifacts;
   }
 }

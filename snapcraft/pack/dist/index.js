@@ -20219,6 +20219,7 @@ var CraftBuilder = class {
   verbosity;
   pro;
   runTests;
+  secondaryArtifactOutputs = [];
   constructor(options) {
     this.projectRoot = expandHome(options.projectRoot);
     this.channel = options.channel;
@@ -20266,10 +20267,7 @@ var CraftBuilder = class {
   }
   async findArtifacts(extension) {
     const files = await this.#readdir(this.projectRoot);
-    const artifacts = files.filter((name) => name.endsWith(extension)).map((name) => path4.join(this.projectRoot, name));
-    if (artifacts.length === 0) {
-      throw new Error(`No ${extension} files produced by build`);
-    }
+    const artifacts = files.filter((name) => name.endsWith(extension)).sort().map((name) => path4.join(this.projectRoot, name));
     return artifacts;
   }
 };
@@ -20325,12 +20323,19 @@ async function runPackAction(builder, outputName) {
     await runSetupAction(builder.toolName);
     await builder.pack();
     const artifacts = await builder.findArtifacts(builder.artifactType);
+    if (artifacts.length === 0) {
+      throw new Error(`No ${builder.artifactType} files produced by build`);
+    }
     if (artifacts.length > 1) {
       warning(
         `Multiple ${builder.artifactType} files found in ${builder.projectRoot}`
       );
     }
     setOutput(outputName, artifacts[0]);
+    for (const secondary of builder.secondaryArtifactOutputs) {
+      const artifacts2 = await builder.findArtifacts(secondary.artifactType);
+      setOutput(secondary.outputName, artifacts2.join(" "));
+    }
   } catch (error2) {
     setFailed(error2?.message);
   }
@@ -20340,6 +20345,9 @@ async function runPackAction(builder, outputName) {
 var SnapcraftBuilder = class extends CraftBuilder {
   toolName = "snapcraft";
   artifactType = ".snap";
+  secondaryArtifactOutputs = [
+    { artifactType: ".comp", outputName: "components" }
+  ];
   constructor(options) {
     super(options);
   }

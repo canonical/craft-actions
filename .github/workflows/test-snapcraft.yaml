@@ -5,7 +5,7 @@ on:
     paths:
       - ".github/workflows/*snapcraft*"
       - "snapcraft**"
-      - "_common/**"  # A change to a common action could affect this action.
+      - "common/**"  # A change to a common module could affect this module.
   push:
     branches:
       - main
@@ -16,7 +16,7 @@ on:
     paths:
       - ".github/workflows/*snapcraft*"
       - "snapcraft**"
-      - "_common/**"  # A change to a common action could affect this action.
+      - "common/**"  # A change to a common module could affect this module.
 
 jobs:
   setup:
@@ -71,25 +71,52 @@ jobs:
           - self-hosted-linux-ppc64el-noble-edge
           - self-hosted-linux-s390x-noble-edge
         channel: [latest/candidate, latest/edge, 8.x/candidate, 7.x/candidate]
+        # The repository to clone for (most) tests
+        fixture_repo: [canonical/snapcraft]
+        fixture_ref: [main]
+        # The path to attempt to pack
+        fixture_path: [tests/spread/core22/clean/snaps/clean]
         include:
           - os: ubuntu-24.04
             channel: ''
             revision: 16570  # 8.13.2, but really here to test the revision field.
+
+          - os: ubuntu-24.04
+            channel: ''
+            fixture_repo: mr-cal/test-snap-with-component
+            fixture_ref: c229768d8fea74707bc18666fed75f954f372d5c # main as of 26-8-2026
+            fixture_path: '.'
+            components: [hello-comp1, hello-comp2]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          repository: canonical/snapcraft
+          repository: ${{ matrix.fixture_repo }}
+          ref: ${{ matrix.fixture_ref }}
           path: test-repo
-          ref: main
       - name: Pack snap
         id: snapcraft
         uses: ./snapcraft/pack
         with:
-          path: test-repo/tests/spread/core22/clean/snaps/clean
+          path: test-repo/${{ matrix.fixture_path }}
           channel: ${{ matrix.channel }}
           revision: ${{ matrix.revision }}
+      - name: Check primary output exists
+        run: test -f "${{ steps.snapcraft.outputs.snap }}"
+      - name: Check secondary output(s) exist
+        run: |
+          # Check that all output components exist, map the filenames to their actual path
+          read -r -a filenames <<< "${{ join(matrix.components || '', ' ') }}"
+          found_components=()
+          for filename in "${filenames[@]}"; do
+            component="test-repo/${{ matrix.fixture_path }}/${filename}.comp"
+            test -f "$component"
+            found_components+=("$(realpath --relative-to="$PWD" "$component")")
+          done
+
+          # Check that the components we discovered match what the action reports it built
+          [[ "${{ steps.snapcraft.outputs.components }}" == "${found_components[*]}" ]]
       - name: Upload snap
         continue-on-error: true
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -97,4 +124,3 @@ jobs:
           name: test-snap-${{ matrix.os }}-${{ steps.snapcraft.outputs.snapcraft-revision }}
           path: test-repo/tests/spread/core22/clean/snaps/clean/*.snap
           overwrite: true
-

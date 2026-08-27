@@ -5,6 +5,7 @@ packages:
   - "rockcraft/pack"
   - "rockcraft/setup"
   - "snapcraft/setup"
+  - "snapcraft/pack"
 
 allowBuilds:
   esbuild: true

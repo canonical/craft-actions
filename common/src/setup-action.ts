@@ -1,6 +1,5 @@
 import * as core from "@actions/core";
 import * as tools from "./tools.ts";
-import * as http from "node:http";
 
 export interface SetupOptions {
   channel: string;
@@ -39,34 +38,11 @@ async function setOutputs(toolName: string): Promise<void> {
 }
 
 export async function getSnapRevision(snap: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const req = http.get(
-      { socketPath: "/run/snapd.socket", path: `/v2/snaps/${snap}` },
-      (res) => {
-        const chunks: Buffer[] = [];
-        res.on("error", () =>
-          reject(new Error("Unable to communicate with SnapD")),
-        );
-        res.on("data", (chunk) => chunks.push(chunk));
-        res.on("end", () => {
-          try {
-            const body = JSON.parse(Buffer.concat(chunks).toString());
-            const rev = body.result.revision;
-            if (res.statusCode !== 200 || rev === undefined) {
-              reject(
-                new Error(`Unable to locate installation of snap ${snap}.`),
-              );
-              return;
-            }
-            resolve(rev);
-          } catch {
-            reject(new Error("Unable to communicate with SnapD"));
-          }
-        });
-      },
-    );
-    req.on("error", () =>
-      reject(new Error("Unable to communicate with SnapD")),
-    );
-  });
+  const { result } = await tools.fetchSnapd(`/v2/snaps/${snap}`);
+
+  if (!tools.isRecord(result) || typeof result.revision !== "string") {
+    throw new Error(`Unable to locate installation of snap ${snap}.`);
+  }
+
+  return result.revision;
 }

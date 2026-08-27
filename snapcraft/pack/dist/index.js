@@ -1074,14 +1074,14 @@ var require_util = __commonJS({
         }
         const port = url.port != null ? url.port : url.protocol === "https:" ? 443 : 80;
         let origin = url.origin != null ? url.origin : `${url.protocol || ""}//${url.hostname || ""}:${port}`;
-        let path4 = url.path != null ? url.path : `${url.pathname || ""}${url.search || ""}`;
+        let path5 = url.path != null ? url.path : `${url.pathname || ""}${url.search || ""}`;
         if (origin[origin.length - 1] === "/") {
           origin = origin.slice(0, origin.length - 1);
         }
-        if (path4 && path4[0] !== "/") {
-          path4 = `/${path4}`;
+        if (path5 && path5[0] !== "/") {
+          path5 = `/${path5}`;
         }
-        return new URL(`${origin}${path4}`);
+        return new URL(`${origin}${path5}`);
       }
       if (!isHttpOrHttpsPrefixed(url.origin || url.protocol)) {
         throw new InvalidArgumentError("Invalid URL protocol: the URL must start with `http:` or `https:`.");
@@ -1532,39 +1532,39 @@ var require_diagnostics = __commonJS({
       });
       diagnosticsChannel.channel("undici:client:sendHeaders").subscribe((evt) => {
         const {
-          request: { method, path: path4, origin }
+          request: { method, path: path5, origin }
         } = evt;
-        debuglog("sending request to %s %s/%s", method, origin, path4);
+        debuglog("sending request to %s %s/%s", method, origin, path5);
       });
       diagnosticsChannel.channel("undici:request:headers").subscribe((evt) => {
         const {
-          request: { method, path: path4, origin },
+          request: { method, path: path5, origin },
           response: { statusCode }
         } = evt;
         debuglog(
           "received response to %s %s/%s - HTTP %d",
           method,
           origin,
-          path4,
+          path5,
           statusCode
         );
       });
       diagnosticsChannel.channel("undici:request:trailers").subscribe((evt) => {
         const {
-          request: { method, path: path4, origin }
+          request: { method, path: path5, origin }
         } = evt;
-        debuglog("trailers received from %s %s/%s", method, origin, path4);
+        debuglog("trailers received from %s %s/%s", method, origin, path5);
       });
       diagnosticsChannel.channel("undici:request:error").subscribe((evt) => {
         const {
-          request: { method, path: path4, origin },
+          request: { method, path: path5, origin },
           error: error2
         } = evt;
         debuglog(
           "request to %s %s/%s errored - %s",
           method,
           origin,
-          path4,
+          path5,
           error2.message
         );
       });
@@ -1613,9 +1613,9 @@ var require_diagnostics = __commonJS({
         });
         diagnosticsChannel.channel("undici:client:sendHeaders").subscribe((evt) => {
           const {
-            request: { method, path: path4, origin }
+            request: { method, path: path5, origin }
           } = evt;
-          debuglog("sending request to %s %s/%s", method, origin, path4);
+          debuglog("sending request to %s %s/%s", method, origin, path5);
         });
       }
       diagnosticsChannel.channel("undici:websocket:open").subscribe((evt) => {
@@ -1678,7 +1678,7 @@ var require_request = __commonJS({
     var kHandler = /* @__PURE__ */ Symbol("handler");
     var Request = class {
       constructor(origin, {
-        path: path4,
+        path: path5,
         method,
         body,
         headers,
@@ -1693,11 +1693,11 @@ var require_request = __commonJS({
         expectContinue,
         servername
       }, handler) {
-        if (typeof path4 !== "string") {
+        if (typeof path5 !== "string") {
           throw new InvalidArgumentError("path must be a string");
-        } else if (path4[0] !== "/" && !(path4.startsWith("http://") || path4.startsWith("https://")) && method !== "CONNECT") {
+        } else if (path5[0] !== "/" && !(path5.startsWith("http://") || path5.startsWith("https://")) && method !== "CONNECT") {
           throw new InvalidArgumentError("path must be an absolute URL or start with a slash");
-        } else if (invalidPathRegex.test(path4)) {
+        } else if (invalidPathRegex.test(path5)) {
           throw new InvalidArgumentError("invalid request path");
         }
         if (typeof method !== "string") {
@@ -1763,7 +1763,7 @@ var require_request = __commonJS({
         this.completed = false;
         this.aborted = false;
         this.upgrade = upgrade || null;
-        this.path = query ? buildURL(path4, query) : path4;
+        this.path = query ? buildURL(path5, query) : path5;
         this.origin = origin;
         this.idempotent = idempotent == null ? method === "HEAD" || method === "GET" : idempotent;
         this.blocking = blocking == null ? false : blocking;
@@ -6393,7 +6393,7 @@ var require_client_h1 = __commonJS({
       return method !== "GET" && method !== "HEAD" && method !== "OPTIONS" && method !== "TRACE" && method !== "CONNECT";
     }
     function writeH1(client, request) {
-      const { method, path: path4, host, upgrade, blocking, reset } = request;
+      const { method, path: path5, host, upgrade, blocking, reset } = request;
       let { body, headers, contentLength } = request;
       const expectsPayload = method === "PUT" || method === "POST" || method === "PATCH" || method === "QUERY" || method === "PROPFIND" || method === "PROPPATCH";
       if (util.isFormDataLike(body)) {
@@ -6468,7 +6468,7 @@ var require_client_h1 = __commonJS({
       if (blocking) {
         socket[kBlocking] = true;
       }
-      let header = `${method} ${path4} HTTP/1.1\r
+      let header = `${method} ${path5} HTTP/1.1\r
 `;
       if (typeof host === "string") {
         header += `host: ${host}\r
@@ -6994,7 +6994,7 @@ var require_client_h2 = __commonJS({
     }
     function writeH2(client, request) {
       const session = client[kHTTP2Session];
-      const { method, path: path4, host, upgrade, expectContinue, signal, headers: reqHeaders } = request;
+      const { method, path: path5, host, upgrade, expectContinue, signal, headers: reqHeaders } = request;
       let { body } = request;
       if (upgrade) {
         util.errorRequest(client, request, new Error("Upgrade not supported for H2"));
@@ -7061,7 +7061,7 @@ var require_client_h2 = __commonJS({
         });
         return true;
       }
-      headers[HTTP2_HEADER_PATH] = path4;
+      headers[HTTP2_HEADER_PATH] = path5;
       headers[HTTP2_HEADER_SCHEME] = "https";
       const expectsPayload = method === "PUT" || method === "POST" || method === "PATCH";
       if (body && typeof body.read === "function") {
@@ -7414,9 +7414,9 @@ var require_redirect_handler = __commonJS({
           return this.handler.onHeaders(statusCode, headers, resume, statusText);
         }
         const { origin, pathname, search } = util.parseURL(new URL(this.location, this.opts.origin && new URL(this.opts.path, this.opts.origin)));
-        const path4 = search ? `${pathname}${search}` : pathname;
+        const path5 = search ? `${pathname}${search}` : pathname;
         this.opts.headers = cleanRequestHeaders(this.opts.headers, statusCode === 303, this.opts.origin !== origin);
-        this.opts.path = path4;
+        this.opts.path = path5;
         this.opts.origin = origin;
         this.opts.maxRedirections = 0;
         this.opts.query = null;
@@ -8651,10 +8651,10 @@ var require_proxy_agent = __commonJS({
         };
         const {
           origin,
-          path: path4 = "/",
+          path: path5 = "/",
           headers = {}
         } = opts;
-        opts.path = origin + path4;
+        opts.path = origin + path5;
         if (!("host" in headers) && !("Host" in headers)) {
           const { host } = new URL2(origin);
           headers.host = host;
@@ -10603,20 +10603,20 @@ var require_mock_utils = __commonJS({
       }
       return true;
     }
-    function safeUrl(path4) {
-      if (typeof path4 !== "string") {
-        return path4;
+    function safeUrl(path5) {
+      if (typeof path5 !== "string") {
+        return path5;
       }
-      const pathSegments = path4.split("?");
+      const pathSegments = path5.split("?");
       if (pathSegments.length !== 2) {
-        return path4;
+        return path5;
       }
       const qp = new URLSearchParams(pathSegments.pop());
       qp.sort();
       return [...pathSegments, qp.toString()].join("?");
     }
-    function matchKey(mockDispatch2, { path: path4, method, body, headers }) {
-      const pathMatch = matchValue(mockDispatch2.path, path4);
+    function matchKey(mockDispatch2, { path: path5, method, body, headers }) {
+      const pathMatch = matchValue(mockDispatch2.path, path5);
       const methodMatch = matchValue(mockDispatch2.method, method);
       const bodyMatch = typeof mockDispatch2.body !== "undefined" ? matchValue(mockDispatch2.body, body) : true;
       const headersMatch = matchHeaders(mockDispatch2, headers);
@@ -10638,7 +10638,7 @@ var require_mock_utils = __commonJS({
     function getMockDispatch(mockDispatches, key) {
       const basePath = key.query ? buildURL(key.path, key.query) : key.path;
       const resolvedPath = typeof basePath === "string" ? safeUrl(basePath) : basePath;
-      let matchedMockDispatches = mockDispatches.filter(({ consumed }) => !consumed).filter(({ path: path4 }) => matchValue(safeUrl(path4), resolvedPath));
+      let matchedMockDispatches = mockDispatches.filter(({ consumed }) => !consumed).filter(({ path: path5 }) => matchValue(safeUrl(path5), resolvedPath));
       if (matchedMockDispatches.length === 0) {
         throw new MockNotMatchedError(`Mock dispatch not matched for path '${resolvedPath}'`);
       }
@@ -10676,9 +10676,9 @@ var require_mock_utils = __commonJS({
       }
     }
     function buildKey(opts) {
-      const { path: path4, method, body, headers, query } = opts;
+      const { path: path5, method, body, headers, query } = opts;
       return {
-        path: path4,
+        path: path5,
         method,
         body,
         headers,
@@ -11141,10 +11141,10 @@ var require_pending_interceptors_formatter = __commonJS({
       }
       format(pendingInterceptors) {
         const withPrettyHeaders = pendingInterceptors.map(
-          ({ method, path: path4, data: { statusCode }, persist, times, timesInvoked, origin }) => ({
+          ({ method, path: path5, data: { statusCode }, persist, times, timesInvoked, origin }) => ({
             Method: method,
             Origin: origin,
-            Path: path4,
+            Path: path5,
             "Status code": statusCode,
             Persistent: persist ? PERSISTENT : NOT_PERSISTENT,
             Invocations: timesInvoked,
@@ -16025,9 +16025,9 @@ var require_util6 = __commonJS({
         }
       }
     }
-    function validateCookiePath(path4) {
-      for (let i = 0; i < path4.length; ++i) {
-        const code = path4.charCodeAt(i);
+    function validateCookiePath(path5) {
+      for (let i = 0; i < path5.length; ++i) {
+        const code = path5.charCodeAt(i);
         if (code < 32 || // exclude CTLs (0-31)
         code > 126 || // exclude DEL and non-ascii
         code === 59) {
@@ -18758,11 +18758,11 @@ var require_undici = __commonJS({
           if (typeof opts.path !== "string") {
             throw new InvalidArgumentError("invalid opts.path");
           }
-          let path4 = opts.path;
+          let path5 = opts.path;
           if (!opts.path.startsWith("/")) {
-            path4 = `/${path4}`;
+            path5 = `/${path5}`;
           }
-          url = new URL(util.parseOrigin(url).origin + path4);
+          url = new URL(util.parseOrigin(url).origin + path5);
         } else {
           if (!opts) {
             opts = typeof url === "object" ? url : {};
@@ -18832,6 +18832,10 @@ var require_undici = __commonJS({
     module.exports.EventSource = EventSource;
   }
 });
+
+// ../../common/src/craft-builder.ts
+import * as fs4 from "fs";
+import * as path4 from "path";
 
 // ../../node_modules/.pnpm/@actions+core@3.0.0/node_modules/@actions/core/lib/command.js
 import * as os from "os";
@@ -20030,6 +20034,9 @@ function setFailed(message) {
 function error(message, properties = {}) {
   issueCommand("error", toCommandProperties(properties), message instanceof Error ? message.toString() : message);
 }
+function warning(message, properties = {}) {
+  issueCommand("warning", toCommandProperties(properties), message instanceof Error ? message.toString() : message);
+}
 function info(message) {
   process.stdout.write(message + os5.EOL);
 }
@@ -20042,10 +20049,20 @@ function endGroup() {
 
 // ../../common/src/tools.ts
 import * as fs3 from "fs";
+import * as os6 from "os";
 import * as http from "node:http";
-async function haveExecutable(path4) {
+function expandHome(p) {
+  if (p === "~" || p.startsWith("~/")) {
+    p = os6.homedir() + p.slice(1);
+  }
+  return p;
+}
+function shellUser() {
+  return os6.userInfo().username;
+}
+async function haveExecutable(path5) {
   try {
-    await fs3.promises.access(path4, fs3.constants.X_OK);
+    await fs3.promises.access(path5, fs3.constants.X_OK);
   } catch {
     return false;
   }
@@ -20123,6 +20140,17 @@ async function ensureLXD(lxdChannel) {
   }
   await ensureLXDNetwork();
 }
+async function configureProLXD() {
+  info("Configuring LXD for pro builds");
+  await runCommand([
+    "sudo",
+    "pro",
+    "config",
+    "set",
+    "lxd_guest_attach=available"
+  ]);
+  await runCommand(["sudo", "snap", "restart", "lxd"]);
+}
 async function ensureCraftTool(name, channel, revision) {
   const haveSnap = await haveExecutable(`/snap/bin/${name}`);
   info(`Installing ${name}...`);
@@ -20139,13 +20167,13 @@ async function ensureCraftTool(name, channel, revision) {
 async function runCommand(command, options) {
   return exec(command[0], command.slice(1), options);
 }
-async function fetchSnapd(path4) {
-  if (!path4.startsWith("/")) {
-    throw new Error(`API path must start with a '/', got: ${path4}.`);
+async function fetchSnapd(path5) {
+  if (!path5.startsWith("/")) {
+    throw new Error(`API path must start with a '/', got: ${path5}.`);
   }
   return new Promise((resolve2, reject) => {
     const request = http.get(
-      { socketPath: "/run/snapd.socket", path: path4 },
+      { socketPath: "/run/snapd.socket", path: path5 },
       (response) => {
         const chunks = [];
         response.on("error", (error2) => {
@@ -20161,13 +20189,13 @@ async function fetchSnapd(path4) {
           } catch (error2) {
             reject(
               new Error(
-                `Invalid JSON response from Snapd API at ${path4}: ${error2.message}`
+                `Invalid JSON response from Snapd API at ${path5}: ${error2.message}`
               )
             );
             return;
           }
           if (!isRecord(body) || !("result" in body) || response.statusCode !== 200) {
-            reject(new Error(`Snapd API request failed for ${path4}`));
+            reject(new Error(`Snapd API request failed for ${path5}`));
             return;
           }
           resolve2({ result: body.result });
@@ -20182,6 +20210,67 @@ async function fetchSnapd(path4) {
 function isRecord(value) {
   return typeof value === "object" && value !== null;
 }
+
+// ../../common/src/craft-builder.ts
+var CraftBuilder = class {
+  projectRoot;
+  channel;
+  revision;
+  verbosity;
+  pro;
+  runTests;
+  secondaryArtifactOutputs = [];
+  constructor(options) {
+    this.projectRoot = expandHome(options.projectRoot);
+    this.channel = options.channel;
+    this.revision = options.revision;
+    this.verbosity = options.verbosity;
+    this.pro = options.pro ?? "";
+    this.runTests = options.runTests ?? false;
+  }
+  async buildPackArgs() {
+    const args = [];
+    if (this.pro) {
+      args.push(`--pro=${this.pro}`);
+    }
+    if (this.verbosity) {
+      args.push("--verbosity", this.verbosity);
+    }
+    return args;
+  }
+  async buildCommand() {
+    return [this.toolName, this.runTests ? "test" : "pack"];
+  }
+  async doPack() {
+    const command = await this.buildCommand();
+    const packArgs = await this.buildPackArgs();
+    await runCommand(
+      [
+        "sudo",
+        "--preserve-env",
+        "--user",
+        shellUser(),
+        ...command,
+        ...packArgs
+      ],
+      { cwd: this.projectRoot }
+    );
+  }
+  async pack() {
+    if (this.pro) {
+      await configureProLXD();
+    }
+    await this.doPack();
+  }
+  async #readdir(dir) {
+    return await fs4.promises.readdir(dir);
+  }
+  async findArtifacts(extension) {
+    const files = await this.#readdir(this.projectRoot);
+    const artifacts = files.filter((name) => name.endsWith(extension)).sort().map((name) => path4.join(this.projectRoot, name));
+    return artifacts;
+  }
+};
 
 // ../../common/src/setup-action.ts
 function readBaseInputs() {
@@ -20218,10 +20307,77 @@ async function getSnapRevision(snap) {
   return result.revision;
 }
 
-// src/index.ts
-if (import.meta.url === `file://${process.argv[1]}`) {
-  void runSetupAction("rockcraft");
+// ../../common/src/pack-action.ts
+function readBaseInputs2(channelInput = "channel") {
+  return {
+    projectRoot: getInput("path"),
+    channel: getInput(channelInput) || "stable",
+    revision: getInput("revision") || "",
+    verbosity: getInput("verbosity"),
+    pro: getInput("pro") || "",
+    runTests: getInput("test").toLowerCase() === "true"
+  };
 }
+async function runPackAction(builder, outputName) {
+  try {
+    await runSetupAction(builder.toolName);
+    await builder.pack();
+    const artifacts = await builder.findArtifacts(builder.artifactType);
+    if (artifacts.length === 0) {
+      throw new Error(`No ${builder.artifactType} files produced by build`);
+    }
+    if (artifacts.length > 1) {
+      warning(
+        `Multiple ${builder.artifactType} files found in ${builder.projectRoot}`
+      );
+    }
+    setOutput(outputName, artifacts[0]);
+    for (const secondary of builder.secondaryArtifactOutputs) {
+      const artifacts2 = await builder.findArtifacts(secondary.artifactType);
+      setOutput(secondary.outputName, artifacts2.join(" "));
+    }
+  } catch (error2) {
+    setFailed(error2?.message);
+  }
+}
+
+// src/index.ts
+var SnapcraftBuilder = class extends CraftBuilder {
+  toolName = "snapcraft";
+  artifactType = ".snap";
+  secondaryArtifactOutputs = [
+    { artifactType: ".comp", outputName: "components" }
+  ];
+  constructor(options) {
+    super(options);
+  }
+  async buildCommand() {
+    if (this.runTests) {
+      return super.buildCommand();
+    }
+    const { result } = await fetchSnapd(`/v2/snaps/${this.toolName}`);
+    if (!isRecord(result) || typeof result.version !== "string") {
+      throw new Error(`Unable to locate installation of snap ${this.toolName}`);
+    }
+    const snapcraftVersion = result.version;
+    const [snapcraftMajor] = snapcraftVersion.split(".", 1);
+    if (!/^\d+$/.test(snapcraftMajor)) {
+      throw new Error(
+        `Snapd returned an invalid Snapcraft version: ${result.version}`
+      );
+    }
+    return Number(snapcraftMajor) < 8 ? [this.toolName] : super.buildCommand();
+  }
+};
+if (import.meta.url === `file://${process.argv[1]}`) {
+  const builder = new SnapcraftBuilder({
+    ...readBaseInputs2()
+  });
+  void runPackAction(builder, "snap");
+}
+export {
+  SnapcraftBuilder
+};
 /*! Bundled license information:
 
 undici/lib/web/fetch/body.js:

@@ -35,7 +35,7 @@ inputs:
     default: ''
   test:
     description: >
-      Run rockcraft test when packing the rock.
+      Run `rockcraft test` after packaging.
 
       If not provided, it defaults to false.
     default: 'false'

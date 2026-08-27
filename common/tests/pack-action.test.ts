@@ -2,7 +2,7 @@ import { vi, afterEach, beforeEach, test, expect } from "vitest";
 import * as core from "@actions/core";
 import { readBaseInputs, runPackAction } from "../src/pack-action.ts";
 import * as setupAction from "../src/setup-action.ts";
-import { CraftBuilder } from "../src/craft-builder.ts";
+import { CraftBuilder, SecondaryArtifactOutput } from "../src/craft-builder.ts";
 import * as path from "node:path";
 import * as os from "node:os";
 import * as fs from "node:fs";
@@ -59,6 +59,7 @@ function makeStubBuilder(
     revision: string;
     artifactType: string;
     projectRoot: string;
+    secondaryArtifactOutputs: SecondaryArtifactOutput[];
     pack: () => Promise<void>;
     findArtifacts: (ext: string) => Promise<string[]>;
   }> = {},
@@ -69,6 +70,7 @@ function makeStubBuilder(
     revision: "",
     artifactType: ".charm",
     projectRoot: "project-root",
+    secondaryArtifactOutputs: [],
     pack: vi.fn(async () => {}),
     findArtifacts: vi.fn(async () => ["project-root/output.charm"]),
     ...overrides,
@@ -180,4 +182,66 @@ test("runPackAction does not warn when only one artifact is found", async () => 
   await runPackAction(builder, "charm");
 
   expect(warning).not.toHaveBeenCalled();
+});
+
+test("runPackAction fails when no primary artifacts are found", async () => {
+  mockSetupAction();
+  const setFailed = vi.mocked(core.setFailed);
+  const builder = makeStubBuilder({
+    artifactType: ".snap",
+    findArtifacts: vi.fn(async () => []),
+  });
+
+  await runPackAction(builder, "snap");
+
+  expect(setFailed).toHaveBeenCalledWith("No .snap files produced by build");
+});
+
+test("runPackAction correctly yields multiple secondary artifacts", async () => {
+  mockSetupAction();
+  const builder = makeStubBuilder({
+    artifactType: ".snap",
+    findArtifacts: vi.fn(async (artifactType: string) => {
+      if (artifactType === ".snap") {
+        return ["example.snap"];
+      }
+
+      if (artifactType === ".comp") {
+        return ["a.comp", "b.comp"];
+      }
+
+      return [];
+    }),
+    secondaryArtifactOutputs: [
+      { artifactType: ".comp", outputName: "components" },
+    ],
+  });
+
+  await runPackAction(builder, "snap");
+
+  assertOutput(fs.readFileSync(tempOutputPath, "utf8"), [
+    "components",
+    "a.comp b.comp",
+  ]);
+});
+
+test("runPackAction sets empty component output", async () => {
+  mockSetupAction();
+  const builder = makeStubBuilder({
+    artifactType: ".snap",
+    findArtifacts: vi.fn(async (artifactType: string) => {
+      if (artifactType === ".snap") {
+        return ["example.snap"];
+      }
+
+      return [];
+    }),
+    secondaryArtifactOutputs: [
+      { artifactType: ".comp", outputName: "components" },
+    ],
+  });
+
+  await runPackAction(builder, "snap");
+
+  assertOutput(fs.readFileSync(tempOutputPath, "utf8"), ["components", ""]);
 });

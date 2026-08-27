@@ -289,6 +289,15 @@ importers:
         specifier: workspace:*
         version: link:../../common
 
+  snapcraft/pack:
+    dependencies:
+      '@actions/core':
+        specifier: 'catalog:'
+        version: 3.0.0
+      '@craft-actions/common':
+        specifier: workspace:*
+        version: link:../../common
+
   snapcraft/setup:
     dependencies:
       '@actions/core':

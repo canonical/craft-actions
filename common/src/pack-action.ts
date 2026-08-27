@@ -21,12 +21,22 @@ export async function runPackAction(
     await runSetupAction(builder.toolName);
     await builder.pack();
     const artifacts = await builder.findArtifacts(builder.artifactType);
+    if (artifacts.length === 0) {
+      throw new Error(`No ${builder.artifactType} files produced by build`);
+    }
     if (artifacts.length > 1) {
       core.warning(
         `Multiple ${builder.artifactType} files found in ${builder.projectRoot}`,
       );
     }
     core.setOutput(outputName, artifacts[0]);
+
+    for (const secondary of builder.secondaryArtifactOutputs) {
+      const artifacts = await builder.findArtifacts(secondary.artifactType);
+
+      // Don't handle the empty case, the output must always be set to something
+      core.setOutput(secondary.outputName, artifacts.join(" "));
+    }
   } catch (error) {
     core.setFailed((error as Error)?.message);
   }

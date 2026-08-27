@@ -2,6 +2,7 @@ import * as core from "@actions/core";
 import * as exec from "@actions/exec";
 import * as fs from "fs";
 import * as os from "os";
+import * as http from "node:http";
 // Necessary for proper testing -- otherwise mocks ignored.
 import * as self from "./tools.ts";
 
@@ -164,4 +165,65 @@ export async function runCommand(
   options?: exec.ExecOptions,
 ): Promise<number> {
   return exec.exec(command[0], command.slice(1), options);
+}
+
+interface SnapdResponse {
+  result: unknown;
+}
+
+export async function fetchSnapd(path: string): Promise<SnapdResponse> {
+  if (!path.startsWith("/")) {
+    throw new Error(`API path must start with a '/', got: ${path}.`);
+  }
+
+  return new Promise((resolve, reject) => {
+    const request = http.get(
+      { socketPath: "/run/snapd.socket", path },
+      (response) => {
+        const chunks: Buffer[] = [];
+
+        response.on("error", (error) => {
+          reject(
+            new Error(`Unable to communicate with Snapd: ${error.message}`),
+          );
+        });
+
+        response.on("data", (chunk: Buffer) => chunks.push(chunk));
+
+        response.on("end", () => {
+          let body: unknown;
+
+          try {
+            body = JSON.parse(Buffer.concat(chunks).toString());
+          } catch (error) {
+            reject(
+              new Error(
+                `Invalid JSON response from Snapd API at ${path}: ${(error as Error).message}`,
+              ),
+            );
+            return;
+          }
+
+          if (
+            !isRecord(body) ||
+            !("result" in body) ||
+            response.statusCode !== 200
+          ) {
+            reject(new Error(`Snapd API request failed for ${path}`));
+            return;
+          }
+
+          resolve({ result: body.result });
+        });
+      },
+    );
+
+    request.on("error", (error) => {
+      reject(new Error(`Unable to communicate with Snapd: ${error.message}`));
+    });
+  });
+}
+
+export function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
 }

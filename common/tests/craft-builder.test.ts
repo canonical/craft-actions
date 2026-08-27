@@ -137,14 +137,6 @@ test("CraftBuilder.pack includes --pro flag when pro is set", async () => {
   );
 });
 
-test("CraftBuilder.findArtifacts throws when no matching files are found", async () => {
-  const tempDir = createTempProject(["other-file.txt"]);
-
-  await expect(
-    makeBuilder({ projectRoot: tempDir }).findArtifacts(".charm"),
-  ).rejects.toThrow("No .charm files produced by build");
-});
-
 test("CraftBuilder.findArtifacts returns all matching files", async () => {
   const tempDir = createTempProject(["a.charm", "b.charm", "readme.txt"]);
 
@@ -153,5 +145,20 @@ test("CraftBuilder.findArtifacts returns all matching files", async () => {
   ).resolves.toEqual([
     path.join(tempDir, "a.charm"),
     path.join(tempDir, "b.charm"),
+  ]);
+});
+
+test("CraftBuilder.findArtifacts returns matching files in a deterministic order", async () => {
+  const tempDir = createTempProject([
+    "z-last.charm",
+    "a-first.charm",
+    "readme.txt",
+  ]);
+
+  await expect(
+    makeBuilder({ projectRoot: tempDir }).findArtifacts(".charm"),
+  ).resolves.toEqual([
+    path.join(tempDir, "a-first.charm"),
+    path.join(tempDir, "z-last.charm"),
   ]);
 });

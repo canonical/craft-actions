@@ -24,7 +24,7 @@
     "url": "https://github.com/canonical/craft-actions/issues"
   },
   "homepage": "https://github.com/canonical/craft-actions#readme",
-  "packageManager": "pnpm@11.22.0",
+  "packageManager": "pnpm@11.24.0",
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/node": "^26.0.0",

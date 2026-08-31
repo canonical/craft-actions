@@ -112,7 +112,7 @@ jobs:
           read -r -a filenames <<< "${{ join(matrix.charms || '', ' ') }}"
           if [[ ${#filenames[@]} -eq 0 ]]; then
             # No expected charms declared: the fixture produces a single charm
-            filenames=("$(basename "$(ls test-repo/${{ matrix.fixture_path }}"/*.charm)")")
+            filenames=("$(basename "$(ls test-repo/${{ matrix.fixture_path }}/*.charm)")")
           fi
           found_charms=()
           for filename in "${filenames[@]}"; do

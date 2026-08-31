@@ -5,6 +5,7 @@ on:
     paths:
       - ".github/workflows/*charmcraft*"
       - "charmcraft**"
+      - "common/**"  # A change to a common module could affect this module.
   push:
     branches:
       - main
@@ -15,7 +16,7 @@ on:
     paths:
       - ".github/workflows/*charmcraft*"
       - "charmcraft**"
-      - "_common/**"  # A change to a common action could affect this action.
+      - "common/**"  # A change to a common module could affect this module.
 
 jobs:
   setup:
@@ -64,28 +65,68 @@ jobs:
           - ubuntu-24.04-arm
           - ubuntu-26.04-arm
         channel: [latest/candidate, latest/edge, 3.x/candidate]
+        # The repository to clone for (most) tests
+        fixture_repo: [juju/juju]
+        fixture_ref: [main]
+        # The path to attempt to pack
+        fixture_path: [testcharms/charms/lxd-profile]
         include:
           - os: ubuntu-24.04
             channel: ''
             revision: 5303
+            fixture_repo: juju/juju
+            fixture_ref: main
+            fixture_path: testcharms/charms/lxd-profile
+
+          # A multi-platform charm that packs two charms in a single run
+          - os: ubuntu-24.04
+            channel: latest/candidate
+            fixture_repo: canonical/charmcraft
+            fixture_ref: 89b8168be6ea8b1ad855c8143b57e9b0d701d036 # main as of 25-8-2026
+            fixture_path: tests/spread/smoketests/multi-base/all
+            charms:
+              - test-charm_jammy.charm
+              - test-charm_noble.charm
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          repository: juju/juju
-          path: juju
-          ref: main
+          repository: ${{ matrix.fixture_repo }}
+          ref: ${{ matrix.fixture_ref }}
+          path: test-repo
       - name: Pack charm
         id: charmcraft
         uses: ./charmcraft/pack
         with:
-          path: juju/testcharms/charms/lxd-profile/
+          path: test-repo/${{ matrix.fixture_path }}
           channel: ${{ matrix.channel }}
           revision: ${{ matrix.revision }}
+      - name: Check that revisions are set
+        run: |
+          test -n "${{ steps.charmcraft.outputs.charmcraft-revision }}"
+          test -n "${{ steps.charmcraft.outputs.lxd-revision }}"
+      - name: Check primary output(s) exist
+        run: |
+          # Check that all output charms exist, map the filenames to their actual path
+          read -r -a filenames <<< "${{ join(matrix.charms || '', ' ') }}"
+          if [[ ${#filenames[@]} -eq 0 ]]; then
+            # No expected charms declared: the fixture produces a single charm
+            filenames=("$(basename "$(ls test-repo/${{ matrix.fixture_path }}"/*.charm)")")
+          fi
+          found_charms=()
+          for filename in "${filenames[@]}"; do
+            charm="test-repo/${{ matrix.fixture_path }}/${filename}"
+            test -f "$charm"
+            found_charms+=("$(realpath --relative-to="$PWD" "$charm")")
+          done
+
+          # Check that the charms we discovered match what the action reports it built
+          [[ "${{ steps.charmcraft.outputs.charms }}" == "${found_charms[*]}" ]]
       - name: Upload charm
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: test-charm-${{ matrix.os }}-${{ steps.charmcraft.outputs.charmcraft-revision }}
-          path: juju/testcharms/charms/lxd-profile/*.charm
+          path: test-repo/${{ matrix.fixture_path }}/*.charm
+          overwrite: true
 

@@ -1,6 +1,7 @@
 packages:
   - "common"
   - "charmcraft/setup"
+  - "charmcraft/pack"
   - "imagecraft/setup"
   - "rockcraft/pack"
   - "rockcraft/setup"
@@ -11,5 +12,5 @@ allowBuilds:
   esbuild: true
 
 catalog:
-  '@actions/core': "^3.0.0"
-  '@actions/exec': "^3.0.0"
+  "@actions/core": "^3.0.0"
+  "@actions/exec": "^3.0.0"

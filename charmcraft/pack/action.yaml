@@ -1,90 +1,60 @@
-name: "Build a charm"
-description: "Pack a charm with Charmcraft"
-author: "Canonical"
+name: 'Build a charm'
+description: 'Pack a charm with Charmcraft'
+author: 'Canonical'
+
 inputs:
   path:
     description: >
       The location of the Charmcraft project.
 
-      Defaults to the base of the repository.
+      Defaults to the root of the repository.
     default: '.'
   verbosity:
     description: >
-      Set the build verbosity level to 'quiet', 'brief', 'verbose', 'debug' or
-      'trace'.
+      The build verbosity level, which can be set to "quiet", "brief",
+      "verbose", "debug", or "trace".
 
-      The default is 'trace'.
+      The default is "trace".
     default: 'trace'
   channel:
     description: >
-      Install the snap from a specific channel
+      The channel to install Charmcraft from.
 
-      If not provided, it defaults to stable.
-    default: 'stable'
+      Defaults to the latest stable release.
+    default: 'latest/stable'
   revision:
     description: >
-      Pin the snap revision to install.
+      The revision of Charmcraft to install.
 
-      If not provided, it defaults to whatever revision is in latest/stable.
+      Defaults to the latest stable revision.
+
+      Overrides the `channel` option.
     default: ''
   lxd-channel:
     description: >
-      The LXD channel to use.
+      The channel to install LXD from.
 
       Defaults to the recommended channel for Charmcraft.
-    default: 5.21/stable
+    default: '5.21/stable'
+  test:
+    description: >
+      Run `charmcraft test` after packaging.
+
+      Defaults to false.
+    default: 'false'
+
 outputs:
   charms:
-    description: The names of any charm files created.
-    value: ${{ steps.pack-charm.outputs.charms }}
-  charmcraft-revision:
-    description: The revision of Charmcraft used for the pack.
-    value: ${{ steps.setup.outputs.charmcraft-revision }}
+    description: The packed charm artifacts, space-separated.
   lxd-revision:
-    description: The revision of lxd used for the pack.
-    value: ${{ steps.setup.outputs.lxd-revision }}
+    description: The LXD revision used.
+  charmcraft-revision:
+    description: The Charmcraft revision used.
+
 runs:
-  using: 'composite'
-  steps:
-    # This action is necessary as a workaround for https://github.com/actions/runner/issues/895.
-    # Since contexts cannot be used in the `uses:` key, we can't guarantee that this action will
-    # use the same branch of craft-actions to call other craft-actions workflows without just
-    # making our own local copy of the repository. See https://github.com/canonical/craft-actions/pull/45#discussion_r2586507869
-    # for a full explanation.
-    - name: Stage actions from adjacent action directory
-      shell: bash
-      env:
-        ACTION_PATH: ${{ github.action_path }}
-      run: |
-        mkdir -p _tmp_charmcraft-pack-actions
-        cp -r "$ACTION_PATH"/../../charmcraft \
-          _tmp_charmcraft-pack-actions/
-    - uses: ./_tmp_charmcraft-pack-actions/charmcraft/setup
-      id: setup
-      with:
-        channel: ${{ inputs.channel }}
-        revision: ${{ inputs.revision }}
-        lxd-channel: ${{ inputs.lxd-channel }}
-    - shell: bash
-      if: always()
-      run: |
-        rm -rf ./_tmp_charmcraft-pack-actions
-    - uses: actions/cache@v6
-      with:
-        path: ${{ runner.temp }}/charmcraft_cache
-        key: charmcraft-cache-${{ hashfiles('**/requirements.txt', '**/*.lock', '**/charmcraft.yaml') }}
-        restore-keys: |
-          charmcraft-cache-
-    - id: pack-charm
-      shell: bash
-      env:
-        CRAFT_VERBOSITY_LEVEL: ${{ inputs.verbosity }}
-        CRAFT_SHARED_CACHE: ${{ runner.temp }}/charmcraft_cache
-      working-directory: ${{ inputs.path }}
-      run: |
-        mkdir -p "${CRAFT_SHARED_CACHE}"
-        charmcraft pack
-        echo "charms=$(ls -1 *.charm | tr '\n' ' ')" >> "$GITHUB_OUTPUT"
+  using: 'node24'
+  main: 'dist/index.js'
+
 branding:
   icon: layers
   color: orange

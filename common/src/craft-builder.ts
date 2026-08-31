@@ -27,6 +27,13 @@ export abstract class CraftBuilder {
   abstract toolName: string;
   abstract artifactType: string;
 
+  /**
+   * Whether a single pack run may produce multiple primary artifacts.
+   * When true, all artifacts are reported space-joined under the output
+   * name passed to runPackAction, instead of only the first.
+   */
+  supportsMultiplePrimaryArtifacts = false;
+
   secondaryArtifactOutputs: SecondaryArtifactOutput[] = [];
 
   constructor(options: CraftBuilderOptions) {

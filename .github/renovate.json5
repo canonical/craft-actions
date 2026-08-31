@@ -3,7 +3,7 @@
   extends: ["config:recommended"],
   // This makes Renovate continue to patch PRs that have been modified by the GitHub Actions bot
   gitIgnoredAuthors: ["github-actions[bot]@users.noreply.github.com"],
-  labels: ["dependencies"],  // For convenient searching in GitHub
+  labels: ["PR: Dependencies"],  // For convenient searching in GitHub
   packageRules: [
     {
       // Automerge patches, pin changes and digest changes.

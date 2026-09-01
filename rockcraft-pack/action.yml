@@ -51,8 +51,8 @@ inputs:
     default: ''
 outputs:
   rock:
-    description: 'The file name of the resulting rock.'
-    value: ${{ steps.first-rock.outputs.rock }}
+    description: 'The file name(s) of the resulting rock(s), space-separated.'
+    value: ${{ steps.pack.outputs.rocks }}
 runs:
   using: 'composite'
   steps:
@@ -85,15 +85,6 @@ runs:
         test: ${{ inputs.test }}
         pro: ${{ inputs.pro }}
         ignore: ${{ inputs.ignore }}
-
-    # Preserve the legacy behavior of returning only the first artifact. The
-    # rocks output is space-delimited, so the first artifact is its first word.
-    - name: Select first rock
-      id: first-rock
-      shell: bash
-      run: |
-        first="$(cut -d' ' -f1 <<< '${{ steps.pack.outputs.rocks }}')"
-        echo "rock=$first" >> "$GITHUB_OUTPUT"
 
     - shell: bash
       if: always()

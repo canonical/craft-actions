@@ -7,7 +7,7 @@ import * as tools from "../src/tools.ts";
 
 class TestBuilder extends CraftBuilder {
   toolName = "test-tool";
-  artifactType = ".charm";
+  artifactOutput = { artifactType: ".charm", outputName: "charms" };
 }
 
 function makeBuilder(

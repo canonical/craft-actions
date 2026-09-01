@@ -6,8 +6,7 @@ import {
 
 export class CharmcraftBuilder extends CraftBuilder {
   toolName = "charmcraft";
-  artifactType = ".charm";
-  supportsMultiplePrimaryArtifacts = true;
+  artifactOutput = { artifactType: ".charm", outputName: "charms" };
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
@@ -15,5 +14,5 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     ...readBaseInputs(),
   });
 
-  void runPackAction(builder, "charms");
+  void runPackAction(builder);
 }

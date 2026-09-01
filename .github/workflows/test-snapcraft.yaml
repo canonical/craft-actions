@@ -108,7 +108,7 @@ jobs:
           channel: ${{ matrix.channel }}
           revision: ${{ matrix.revision }}
       - name: Check primary output exists
-        run: test -f "${{ steps.snapcraft.outputs.snap }}"
+        run: test -f "${{ steps.snapcraft.outputs.snaps }}"
       - name: Check secondary output(s) exist
         run: |
           # Check that all output components exist, map the filenames to their actual path

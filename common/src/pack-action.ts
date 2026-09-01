@@ -13,29 +13,20 @@ export function readBaseInputs(channelInput = "channel"): CraftBuilderOptions {
   };
 }
 
-export async function runPackAction(
-  builder: CraftBuilder,
-  outputName: string,
-): Promise<void> {
+export async function runPackAction(builder: CraftBuilder): Promise<void> {
   try {
     await runSetupAction(builder.toolName);
     await builder.pack();
-    const artifacts = await builder.findArtifacts(builder.artifactType);
+    const artifacts = await builder.findArtifacts(
+      builder.artifactOutput.artifactType,
+    );
     if (artifacts.length === 0) {
-      throw new Error(`No ${builder.artifactType} files produced by build`);
+      throw new Error(
+        `No ${builder.artifactOutput.artifactType} files produced by build`,
+      );
     }
 
-    if (builder.supportsMultiplePrimaryArtifacts) {
-      // All artifacts are reported under the single output name.
-      core.setOutput(outputName, artifacts.join(" "));
-    } else {
-      core.setOutput(outputName, artifacts[0]);
-      if (artifacts.length > 1) {
-        core.warning(
-          `Multiple ${builder.artifactType} files found in ${builder.projectRoot}`,
-        );
-      }
-    }
+    core.setOutput(builder.artifactOutput.outputName, artifacts.join(" "));
 
     for (const secondary of builder.secondaryArtifactOutputs) {
       const artifacts = await builder.findArtifacts(secondary.artifactType);

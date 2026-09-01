@@ -58,7 +58,7 @@ jobs:
       uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:
         name: test-rock-${{ matrix.os }}-${{ matrix.revision }}
-        path: ${{ steps.rockcraft.outputs.rock }}
+        path: ${{ steps.rockcraft.outputs.rocks }}
 
   run-rockcraft-pack-action-legacy-rock:
     strategy:
@@ -78,4 +78,4 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: test-legacy-rock-${{ matrix.os }}
-          path: ${{ steps.rockcraft.outputs.rock }}
+          path: ${{ steps.rockcraft.outputs.rocks }}

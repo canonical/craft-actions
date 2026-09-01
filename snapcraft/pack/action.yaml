@@ -44,10 +44,10 @@ inputs:
     default: 'false'
 
 outputs:
-  snap:
-    description: The packed snap artifact.
+  snaps:
+    description: The packed snap artifacts, space-separated.
   components:
-    description: The packed components.
+    description: The packed components, space-separated.
   lxd-revision:
     description: The LXD revision used.
   snapcraft-revision:

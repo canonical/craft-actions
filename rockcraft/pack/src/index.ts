@@ -14,7 +14,7 @@ export interface RockcraftBuilderOptions extends CraftBuilderOptions {
 
 export class RockcraftBuilder extends CraftBuilder {
   toolName = "rockcraft";
-  artifactType = ".rock";
+  artifactOutput = { artifactType: ".rock", outputName: "rocks" };
   ignore: string;
 
   constructor(options: RockcraftBuilderOptions) {
@@ -39,5 +39,5 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     ignore: core.getInput("ignore"),
   });
 
-  void runPackAction(builder, "rock");
+  void runPackAction(builder);
 }

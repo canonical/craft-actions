@@ -10,7 +10,7 @@ import * as tools from "@craft-actions/common/tools.ts";
 
 export class SnapcraftBuilder extends CraftBuilder {
   toolName = "snapcraft";
-  artifactType = ".snap";
+  artifactOutput = { artifactType: ".snap", outputName: "snaps" };
   secondaryArtifactOutputs = [
     { artifactType: ".comp", outputName: "components" },
   ];
@@ -49,5 +49,5 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     ...readBaseInputs(),
   });
 
-  void runPackAction(builder, "snap");
+  void runPackAction(builder);
 }

@@ -12,6 +12,8 @@ export class ImagecraftBuilder extends CraftBuilder {
 if (import.meta.url === `file://${process.argv[1]}`) {
   const builder = new ImagecraftBuilder({
     ...readBaseInputs(),
+    // no test command on imagecraft yet
+    runTests: false,
   });
 
   void runPackAction(builder);

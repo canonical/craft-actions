@@ -20344,7 +20344,9 @@ var ImagecraftBuilder = class extends CraftBuilder {
 };
 if (import.meta.url === `file://${process.argv[1]}`) {
   const builder = new ImagecraftBuilder({
-    ...readBaseInputs2()
+    ...readBaseInputs2(),
+    // no test command on imagecraft yet
+    runTests: false
   });
   void runPackAction(builder);
 }

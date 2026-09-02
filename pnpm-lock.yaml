@@ -271,6 +271,15 @@ importers:
         specifier: 'catalog:'
         version: 3.0.0
 
+  imagecraft/pack:
+    dependencies:
+      '@actions/core':
+        specifier: 'catalog:'
+        version: 3.0.1
+      '@craft-actions/common':
+        specifier: workspace:*
+        version: link:../../common
+
   imagecraft/setup:
     dependencies:
       '@actions/core':

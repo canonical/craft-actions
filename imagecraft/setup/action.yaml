@@ -6,11 +6,8 @@ inputs:
     description: >
       The channel to install Imagecraft from.
 
-      Defaults to the latest beta release.
-
-      This option will default to the latest stable release once one is
-      available.
-    default: 'latest/beta'
+      Defaults to the latest stable release.
+    default: 'latest/stable'
   revision:
     description: >
       The revision of Imagecraft to install.

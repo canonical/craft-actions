@@ -1,0 +1,107 @@
+name: Test Imagecraft
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/*imagecraft*"
+      - "imagecraft**"
+      - "common/**"  # A change to a common module could affect this module.
+  push:
+    branches:
+      - main
+      - "feature/*"
+      - "hotfix/*"
+      - "release/*"
+      - "renovate/*"
+    paths:
+      - ".github/workflows/*imagecraft*"
+      - "imagecraft**"
+      - "common/**"  # A change to a common module could affect this module.
+
+jobs:
+  setup:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-22.04
+          - ubuntu-24.04
+          - ubuntu-26.04
+          - ubuntu-22.04-arm
+          - ubuntu-24.04-arm
+          - ubuntu-26.04-arm
+        channel: [latest/stable, latest/edge]
+        include:
+          - os: ubuntu-24.04
+            channel: ''
+            revision: 302  # 0.1.0, but really here to test the revision field.
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./imagecraft/setup
+        id: setup
+        with:
+          channel: ${{ matrix.channel }}
+          revision: ${{ matrix.revision }}
+      - name: Check revision number if set with a revision
+        if: matrix.revision != ''
+        run: |
+          [[ ${{ matrix.revision }} == ${{ steps.setup.outputs.imagecraft-revision }} ]]
+      - name: Check that revisions are set
+        run: |
+          [[ ${{ steps.setup.outputs.imagecraft-revision }} -ge 0 ]]
+          [[ ${{ steps.setup.outputs.lxd-revision }} -ge 0 ]]
+      - name: Check that install works even if Imagecraft is already installed
+        uses: ./imagecraft/setup
+  pack:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-22.04
+          - ubuntu-24.04
+          - ubuntu-26.04
+          - ubuntu-22.04-arm
+          - ubuntu-24.04-arm
+          - ubuntu-26.04-arm
+        channel: [latest/stable, latest/edge]
+        # The repository to clone for (most) tests
+        fixture_repo: [canonical/imagecraft]
+        fixture_ref: [c0e4b007e7617045842772a91bcd53e015816dbd]  # main as of 02-9-2026
+        # The path to attempt to pack
+        fixture_path: [tests/spread/pack/grammar]
+        include:
+          - os: ubuntu-24.04
+            channel: ''
+            revision: 302  # 0.1.0, but really here to test the revision field.
+            fixture_repo: canonical/imagecraft
+            fixture_ref: c0e4b007e7617045842772a91bcd53e015816dbd  # main as of 02-9-2026
+            fixture_path: tests/spread/pack/grammar
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ matrix.fixture_repo }}
+          ref: ${{ matrix.fixture_ref }}
+          path: test-repo
+      - name: Pack image
+        id: imagecraft
+        uses: ./imagecraft/pack
+        with:
+          path: test-repo/${{ matrix.fixture_path }}
+          channel: ${{ matrix.channel }}
+          revision: ${{ matrix.revision }}
+      - name: Check that revisions are set
+        run: |
+          test -n "${{ steps.imagecraft.outputs.imagecraft-revision }}"
+          test -n "${{ steps.imagecraft.outputs.lxd-revision }}"
+      - name: Check primary output exists
+        run: test -f "${{ steps.imagecraft.outputs.images }}"
+      - name: Upload image
+        continue-on-error: true
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: test-image-${{ matrix.os }}-${{ steps.imagecraft.outputs.imagecraft-revision }}
+          path: test-repo/${{ matrix.fixture_path }}/*.img
+          overwrite: true

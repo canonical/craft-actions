@@ -54,8 +54,8 @@ inputs:
       If not provided, it defaults to empty.
     default: ''
 outputs:
-  rock:
-    description: 'The file name of the resulting rock.'
+  rocks:
+    description: The packed rock artifacts, space-separated.
   rockcraft-revision:
     description: 'The Rockcraft revision used.'
   lxd-revision:

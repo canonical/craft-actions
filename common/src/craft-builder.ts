@@ -11,7 +11,7 @@ export interface CraftBuilderOptions {
   runTests?: boolean;
 }
 
-export interface SecondaryArtifactOutput {
+export interface ArtifactOutput {
   artifactType: string;
   outputName: string;
 }
@@ -25,16 +25,9 @@ export abstract class CraftBuilder {
   runTests: boolean;
 
   abstract toolName: string;
-  abstract artifactType: string;
+  abstract artifactOutput: ArtifactOutput;
 
-  /**
-   * Whether a single pack run may produce multiple primary artifacts.
-   * When true, all artifacts are reported space-joined under the output
-   * name passed to runPackAction, instead of only the first.
-   */
-  supportsMultiplePrimaryArtifacts = false;
-
-  secondaryArtifactOutputs: SecondaryArtifactOutput[] = [];
+  secondaryArtifactOutputs: ArtifactOutput[] = [];
 
   constructor(options: CraftBuilderOptions) {
     this.projectRoot = tools.expandHome(options.projectRoot);

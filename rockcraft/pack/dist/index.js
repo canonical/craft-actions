@@ -20030,9 +20030,6 @@ function setFailed(message) {
 function error(message, properties = {}) {
   issueCommand("error", toCommandProperties(properties), message instanceof Error ? message.toString() : message);
 }
-function warning(message, properties = {}) {
-  issueCommand("warning", toCommandProperties(properties), message instanceof Error ? message.toString() : message);
-}
 function info(message) {
   process.stdout.write(message + os5.EOL);
 }
@@ -20219,12 +20216,6 @@ var CraftBuilder = class {
   verbosity;
   pro;
   runTests;
-  /**
-   * Whether a single pack run may produce multiple primary artifacts.
-   * When true, all artifacts are reported space-joined under the output
-   * name passed to runPackAction, instead of only the first.
-   */
-  supportsMultiplePrimaryArtifacts = false;
   secondaryArtifactOutputs = [];
   constructor(options) {
     this.projectRoot = expandHome(options.projectRoot);
@@ -20324,24 +20315,19 @@ function readBaseInputs2(channelInput = "channel") {
     runTests: getInput("test").toLowerCase() === "true"
   };
 }
-async function runPackAction(builder, outputName) {
+async function runPackAction(builder) {
   try {
     await runSetupAction(builder.toolName);
     await builder.pack();
-    const artifacts = await builder.findArtifacts(builder.artifactType);
+    const artifacts = await builder.findArtifacts(
+      builder.artifactOutput.artifactType
+    );
     if (artifacts.length === 0) {
-      throw new Error(`No ${builder.artifactType} files produced by build`);
+      throw new Error(
+        `No ${builder.artifactOutput.artifactType} files produced by build`
+      );
     }
-    if (builder.supportsMultiplePrimaryArtifacts) {
-      setOutput(outputName, artifacts.join(" "));
-    } else {
-      setOutput(outputName, artifacts[0]);
-      if (artifacts.length > 1) {
-        warning(
-          `Multiple ${builder.artifactType} files found in ${builder.projectRoot}`
-        );
-      }
-    }
+    setOutput(builder.artifactOutput.outputName, artifacts.join(" "));
     for (const secondary of builder.secondaryArtifactOutputs) {
       const artifacts2 = await builder.findArtifacts(secondary.artifactType);
       setOutput(secondary.outputName, artifacts2.join(" "));
@@ -20354,7 +20340,7 @@ async function runPackAction(builder, outputName) {
 // src/index.ts
 var RockcraftBuilder = class extends CraftBuilder {
   toolName = "rockcraft";
-  artifactType = ".rock";
+  artifactOutput = { artifactType: ".rock", outputName: "rocks" };
   ignore;
   constructor(options) {
     super(options);
@@ -20373,7 +20359,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     ...readBaseInputs2(),
     ignore: getInput("ignore")
   });
-  void runPackAction(builder, "rock");
+  void runPackAction(builder);
 }
 export {
   RockcraftBuilder

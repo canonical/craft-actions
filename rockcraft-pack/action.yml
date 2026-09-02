@@ -51,8 +51,8 @@ inputs:
     default: ''
 outputs:
   rock:
-    description: 'The file name of the resulting rock.'
-    value: ${{ steps.pack.outputs.rock }}
+    description: 'The file name(s) of the resulting rock(s), space-separated.'
+    value: ${{ steps.pack.outputs.rocks }}
 runs:
   using: 'composite'
   steps:

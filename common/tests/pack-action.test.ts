@@ -2,7 +2,7 @@ import { vi, afterEach, beforeEach, test, expect } from "vitest";
 import * as core from "@actions/core";
 import { readBaseInputs, runPackAction } from "../src/pack-action.ts";
 import * as setupAction from "../src/setup-action.ts";
-import { CraftBuilder, SecondaryArtifactOutput } from "../src/craft-builder.ts";
+import { CraftBuilder, ArtifactOutput } from "../src/craft-builder.ts";
 import * as path from "node:path";
 import * as os from "node:os";
 import * as fs from "node:fs";
@@ -32,7 +32,7 @@ afterEach(() => {
 
 function assertOutput(real: string, expected: [string, string]): void {
   const [key, value] = expected;
-  const escapedValue = value.replace(/\./g, "\\.");
+  const escapedValue = value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const regex = new RegExp(
     `${key}<<gh[a]?delimiter_.*\n${escapedValue}\ngh[a]?delimiter_.*`,
   );
@@ -57,10 +57,9 @@ function makeStubBuilder(
     toolName: string;
     channel: string;
     revision: string;
-    artifactType: string;
+    artifactOutput: ArtifactOutput;
     projectRoot: string;
-    supportsMultiplePrimaryArtifacts: boolean;
-    secondaryArtifactOutputs: SecondaryArtifactOutput[];
+    secondaryArtifactOutputs: ArtifactOutput[];
     pack: () => Promise<void>;
     findArtifacts: (ext: string) => Promise<string[]>;
   }> = {},
@@ -69,9 +68,8 @@ function makeStubBuilder(
     toolName: "test-tool",
     channel: "stable",
     revision: "",
-    artifactType: ".charm",
+    artifactOutput: { artifactType: ".charm", outputName: "charm" },
     projectRoot: "project-root",
-    supportsMultiplePrimaryArtifacts: false,
     secondaryArtifactOutputs: [],
     pack: vi.fn(async () => {}),
     findArtifacts: vi.fn(async () => ["project-root/output.charm"]),
@@ -127,7 +125,7 @@ test("runPackAction calls runSetupAction with the tool name", async () => {
   const runSetup = mockSetupAction();
   const builder = makeStubBuilder({ revision: "1" });
 
-  await runPackAction(builder, "charm");
+  await runPackAction(builder);
 
   expect(runSetup).toHaveBeenCalledWith("test-tool");
 });
@@ -136,7 +134,7 @@ test("runPackAction calls pack and sets output", async () => {
   mockSetupAction();
   const builder = makeStubBuilder({ revision: "1" });
 
-  await runPackAction(builder, "charm");
+  await runPackAction(builder);
 
   expect(builder.pack).toHaveBeenCalled();
   assertOutput(fs.readFileSync(tempOutputPath, "utf8"), [
@@ -155,48 +153,22 @@ test("runPackAction calls setFailed on error", async () => {
     }),
   });
 
-  await runPackAction(builder, "charm");
+  await runPackAction(builder);
 
   expect(setFailed).toHaveBeenCalledWith("pack failed");
 });
 
-test("runPackAction warns when multiple artifacts are found", async () => {
+test("runPackAction joins multiple primary artifacts into one output", async () => {
   mockSetupAction();
-  const warning = vi.mocked(core.warning);
   const builder = makeStubBuilder({
-    revision: "1",
+    artifactOutput: { artifactType: ".charm", outputName: "charms" },
     findArtifacts: vi.fn(async () => [
       "project-root/a.charm",
       "project-root/b.charm",
     ]),
   });
 
-  await runPackAction(builder, "charm");
-
-  expect(warning).toHaveBeenCalled();
-});
-
-test("runPackAction does not warn when only one artifact is found", async () => {
-  mockSetupAction();
-  const warning = vi.mocked(core.warning);
-  const builder = makeStubBuilder({ revision: "1" });
-
-  await runPackAction(builder, "charm");
-
-  expect(warning).not.toHaveBeenCalled();
-});
-
-test("runPackAction sets all artifacts when multiple primary artifacts are supported", async () => {
-  mockSetupAction();
-  const builder = makeStubBuilder({
-    supportsMultiplePrimaryArtifacts: true,
-    findArtifacts: vi.fn(async () => [
-      "project-root/a.charm",
-      "project-root/b.charm",
-    ]),
-  });
-
-  await runPackAction(builder, "charms");
+  await runPackAction(builder);
 
   assertOutput(fs.readFileSync(tempOutputPath, "utf8"), [
     "charms",
@@ -204,31 +176,15 @@ test("runPackAction sets all artifacts when multiple primary artifacts are suppo
   ]);
 });
 
-test("runPackAction does not warn on multiple artifacts when they are supported", async () => {
-  mockSetupAction();
-  const warning = vi.mocked(core.warning);
-  const builder = makeStubBuilder({
-    supportsMultiplePrimaryArtifacts: true,
-    findArtifacts: vi.fn(async () => [
-      "project-root/a.charm",
-      "project-root/b.charm",
-    ]),
-  });
-
-  await runPackAction(builder, "charms");
-
-  expect(warning).not.toHaveBeenCalled();
-});
-
 test("runPackAction fails when no primary artifacts are found", async () => {
   mockSetupAction();
   const setFailed = vi.mocked(core.setFailed);
   const builder = makeStubBuilder({
-    artifactType: ".snap",
+    artifactOutput: { artifactType: ".snap", outputName: "snaps" },
     findArtifacts: vi.fn(async () => []),
   });
 
-  await runPackAction(builder, "snap");
+  await runPackAction(builder);
 
   expect(setFailed).toHaveBeenCalledWith("No .snap files produced by build");
 });
@@ -236,7 +192,7 @@ test("runPackAction fails when no primary artifacts are found", async () => {
 test("runPackAction correctly yields multiple secondary artifacts", async () => {
   mockSetupAction();
   const builder = makeStubBuilder({
-    artifactType: ".snap",
+    artifactOutput: { artifactType: ".snap", outputName: "snaps" },
     findArtifacts: vi.fn(async (artifactType: string) => {
       if (artifactType === ".snap") {
         return ["example.snap"];
@@ -253,7 +209,7 @@ test("runPackAction correctly yields multiple secondary artifacts", async () => 
     ],
   });
 
-  await runPackAction(builder, "snap");
+  await runPackAction(builder);
 
   assertOutput(fs.readFileSync(tempOutputPath, "utf8"), [
     "components",
@@ -264,7 +220,7 @@ test("runPackAction correctly yields multiple secondary artifacts", async () => 
 test("runPackAction sets empty component output", async () => {
   mockSetupAction();
   const builder = makeStubBuilder({
-    artifactType: ".snap",
+    artifactOutput: { artifactType: ".snap", outputName: "snaps" },
     findArtifacts: vi.fn(async (artifactType: string) => {
       if (artifactType === ".snap") {
         return ["example.snap"];
@@ -277,7 +233,7 @@ test("runPackAction sets empty component output", async () => {
     ],
   });
 
-  await runPackAction(builder, "snap");
+  await runPackAction(builder);
 
   assertOutput(fs.readFileSync(tempOutputPath, "utf8"), ["components", ""]);
 });

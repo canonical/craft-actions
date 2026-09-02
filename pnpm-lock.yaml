@@ -244,6 +244,15 @@ importers:
         specifier: ^4.1.9
         version: 4.1.11(@types/node@26.4.0)(vite@8.1.0(@types/node@26.4.0)(esbuild@0.28.2))
 
+  charmcraft/pack:
+    dependencies:
+      '@actions/core':
+        specifier: 'catalog:'
+        version: 3.0.1
+      '@craft-actions/common':
+        specifier: workspace:*
+        version: link:../../common
+
   charmcraft/setup:
     dependencies:
       '@actions/core':

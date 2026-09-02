@@ -59,6 +59,7 @@ function makeStubBuilder(
     revision: string;
     artifactType: string;
     projectRoot: string;
+    supportsMultiplePrimaryArtifacts: boolean;
     secondaryArtifactOutputs: SecondaryArtifactOutput[];
     pack: () => Promise<void>;
     findArtifacts: (ext: string) => Promise<string[]>;
@@ -70,6 +71,7 @@ function makeStubBuilder(
     revision: "",
     artifactType: ".charm",
     projectRoot: "project-root",
+    supportsMultiplePrimaryArtifacts: false,
     secondaryArtifactOutputs: [],
     pack: vi.fn(async () => {}),
     findArtifacts: vi.fn(async () => ["project-root/output.charm"]),
@@ -180,6 +182,40 @@ test("runPackAction does not warn when only one artifact is found", async () => 
   const builder = makeStubBuilder({ revision: "1" });
 
   await runPackAction(builder, "charm");
+
+  expect(warning).not.toHaveBeenCalled();
+});
+
+test("runPackAction sets all artifacts when multiple primary artifacts are supported", async () => {
+  mockSetupAction();
+  const builder = makeStubBuilder({
+    supportsMultiplePrimaryArtifacts: true,
+    findArtifacts: vi.fn(async () => [
+      "project-root/a.charm",
+      "project-root/b.charm",
+    ]),
+  });
+
+  await runPackAction(builder, "charms");
+
+  assertOutput(fs.readFileSync(tempOutputPath, "utf8"), [
+    "charms",
+    "project-root/a.charm project-root/b.charm",
+  ]);
+});
+
+test("runPackAction does not warn on multiple artifacts when they are supported", async () => {
+  mockSetupAction();
+  const warning = vi.mocked(core.warning);
+  const builder = makeStubBuilder({
+    supportsMultiplePrimaryArtifacts: true,
+    findArtifacts: vi.fn(async () => [
+      "project-root/a.charm",
+      "project-root/b.charm",
+    ]),
+  });
+
+  await runPackAction(builder, "charms");
 
   expect(warning).not.toHaveBeenCalled();
 });

@@ -12,6 +12,7 @@
   },
   "include": [
     "charmcraft/setup/**/*.ts",
+    "charmcraft/pack/**/*.ts",
     "common/**/*.ts",
     "imagecraft/setup/**/*.ts",
     "rockcraft/pack/**/*.ts",

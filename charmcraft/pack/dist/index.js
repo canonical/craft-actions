@@ -20352,41 +20352,19 @@ async function runPackAction(builder, outputName) {
 }
 
 // src/index.ts
-var SnapcraftBuilder = class extends CraftBuilder {
-  toolName = "snapcraft";
-  artifactType = ".snap";
-  secondaryArtifactOutputs = [
-    { artifactType: ".comp", outputName: "components" }
-  ];
-  constructor(options) {
-    super(options);
-  }
-  async buildCommand() {
-    if (this.runTests) {
-      return super.buildCommand();
-    }
-    const { result } = await fetchSnapd(`/v2/snaps/${this.toolName}`);
-    if (!isRecord(result) || typeof result.version !== "string") {
-      throw new Error(`Unable to locate installation of snap ${this.toolName}`);
-    }
-    const snapcraftVersion = result.version;
-    const [snapcraftMajor] = snapcraftVersion.split(".", 1);
-    if (!/^\d+$/.test(snapcraftMajor)) {
-      throw new Error(
-        `Snapd returned an invalid Snapcraft version: ${result.version}`
-      );
-    }
-    return Number(snapcraftMajor) < 8 ? [this.toolName] : super.buildCommand();
-  }
+var CharmcraftBuilder = class extends CraftBuilder {
+  toolName = "charmcraft";
+  artifactType = ".charm";
+  supportsMultiplePrimaryArtifacts = true;
 };
 if (import.meta.url === `file://${process.argv[1]}`) {
-  const builder = new SnapcraftBuilder({
+  const builder = new CharmcraftBuilder({
     ...readBaseInputs2()
   });
-  void runPackAction(builder, "snap");
+  void runPackAction(builder, "charms");
 }
 export {
-  SnapcraftBuilder
+  CharmcraftBuilder
 };
 /*! Bundled license information:
 

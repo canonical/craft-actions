@@ -1,0 +1,14 @@
+{
+  "name": "@craft-actions/charmcraft-pack",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "pnpm node ../../build.js src/index.ts dist/index.js",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@actions/core": "catalog:",
+    "@craft-actions/common": "workspace:*"
+  }
+}

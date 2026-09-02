@@ -20219,6 +20219,12 @@ var CraftBuilder = class {
   verbosity;
   pro;
   runTests;
+  /**
+   * Whether a single pack run may produce multiple primary artifacts.
+   * When true, all artifacts are reported space-joined under the output
+   * name passed to runPackAction, instead of only the first.
+   */
+  supportsMultiplePrimaryArtifacts = false;
   secondaryArtifactOutputs = [];
   constructor(options) {
     this.projectRoot = expandHome(options.projectRoot);
@@ -20326,12 +20332,16 @@ async function runPackAction(builder, outputName) {
     if (artifacts.length === 0) {
       throw new Error(`No ${builder.artifactType} files produced by build`);
     }
-    if (artifacts.length > 1) {
-      warning(
-        `Multiple ${builder.artifactType} files found in ${builder.projectRoot}`
-      );
+    if (builder.supportsMultiplePrimaryArtifacts) {
+      setOutput(outputName, artifacts.join(" "));
+    } else {
+      setOutput(outputName, artifacts[0]);
+      if (artifacts.length > 1) {
+        warning(
+          `Multiple ${builder.artifactType} files found in ${builder.projectRoot}`
+        );
+      }
     }
-    setOutput(outputName, artifacts[0]);
     for (const secondary of builder.secondaryArtifactOutputs) {
       const artifacts2 = await builder.findArtifacts(secondary.artifactType);
       setOutput(secondary.outputName, artifacts2.join(" "));

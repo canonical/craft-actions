@@ -24,12 +24,18 @@ export async function runPackAction(
     if (artifacts.length === 0) {
       throw new Error(`No ${builder.artifactType} files produced by build`);
     }
-    if (artifacts.length > 1) {
-      core.warning(
-        `Multiple ${builder.artifactType} files found in ${builder.projectRoot}`,
-      );
+
+    if (builder.supportsMultiplePrimaryArtifacts) {
+      // All artifacts are reported under the single output name.
+      core.setOutput(outputName, artifacts.join(" "));
+    } else {
+      core.setOutput(outputName, artifacts[0]);
+      if (artifacts.length > 1) {
+        core.warning(
+          `Multiple ${builder.artifactType} files found in ${builder.projectRoot}`,
+        );
+      }
     }
-    core.setOutput(outputName, artifacts[0]);
 
     for (const secondary of builder.secondaryArtifactOutputs) {
       const artifacts = await builder.findArtifacts(secondary.artifactType);

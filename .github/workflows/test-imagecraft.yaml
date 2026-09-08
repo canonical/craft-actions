@@ -53,6 +53,9 @@ jobs:
           [[ ${{ steps.setup.outputs.lxd-revision }} -ge 0 ]]
       - name: Check that install works even if Imagecraft is already installed
         uses: ./imagecraft/setup
+        with:
+          channel: ${{ matrix.channel }}
+          revision: ${{ matrix.revision }}
   pack:
     strategy:
       fail-fast: false

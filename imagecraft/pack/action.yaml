@@ -1,0 +1,59 @@
+name: "Build an image"
+description: "Pack an image with Imagecraft"
+author: "Canonical"
+
+inputs:
+  path:
+    description: >
+      The location of the Imagecraft project.
+
+      Defaults to the root of the repository.
+    default: "."
+  verbosity:
+    description: >
+      The build verbosity level, which can be set to "quiet", "brief",
+      "verbose", "debug", or "trace".
+
+      The default is "trace".
+    default: "trace"
+  channel:
+    description: >
+      The channel to install Imagecraft from.
+
+      Defaults to the latest stable release.
+    default: "latest/stable"
+  revision:
+    description: >
+      The revision of Imagecraft to install.
+
+      Defaults to the latest stable revision.
+
+      Overrides the `channel` option.
+    default: ""
+  lxd-channel:
+    description: >
+      The channel to install LXD from.
+
+      Defaults to the recommended channel for Imagecraft.
+    default: "5.21/stable"
+
+  # Not supported: Imagecraft has no `test` command. The input is still read
+  # from the environment but intentionally left undocumented.
+  # test:
+  #   default: "false"
+
+outputs:
+  images:
+    description: The packed images, space-separated.
+  lxd-revision:
+    description: The LXD revision used.
+  imagecraft-revision:
+    description: The Imagecraft revision used.
+
+runs:
+  using: "node24"
+  main: "dist/index.js"
+
+branding:
+  icon: layers
+  color: orange

@@ -15,8 +15,9 @@
     "charmcraft/pack/**/*.ts",
     "common/**/*.ts",
     "imagecraft/setup/**/*.ts",
-    "rockcraft/pack/**/*.ts",
+    "imagecraft/pack/**/*.ts",
     "rockcraft/setup/**/*.ts",
+    "rockcraft/pack/**/*.ts",
     "snapcraft/setup/**/*.ts",
     "snapcraft/pack/**/*.ts"
   ],

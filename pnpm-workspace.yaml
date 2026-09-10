@@ -3,8 +3,9 @@ packages:
   - "charmcraft/setup"
   - "charmcraft/pack"
   - "imagecraft/setup"
-  - "rockcraft/pack"
+  - "imagecraft/pack"
   - "rockcraft/setup"
+  - "rockcraft/pack"
   - "snapcraft/setup"
   - "snapcraft/pack"
 

@@ -53,6 +53,9 @@ jobs:
           test ${{ steps.setup.outputs.lxd-revision }} -ge 0
       - name: Check that install works even if Charmcraft is already installed
         uses: ./charmcraft/setup
+        with:
+          channel: ${{ matrix.channel }}
+          revision: ${{ matrix.revision }}
   pack:
     strategy:
       fail-fast: false

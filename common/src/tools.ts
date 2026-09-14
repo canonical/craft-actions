@@ -99,16 +99,13 @@ export async function ensureLXD(lxdChannel: string): Promise<void> {
   const haveSnapLXD = await haveExecutable("/snap/bin/lxd");
   if (!haveSnapLXD) {
     core.info("Installing LXD...");
-    await self.runCommand([
-      "sudo",
-      "snap",
-      "install",
-      "lxd",
-      "--channel",
-      lxdChannel,
-      "--cohort",
-      "+",
-    ]);
+    const installCommand = ["sudo", "snap", "install", "lxd"];
+    // An empty channel lets snapd pick its default channel for LXD.
+    if (lxdChannel.length > 0) {
+      installCommand.push("--channel", lxdChannel);
+    }
+    installCommand.push("--cohort", "+");
+    await self.runCommand(installCommand);
   }
 
   // `usermod` would require a new user session to take effect, but the runner

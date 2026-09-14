@@ -34,8 +34,8 @@ inputs:
     description: >
       The channel to install LXD from.
 
-      Defaults to the recommended channel for Charmcraft.
-    default: '5.21/stable'
+      If empty, snapd's default channel for LXD is used.
+    default: ''
   test:
     description: >
       Run `charmcraft test` after packaging.

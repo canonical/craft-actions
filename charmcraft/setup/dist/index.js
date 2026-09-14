@@ -20100,16 +20100,12 @@ async function ensureLXD(lxdChannel) {
   const haveSnapLXD = await haveExecutable("/snap/bin/lxd");
   if (!haveSnapLXD) {
     info("Installing LXD...");
-    await runCommand([
-      "sudo",
-      "snap",
-      "install",
-      "lxd",
-      "--channel",
-      lxdChannel,
-      "--cohort",
-      "+"
-    ]);
+    const installCommand = ["sudo", "snap", "install", "lxd"];
+    if (lxdChannel.length > 0) {
+      installCommand.push("--channel", lxdChannel);
+    }
+    installCommand.push("--cohort", "+");
+    await runCommand(installCommand);
   }
   info("Setting daemon group on LXD snap to adm...");
   await runCommand(["sudo", "snap", "set", "lxd", "daemon.group=adm"]);
@@ -20188,7 +20184,7 @@ function readBaseInputs() {
   return {
     channel: getInput("channel") || "latest/stable",
     revision: getInput("revision"),
-    lxdChannel: getInput("lxd-channel") || "5.21/stable"
+    lxdChannel: getInput("lxd-channel")
   };
 }
 async function runSetupAction(toolName) {

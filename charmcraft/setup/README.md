@@ -28,7 +28,7 @@ The action supports the following inputs.
     revision: ''
 
     # The channel to install the LXD snap from.
-    # If unset or set to an empty string, defaults to the current recommended channel for Charmcraft.
+    # If unset or set to an empty string, snapd's default channel for LXD is used.
     lxd-channel: ''
 ```
 

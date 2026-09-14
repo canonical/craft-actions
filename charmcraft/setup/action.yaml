@@ -18,8 +18,8 @@ inputs:
     description: >
       The LXD channel to use.
 
-      Defaults to the recommended channel for Charmcraft.
-    default: 5.21/stable
+      If empty, snapd's default channel for LXD is used.
+    default: ''
 outputs:
   lxd-revision:
     description: The LXD revision used.

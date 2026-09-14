@@ -1,7 +1,4 @@
-import {
-  CraftBuilder,
-  CraftBuilderOptions,
-} from "@craft-actions/common/craft-builder.ts";
+import { CraftBuilder } from "@craft-actions/common/craft-builder.ts";
 import {
   readBaseInputs,
   runPackAction,
@@ -14,10 +11,6 @@ export class SnapcraftBuilder extends CraftBuilder {
   secondaryArtifactOutputs = [
     { artifactType: ".comp", outputName: "components" },
   ];
-
-  constructor(options: CraftBuilderOptions) {
-    super(options);
-  }
 
   protected override async buildCommand(): Promise<string[]> {
     // Don't bother checking if the current version can run tests for now

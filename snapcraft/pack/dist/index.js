@@ -20255,11 +20255,8 @@ var CraftBuilder = class {
     }
     await this.doPack();
   }
-  async #readdir(dir) {
-    return await fs4.promises.readdir(dir);
-  }
   async findArtifacts(extension) {
-    const files = await this.#readdir(this.projectRoot);
+    const files = await fs4.promises.readdir(this.projectRoot);
     const artifacts = files.filter((name) => name.endsWith(extension)).sort().map((name) => path4.join(this.projectRoot, name));
     return artifacts;
   }
@@ -20340,9 +20337,6 @@ var SnapcraftBuilder = class extends CraftBuilder {
   secondaryArtifactOutputs = [
     { artifactType: ".comp", outputName: "components" }
   ];
-  constructor(options) {
-    super(options);
-  }
   async buildCommand() {
     if (this.runTests) {
       return super.buildCommand();

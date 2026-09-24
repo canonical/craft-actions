@@ -12,8 +12,6 @@ inputs:
     description: >
       The revision of Rockcraft to install.
 
-      Defaults to the latest stable revision.
-
       Overrides the `channel` option.
     default: ''
   lxd-channel:

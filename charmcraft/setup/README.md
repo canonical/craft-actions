@@ -1,38 +1,34 @@
-# charmcraft/setup
+# `charmcraft/setup`
 
-This action installs and configures LXD and Charmcraft.
+Install and configure Charmcraft, with LXD as the build provider. This action is useful in situations where
+you need Charmcraft installed, but don't wish to run a full action such as "pack".
 
 ## Usage
 
-The snapcraft/pack action can be added to your repository's workflows with:
+The `charmcraft/setup` action can be added to your repository's workflows with:
 
 ```yaml
-- name: Set up Charmcraft
-  uses: canonical/craft-actions/charmcraft/setup@main
+jobs:
+  # ...
+  setup-charmcraft:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: canonical/craft-actions/charmcraft/setup@v1
 ```
 
-### Inputs
+## Inputs
 
-The action supports the following inputs.
+The behavior of the `charmcraft/setup` action can be customized with the following inputs:
 
-```yaml
-- name: Set up Charmcraft
-  uses: canonical/craft-actions/charmcraft/setup@main
-  with:
-    # The channel to install the Charmcraft snap from.
-    # If unset or set to an empty string, the default channel for Charmcraft is used.
-    channel: ''
-    
-    # The revision of the Charmcraft snap to install.
-    # Overrides the 'channel' option.
-    revision: ''
+| Input       | Description                                                            | Default                                  |
+| ----------- | ---------------------------------------------------------------------- | ---------------------------------------- |
+| channel     | The channel to install Charmcraft from.                                | The default snap channel for Charmcraft. |
+| revision    | The revision of Charmcraft to install. Overrides the `channel` option. | `""`                                     |
+| lxd-channel | The channel to install LXD from.                                       | The default snap channel for LXD.        |
 
-    # The channel to install the LXD snap from.
-    # If unset or set to an empty string, snapd's default channel for LXD is used.
-    lxd-channel: ''
-```
+## Outputs
 
-### Outputs
-
-- `charmcraft-revision`: The revision of Charmcraft that was installed.
-- `lxd-revision`: The revision of LXD that was installed.
+| Output              | Description                   | Example |
+| ------------------- | ----------------------------- | ------- |
+| charmcraft-revision | The Charmcraft revision used. | `"123"` |
+| lxd-revision        | The LXD revision used.        | `"123"` |

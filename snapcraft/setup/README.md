@@ -1,38 +1,34 @@
-# snapcraft/setup
+# `snapcraft/setup`
 
-This action installs and configures LXD and Snapcraft.
+Install and configure Snapcraft, with LXD as the build provider. This action is useful in situations where
+you need Snapcraft installed, but don't wish to run a full action such as "pack".
 
 ## Usage
 
-The snapcraft/setup action can be added to your repository's workflows with:
+The `snapcraft/setup` action can be added to your repository's workflows with:
 
 ```yaml
-- name: Set up Snapcraft
-  uses: canonical/craft-actions/snapcraft/setup@main
+jobs:
+  # ...
+  setup-snapcraft:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: canonical/craft-actions/snapcraft/setup@v1
 ```
 
-### Inputs
+## Inputs
 
-The action supports the following inputs.
+The behavior of the `snapcraft/setup` action can be customized with the following inputs:
 
-```yaml
-- name: Set up Snapcraft
-  uses: canonical/craft-actions/snapcraft/setup@main
-  with:
-    # The channel to install the Snapcraft snap from.
-    # If unset or set to an empty string, the default channel for Snapcraft is used.
-    channel: ''
-    
-    # The revision of the Snapcraft snap to install.
-    # Overrides the 'channel' option.
-    revision: ''
+| Input       | Description                                                           | Default                                 |
+| ----------- | --------------------------------------------------------------------- | --------------------------------------- |
+| channel     | The channel to install Snapcraft from.                                | The default snap channel for Snapcraft. |
+| revision    | The revision of Snapcraft to install. Overrides the `channel` option. | `""`                                    |
+| lxd-channel | The channel to install LXD from.                                      | The default snap channel for LXD.       |
 
-    # The channel to install the LXD snap from.
-    # If unset or set to an empty string, snapd's default channel for LXD is used.
-    lxd-channel: ''
-```
+## Outputs
 
-### Outputs
-
-- `snapcraft-revision`: The revision of Snapcraft that was installed.
-- `lxd-revision`: The revision of LXD that was installed.
+| Output             | Description                  | Example |
+| ------------------ | ---------------------------- | ------- |
+| snapcraft-revision | The Snapcraft revision used. | `"123"` |
+| lxd-revision       | The LXD revision used.       | `"123"` |

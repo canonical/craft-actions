@@ -2,33 +2,47 @@
 
 # Craft Actions
 
-This monorepo contains GitHub actions for setting up craft tools and packing their artifacts.
+A collection of GitHub actions for testing, packaging, and distributing software with the craft apps.
 
-## Contents
+To use these actions, pin them to the latest release, `@v1`. The `main` branch is being used for active
+development and may introduce breaking changes at any time.
 
-Actions related to snaps and [Snapcraft](https://snapcraft.io/):
+## Snap actions
 
-- [Package a snap](snapcraft/pack/README.md), for installing Snapcraft in the environment and packing a snap.
-- [Set up Snapcraft](snapcraft/setup/README.md), for installing Snapcraft in the environment.
+- [Package a snap](snapcraft/pack/README.md)
+- [Set up Snapcraft](snapcraft/setup/README.md)
 
-Actions related to rocks and [Rockcraft](https://documentation.ubuntu.com/rockcraft/stable):
+## Rock actions
 
-- [Package a rock](rockcraft-pack/README.md), for installing Rockcraft in the environment and packing a rock.
+- [Package a rock](rockcraft/pack/README.md)
+- [Set up Rockcraft](rockcraft/setup/README.md)
 
-Actions related to charms and [Charmcraft](https://juju.is/):
+## Charm actions
 
-- [Package a charm](charmcraft/pack/README.md), for installing Charmcraft in the environment and packing a charm.
-- [Set up Charmcraft](charmcraft/setup/README.md), for installing Charmcraft in the environment.
+- [Package a charm](charmcraft/pack/README.md)
+- [Set up Charmcraft](charmcraft/setup/README.md)
 
-## Committing code
+## Image actions
 
-Please follow these guidelines when committing code for this project:
+- [Set up Imagecraft](imagecraft/setup/README.md)
 
-- Use a topic with a colon to start the subject
-- Separate subject from body with a blank line
-- Limit the subject line to 50 characters
-- Do not capitalize the subject line
-- Do not end the subject line with a period
-- Use the imperative mood in the subject line
-- Wrap the body at 72 characters
-- Use the body to explain what and why (instead of how)
+## Community and support
+
+You can report any issues or bugs on the project's [GitHub repository](https://github.com/canonical/craft-actions/issues).
+
+Craft Actions is covered by the [Ubuntu Code of Conduct](https://ubuntu.com/community/ethos/code-of-conduct).
+
+## Contribute to Craft Actions
+
+Craft Actions is open source and part of the Canonical family. We would love your help.
+
+If you're interested, start with the [contribution guide](CONTRIBUTING.md).
+
+We welcome any suggestions and help with the docs. The [Canonical Open Documentation Academy](https://github.com/canonical/open-documentation-academy)
+is the hub for doc development, including Craft Actions docs. No prior coding experience is required.
+
+## License and copyright
+
+Craft Actions is released under the [MIT license](LICENSE).
+
+© 2022-2026 Canonical Ltd.

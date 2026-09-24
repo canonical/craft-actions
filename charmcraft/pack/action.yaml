@@ -20,8 +20,8 @@ inputs:
     description: >
       The channel to install Charmcraft from.
 
-      Defaults to the latest stable release.
-    default: 'latest/stable'
+      If empty, the default channel for Charmcraft is used.
+    default: ''
   revision:
     description: >
       The revision of Charmcraft to install.

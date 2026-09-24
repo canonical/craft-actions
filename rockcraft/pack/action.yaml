@@ -19,8 +19,8 @@ inputs:
     description: >
       The channel to install Rockcraft from.
 
-      If not provided, it defaults to stable.
-    default: 'stable'
+      If empty, the default channel for Rockcraft is used.
+    default: ''
   lxd-channel:
     description: >
       The channel to install LXD from.

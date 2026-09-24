@@ -5,7 +5,7 @@ import { runSetupAction } from "./setup-action.ts";
 export function readBaseInputs(channelInput = "channel"): CraftBuilderOptions {
   return {
     projectRoot: core.getInput("path"),
-    channel: core.getInput(channelInput) || "stable",
+    channel: core.getInput(channelInput),
     revision: core.getInput("revision") || "",
     verbosity: core.getInput("verbosity"),
     pro: core.getInput("pro") || "",

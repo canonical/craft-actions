@@ -74,10 +74,10 @@ test("readBaseInputs reads channel input", () => {
   expect(readBaseInputs()).toMatchObject({ channel: "edge" });
 });
 
-test("readBaseInputs defaults channel to latest/stable when empty", () => {
+test("readBaseInputs defaults channel to an empty string when unset", () => {
   mockInputs({});
 
-  expect(readBaseInputs()).toMatchObject({ channel: "latest/stable" });
+  expect(readBaseInputs()).toMatchObject({ channel: "" });
 });
 
 test("readBaseInputs reads revision input", () => {
@@ -110,6 +110,16 @@ test("runSetupAction calls ensureSnapd, ensureLXD, and ensureCraftTool", async (
   expect(ensureSnapd).toHaveBeenCalled();
   expect(ensureLXD).toHaveBeenCalledWith("5.21/stable");
   expect(ensureCraftTool).toHaveBeenCalledWith("rockcraft", "stable", "");
+});
+
+test("runSetupAction passes an empty channel to ensureCraftTool", async () => {
+  mockInputs({});
+  mockSnapdRevision("123");
+  const { ensureCraftTool } = mockToolFunctions();
+
+  await runSetupAction("rockcraft");
+
+  expect(ensureCraftTool).toHaveBeenCalledWith("rockcraft", "", "");
 });
 
 test("runSetupAction passes an empty lxd-channel to ensureLXD", async () => {

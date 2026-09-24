@@ -14,8 +14,8 @@ inputs:
       The build verbosity level, which can be set to "quiet", "brief",
       "verbose", "debug", or "trace".
 
-      The default is "trace".
-    default: 'trace'
+      The default is "verbose".
+    default: 'verbose'
   channel:
     description: >
       The channel to install Snapcraft from.

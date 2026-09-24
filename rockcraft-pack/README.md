@@ -39,8 +39,8 @@ The action supports the following inputs.
     path: '.'
     
     # Sets the build verbosity level for Rockcraft. Must be one of: 'quiet', 'brief', 'verbose', 'debug', or 'trace'.
-    # Defaults to 'trace'.
-    verbosity: 'trace'
+    # Defaults to 'verbose'.
+    verbosity: 'verbose'
     
     # Whether to run 'rockcraft test' when packing the rock.
     # Defaults to false.

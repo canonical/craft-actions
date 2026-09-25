@@ -20,8 +20,8 @@ The action supports the following inputs.
   uses: canonical/craft-actions/snapcraft/setup@main
   with:
     # The channel to install the Snapcraft snap from.
-    # Defaults to 'latest/stable'.
-    channel: 'latest/stable'
+    # If unset or set to an empty string, the default channel for Snapcraft is used.
+    channel: ''
     
     # The revision of the Snapcraft snap to install.
     # Overrides the 'channel' option.

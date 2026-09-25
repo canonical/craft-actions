@@ -99,10 +99,10 @@ test("readBaseInputs reads standard inputs", () => {
   });
 });
 
-test("readBaseInputs defaults channel to stable when empty", () => {
+test("readBaseInputs defaults channel to an empty string when unset", () => {
   mockInputs({ path: "." });
 
-  expect(readBaseInputs()).toMatchObject({ channel: "stable" });
+  expect(readBaseInputs()).toMatchObject({ channel: "" });
 });
 
 test("readBaseInputs uses a custom channel input name", () => {

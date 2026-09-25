@@ -6,8 +6,8 @@ inputs:
     description: >
       The channel to install Snapcraft from.
 
-      Defaults to the latest stable release.
-    default: 'latest/stable'
+      If empty, the default channel for Snapcraft is used.
+    default: ''
   revision:
     description: >
       The revision of Snapcraft to install.

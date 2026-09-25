@@ -4,10 +4,10 @@ author: "Canonical"
 inputs:
   channel:
     description: >
-      Install the snap from a specific channel
+      The channel to install Charmcraft from.
 
-      If not provided, it defaults to stable.
-    default: 'latest/stable'
+      If empty, the default channel for Charmcraft is used.
+    default: ''
   revision:
     description: >
       Pin the snap revision to install.

@@ -344,6 +344,27 @@ test("ensureCraftTool installs a craft tool if needed", async () => {
   ]);
 });
 
+test("ensureCraftTool omits --channel when the channel is empty", async () => {
+  vi.spyOn(fs.promises, "access").mockImplementation(
+    async (): Promise<void> => {
+      throw new Error("not found");
+    },
+  );
+  const execMock = vi
+    .spyOn(tools, "runCommand")
+    .mockImplementation(async (): Promise<number> => 0);
+
+  await tools.ensureCraftTool("rockcraft", "", "");
+
+  expect(execMock).toHaveBeenCalledWith([
+    "sudo",
+    "snap",
+    "install",
+    "--classic",
+    "rockcraft",
+  ]);
+});
+
 test("ensureCraftTool refreshes if the tool is already installed", async () => {
   const accessMock = vi
     .spyOn(fs.promises, "access")

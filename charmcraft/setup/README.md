@@ -20,8 +20,8 @@ The action supports the following inputs.
   uses: canonical/craft-actions/charmcraft/setup@main
   with:
     # The channel to install the Charmcraft snap from.
-    # Defaults to 'latest/stable'.
-    channel: 'latest/stable'
+    # If unset or set to an empty string, the default channel for Charmcraft is used.
+    channel: ''
     
     # The revision of the Charmcraft snap to install.
     # Overrides the 'channel' option.

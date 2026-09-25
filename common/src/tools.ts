@@ -146,15 +146,14 @@ export async function ensureCraftTool(
 ): Promise<void> {
   const haveSnap = await haveExecutable(`/snap/bin/${name}`);
   core.info(`Installing ${name}...`);
-  await self.runCommand([
-    "sudo",
-    "snap",
-    haveSnap ? "refresh" : "install",
-    revision.length > 0 ? "--revision" : "--channel",
-    revision.length > 0 ? revision : channel,
-    "--classic",
-    name,
-  ]);
+  const installCommand = ["sudo", "snap", haveSnap ? "refresh" : "install"];
+  if (revision.length > 0) {
+    installCommand.push("--revision", revision);
+  } else if (channel.length > 0) {
+    installCommand.push("--channel", channel);
+  }
+  installCommand.push("--classic", name);
+  await self.runCommand(installCommand);
 }
 
 export async function runCommand(

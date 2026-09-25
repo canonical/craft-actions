@@ -20122,11 +20122,7 @@ async function ensureLXD(lxdChannel) {
 async function ensureCraftTool(name, channel, revision) {
   const haveSnap = await haveExecutable(`/snap/bin/${name}`);
   info(`Installing ${name}...`);
-  const installCommand = [
-    "sudo",
-    "snap",
-    haveSnap ? "refresh" : "install"
-  ];
+  const installCommand = ["sudo", "snap", haveSnap ? "refresh" : "install"];
   if (revision.length > 0) {
     installCommand.push("--revision", revision);
   } else if (channel.length > 0) {

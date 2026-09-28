@@ -26,8 +26,6 @@ inputs:
     description: >
       The revision of Snapcraft to install.
 
-      Defaults to the latest stable revision.
-
       Overrides the `channel` option.
     default: ''
   lxd-channel:

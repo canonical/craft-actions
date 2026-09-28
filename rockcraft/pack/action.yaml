@@ -13,8 +13,8 @@ inputs:
       Set the build verbosity level to 'quiet', 'brief', 'verbose', 'debug' or
       'trace'.
 
-      The default is 'trace'.
-    default: 'trace'
+      The default is 'debug'.
+    default: 'debug'
   channel:
     description: >
       The channel to install Rockcraft from.

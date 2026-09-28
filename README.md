@@ -43,6 +43,6 @@ is the hub for doc development, including Craft Actions docs. No prior coding ex
 
 ## License and copyright
 
-Craft Actions is released under the [MIT license](LICENSE).
+Craft Actions is released under the [GPL-3.0 license](LICENSE).
 
 © 2022-2026 Canonical Ltd.

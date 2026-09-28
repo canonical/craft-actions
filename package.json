@@ -19,7 +19,7 @@
     "type": "git",
     "url": "git+https://github.com/canonical/craft-actions.git"
   },
-  "license": "MIT",
+  "license": "GPL-3.0",
   "bugs": {
     "url": "https://github.com/canonical/craft-actions/issues"
   },

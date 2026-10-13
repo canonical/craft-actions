@@ -69,14 +69,14 @@ jobs:
         fixture_repo: [juju/juju]
         fixture_ref: [main]
         # The path to attempt to pack
-        fixture_path: [testcharms/charms/lxd-profile]
+        fixture_path: [testcharms/charms/dummy-source]
         include:
           - os: ubuntu-24.04
             channel: ''
             revision: 5303
             fixture_repo: juju/juju
             fixture_ref: main
-            fixture_path: testcharms/charms/lxd-profile
+            fixture_path: testcharms/charms/dummy-source
 
           # A multi-platform charm that packs two charms in a single run
           - os: ubuntu-24.04

@@ -1,5 +1,5 @@
 name: "Build an image"
-description: "Pack an image with Imagecraft"
+description: "Build an image with Imagecraft"
 author: "Canonical"
 
 inputs:
@@ -14,19 +14,17 @@ inputs:
       The build verbosity level, which can be set to "quiet", "brief",
       "verbose", "debug", or "trace".
 
-      The default is "trace".
-    default: "trace"
+      The default is "debug".
+    default: "debug"
   channel:
     description: >
       The channel to install Imagecraft from.
 
-      Defaults to the latest stable release.
-    default: "latest/stable"
+      If empty, the default channel for Imagecraft is used.
+    default: ""
   revision:
     description: >
       The revision of Imagecraft to install.
-
-      Defaults to the latest stable revision.
 
       Overrides the `channel` option.
     default: ""
@@ -34,8 +32,8 @@ inputs:
     description: >
       The channel to install LXD from.
 
-      Defaults to the recommended channel for Imagecraft.
-    default: "5.21/stable"
+      If empty, snapd's default channel for LXD is used.
+    default: ""
 
   # Not supported: Imagecraft has no `test` command. The input is still read
   # from the environment but intentionally left undocumented.
@@ -44,7 +42,7 @@ inputs:
 
 outputs:
   images:
-    description: The packed images, space-separated.
+    description: The built images, space-separated.
   lxd-revision:
     description: The LXD revision used.
   imagecraft-revision:

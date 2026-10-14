@@ -1,0 +1,57 @@
+name: "Build an image"
+description: "Build an image with Imagecraft"
+author: "Canonical"
+
+inputs:
+  path:
+    description: >
+      The location of the Imagecraft project.
+
+      Defaults to the root of the repository.
+    default: "."
+  verbosity:
+    description: >
+      The build verbosity level, which can be set to "quiet", "brief",
+      "verbose", "debug", or "trace".
+
+      The default is "debug".
+    default: "debug"
+  channel:
+    description: >
+      The channel to install Imagecraft from.
+
+      If empty, the default channel for Imagecraft is used.
+    default: ""
+  revision:
+    description: >
+      The revision of Imagecraft to install.
+
+      Overrides the `channel` option.
+    default: ""
+  lxd-channel:
+    description: >
+      The channel to install LXD from.
+
+      If empty, snapd's default channel for LXD is used.
+    default: ""
+
+  # Not supported: Imagecraft has no `test` command. The input is still read
+  # from the environment but intentionally left undocumented.
+  # test:
+  #   default: "false"
+
+outputs:
+  images:
+    description: The built images, space-separated.
+  lxd-revision:
+    description: The LXD revision used.
+  imagecraft-revision:
+    description: The Imagecraft revision used.
+
+runs:
+  using: "node24"
+  main: "dist/index.js"
+
+branding:
+  icon: layers
+  color: orange

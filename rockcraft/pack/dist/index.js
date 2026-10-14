@@ -20114,16 +20114,12 @@ async function ensureLXD(lxdChannel) {
   const haveSnapLXD = await haveExecutable("/snap/bin/lxd");
   if (!haveSnapLXD) {
     info("Installing LXD...");
-    await runCommand([
-      "sudo",
-      "snap",
-      "install",
-      "lxd",
-      "--channel",
-      lxdChannel,
-      "--cohort",
-      "+"
-    ]);
+    const installCommand = ["sudo", "snap", "install", "lxd"];
+    if (lxdChannel.length > 0) {
+      installCommand.push("--channel", lxdChannel);
+    }
+    installCommand.push("--cohort", "+");
+    await runCommand(installCommand);
   }
   info("Setting daemon group on LXD snap to adm...");
   await runCommand(["sudo", "snap", "set", "lxd", "daemon.group=adm"]);
@@ -20151,15 +20147,14 @@ async function configureProLXD() {
 async function ensureCraftTool(name, channel, revision) {
   const haveSnap = await haveExecutable(`/snap/bin/${name}`);
   info(`Installing ${name}...`);
-  await runCommand([
-    "sudo",
-    "snap",
-    haveSnap ? "refresh" : "install",
-    revision.length > 0 ? "--revision" : "--channel",
-    revision.length > 0 ? revision : channel,
-    "--classic",
-    name
-  ]);
+  const installCommand = ["sudo", "snap", haveSnap ? "refresh" : "install"];
+  if (revision.length > 0) {
+    installCommand.push("--revision", revision);
+  } else if (channel.length > 0) {
+    installCommand.push("--channel", channel);
+  }
+  installCommand.push("--classic", name);
+  await runCommand(installCommand);
 }
 async function runCommand(command, options) {
   return exec(command[0], command.slice(1), options);
@@ -20259,11 +20254,8 @@ var CraftBuilder = class {
     }
     await this.doPack();
   }
-  async #readdir(dir) {
-    return await fs4.promises.readdir(dir);
-  }
   async findArtifacts(extension) {
-    const files = await this.#readdir(this.projectRoot);
+    const files = await fs4.promises.readdir(this.projectRoot);
     const artifacts = files.filter((name) => name.endsWith(extension)).sort().map((name) => path4.join(this.projectRoot, name));
     return artifacts;
   }
@@ -20272,9 +20264,9 @@ var CraftBuilder = class {
 // ../../common/src/setup-action.ts
 function readBaseInputs() {
   return {
-    channel: getInput("channel") || "latest/stable",
+    channel: getInput("channel"),
     revision: getInput("revision"),
-    lxdChannel: getInput("lxd-channel") || "5.21/stable"
+    lxdChannel: getInput("lxd-channel")
   };
 }
 async function runSetupAction(toolName) {
@@ -20308,7 +20300,7 @@ async function getSnapRevision(snap) {
 function readBaseInputs2(channelInput = "channel") {
   return {
     projectRoot: getInput("path"),
-    channel: getInput(channelInput) || "stable",
+    channel: getInput(channelInput),
     revision: getInput("revision") || "",
     verbosity: getInput("verbosity"),
     pro: getInput("pro") || "",

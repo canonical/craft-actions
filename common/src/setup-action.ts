@@ -9,9 +9,9 @@ export interface SetupOptions {
 
 export function readBaseInputs(): SetupOptions {
   return {
-    channel: core.getInput("channel") || "latest/stable",
+    channel: core.getInput("channel"),
     revision: core.getInput("revision"),
-    lxdChannel: core.getInput("lxd-channel") || "5.21/stable",
+    lxdChannel: core.getInput("lxd-channel"),
   };
 }
 

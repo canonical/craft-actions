@@ -99,16 +99,13 @@ export async function ensureLXD(lxdChannel: string): Promise<void> {
   const haveSnapLXD = await haveExecutable("/snap/bin/lxd");
   if (!haveSnapLXD) {
     core.info("Installing LXD...");
-    await self.runCommand([
-      "sudo",
-      "snap",
-      "install",
-      "lxd",
-      "--channel",
-      lxdChannel,
-      "--cohort",
-      "+",
-    ]);
+    const installCommand = ["sudo", "snap", "install", "lxd"];
+    // An empty channel lets snapd pick its default channel for LXD.
+    if (lxdChannel.length > 0) {
+      installCommand.push("--channel", lxdChannel);
+    }
+    installCommand.push("--cohort", "+");
+    await self.runCommand(installCommand);
   }
 
   // `usermod` would require a new user session to take effect, but the runner
@@ -149,15 +146,14 @@ export async function ensureCraftTool(
 ): Promise<void> {
   const haveSnap = await haveExecutable(`/snap/bin/${name}`);
   core.info(`Installing ${name}...`);
-  await self.runCommand([
-    "sudo",
-    "snap",
-    haveSnap ? "refresh" : "install",
-    revision.length > 0 ? "--revision" : "--channel",
-    revision.length > 0 ? revision : channel,
-    "--classic",
-    name,
-  ]);
+  const installCommand = ["sudo", "snap", haveSnap ? "refresh" : "install"];
+  if (revision.length > 0) {
+    installCommand.push("--revision", revision);
+  } else if (channel.length > 0) {
+    installCommand.push("--channel", channel);
+  }
+  installCommand.push("--classic", name);
+  await self.runCommand(installCommand);
 }
 
 export async function runCommand(

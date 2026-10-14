@@ -163,6 +163,28 @@ test("ensureLXD installs from the requested channel", async () => {
   ]);
 });
 
+test("ensureLXD omits --channel when the channel is empty", async () => {
+  vi.spyOn(fs.promises, "access").mockImplementation(
+    async (): Promise<void> => {
+      throw new Error("not found");
+    },
+  );
+  const execMock = vi
+    .spyOn(tools, "runCommand")
+    .mockImplementation(async (): Promise<number> => 0);
+
+  await tools.ensureLXD("");
+
+  expect(execMock).toHaveBeenCalledWith([
+    "sudo",
+    "snap",
+    "install",
+    "lxd",
+    "--cohort",
+    "+",
+  ]);
+});
+
 test("configureProLXD configures lxd_guest_attach", async () => {
   const execMock = vi
     .spyOn(tools, "runCommand")
@@ -319,6 +341,27 @@ test("ensureCraftTool installs a craft tool if needed", async () => {
     "1234",
     "--classic",
     "snapcraft",
+  ]);
+});
+
+test("ensureCraftTool omits --channel when the channel is empty", async () => {
+  vi.spyOn(fs.promises, "access").mockImplementation(
+    async (): Promise<void> => {
+      throw new Error("not found");
+    },
+  );
+  const execMock = vi
+    .spyOn(tools, "runCommand")
+    .mockImplementation(async (): Promise<number> => 0);
+
+  await tools.ensureCraftTool("rockcraft", "", "");
+
+  expect(execMock).toHaveBeenCalledWith([
+    "sudo",
+    "snap",
+    "install",
+    "--classic",
+    "rockcraft",
   ]);
 });
 

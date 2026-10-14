@@ -79,12 +79,8 @@ export abstract class CraftBuilder {
     await this.doPack();
   }
 
-  async #readdir(dir: string): Promise<string[]> {
-    return await fs.promises.readdir(dir);
-  }
-
   async findArtifacts(extension: string): Promise<string[]> {
-    const files = await this.#readdir(this.projectRoot);
+    const files = await fs.promises.readdir(this.projectRoot);
     const artifacts = files
       .filter((name) => name.endsWith(extension))
       .sort()

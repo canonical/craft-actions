@@ -22,7 +22,7 @@ export class RockcraftBuilder extends CraftBuilder {
     this.ignore = options.ignore;
   }
 
-  protected async buildPackArgs(): Promise<string[]> {
+  protected override async buildPackArgs(): Promise<string[]> {
     const args = await super.buildPackArgs();
 
     if (this.ignore) {

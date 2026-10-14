@@ -72,14 +72,14 @@ jobs:
         fixture_repo: [juju/juju]
         fixture_ref: [main]
         # The path to attempt to pack
-        fixture_path: [testcharms/charms/lxd-profile]
+        fixture_path: [testcharms/charms/dummy-source]
         include:
           - os: ubuntu-24.04
             channel: ''
             revision: 5303
             fixture_repo: juju/juju
             fixture_ref: main
-            fixture_path: testcharms/charms/lxd-profile
+            fixture_path: testcharms/charms/dummy-source
 
           # A multi-platform charm that packs two charms in a single run
           - os: ubuntu-24.04
@@ -127,7 +127,7 @@ jobs:
           # Check that the charms we discovered match what the action reports it built
           [[ "${{ steps.charmcraft.outputs.charms }}" == "${found_charms[*]}" ]]
       - name: Upload charm
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: test-charm-${{ matrix.os }}-${{ steps.charmcraft.outputs.charmcraft-revision }}
           path: test-repo/${{ matrix.fixture_path }}/*.charm

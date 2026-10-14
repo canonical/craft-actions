@@ -19,12 +19,12 @@
     "type": "git",
     "url": "git+https://github.com/canonical/craft-actions.git"
   },
-  "license": "MIT",
+  "license": "GPL-3.0",
   "bugs": {
     "url": "https://github.com/canonical/craft-actions/issues"
   },
   "homepage": "https://github.com/canonical/craft-actions#readme",
-  "packageManager": "pnpm@11.24.0",
+  "packageManager": "pnpm@12.11.2",
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/node": "^26.0.0",
@@ -34,6 +34,6 @@
     "prettier": "^3.8.4",
     "typescript": "npm:@typescript/typescript6@^6.0.2",
     "typescript-eslint": "^8.62.0",
-    "vitest": "^4.1.9"
+    "vitest": "^5.0.0"
   }
 }

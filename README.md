@@ -9,23 +9,23 @@ development and may introduce breaking changes at any time.
 
 ## Snap actions
 
-- [Pack a snap](snapcraft/pack/README.md)
 - [Set up Snapcraft](snapcraft/setup/README.md)
+- [Pack a snap](snapcraft/pack/README.md)
 
 ## Rock actions
 
-- [Pack a rock](rockcraft/pack/README.md)
 - [Set up Rockcraft](rockcraft/setup/README.md)
+- [Pack a rock](rockcraft/pack/README.md)
 
 ## Charm actions
 
-- [Pack a charm](charmcraft/pack/README.md)
 - [Set up Charmcraft](charmcraft/setup/README.md)
+- [Pack a charm](charmcraft/pack/README.md)
 
 ## Image actions
 
-- [Pack an image](imagecraft/pack/README.md)
 - [Set up Imagecraft](imagecraft/setup/README.md)
+- [Pack an image](imagecraft/pack/README.md)
 
 ## Using packed artifacts in publish workflows
 

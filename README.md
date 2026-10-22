@@ -9,23 +9,59 @@ development and may introduce breaking changes at any time.
 
 ## Snap actions
 
-- [Package a snap](snapcraft/pack/README.md)
+- [Build a snap](snapcraft/pack/README.md)
 - [Set up Snapcraft](snapcraft/setup/README.md)
 
 ## Rock actions
 
-- [Package a rock](rockcraft/pack/README.md)
+- [Build a rock](rockcraft/pack/README.md)
 - [Set up Rockcraft](rockcraft/setup/README.md)
 
 ## Charm actions
 
-- [Package a charm](charmcraft/pack/README.md)
+- [Build a charm](charmcraft/pack/README.md)
 - [Set up Charmcraft](charmcraft/setup/README.md)
 
 ## Image actions
 
-- [Set up Imagecraft](imagecraft/setup/README.md)
 - [Build an image](imagecraft/pack/README.md)
+- [Set up Imagecraft](imagecraft/setup/README.md)
+
+## Using build artifacts in publish workflows
+
+The build actions create local artifacts; they do not publish packages to stores or registries. Use a later workflow
+job to publish them, and pass them between jobs with workflow artifacts. For example, after building a snap:
+
+```yaml
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: canonical/craft-actions/snapcraft/pack@v1
+        with:
+          path: dist
+      - uses: actions/upload-artifact@v7
+        with:
+          name: snap
+          path: dist/*.snap
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v7
+        with:
+          name: snap
+      # Add the appropriate authenticated publishing command for your destination.
+```
+
+Use the output names documented on each build action when you need to reference its artifact paths in a workflow.
+
+## Deprecated actions
+
+- [Build a rock with the legacy `rockcraft-pack` action](rockcraft-pack/README.md). Use
+  [`rockcraft/pack`](rockcraft/pack/README.md) for new workflows.
 
 ## Community and support
 

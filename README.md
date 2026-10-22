@@ -9,23 +9,23 @@ development and may introduce breaking changes at any time.
 
 ## Snap actions
 
-- [Set up Snapcraft](snapcraft/setup/README.md)
 - [Pack a snap](snapcraft/pack/README.md)
+- [Set up Snapcraft](snapcraft/setup/README.md)
 
 ## Rock actions
 
-- [Set up Rockcraft](rockcraft/setup/README.md)
 - [Pack a rock](rockcraft/pack/README.md)
+- [Set up Rockcraft](rockcraft/setup/README.md)
 
 ## Charm actions
 
-- [Set up Charmcraft](charmcraft/setup/README.md)
 - [Pack a charm](charmcraft/pack/README.md)
+- [Set up Charmcraft](charmcraft/setup/README.md)
 
 ## Image actions
 
-- [Set up Imagecraft](imagecraft/setup/README.md)
 - [Pack an image](imagecraft/pack/README.md)
+- [Set up Imagecraft](imagecraft/setup/README.md)
 
 ## Using packed artifacts in publish workflows
 
@@ -39,12 +39,11 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: canonical/craft-actions/snapcraft/pack@v1
-        with:
-          path: dist
+        id: pack
       - uses: actions/upload-artifact@v7
         with:
           name: snap
-          path: dist/*.snap
+          path: ${{ steps.pack.outputs.snaps }}
 
   publish:
     needs: pack
@@ -56,12 +55,7 @@ jobs:
       # Add the appropriate authenticated publishing command for your destination.
 ```
 
-Use the output names documented on each pack action when you need to reference its artifact paths in a workflow.
-
-## Deprecated actions
-
-- [Pack a rock with the legacy `rockcraft-pack` action](rockcraft-pack/README.md). Use
-  [`rockcraft/pack`](rockcraft/pack/README.md) for new workflows.
+Use the outputs documented on each pack action when you need to reference its artifacts in a workflow.
 
 ## Community and support
 

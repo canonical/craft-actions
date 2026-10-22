@@ -2,39 +2,39 @@
 
 # Craft Actions
 
-A collection of GitHub actions for testing, packaging, and distributing software with the craft apps.
+A collection of GitHub actions for testing, packing, and distributing software with the craft apps.
 
 To use these actions, pin them to the latest release, `@v1`. The `main` branch is being used for active
 development and may introduce breaking changes at any time.
 
 ## Snap actions
 
-- [Build a snap](snapcraft/pack/README.md)
+- [Pack a snap](snapcraft/pack/README.md)
 - [Set up Snapcraft](snapcraft/setup/README.md)
 
 ## Rock actions
 
-- [Build a rock](rockcraft/pack/README.md)
+- [Pack a rock](rockcraft/pack/README.md)
 - [Set up Rockcraft](rockcraft/setup/README.md)
 
 ## Charm actions
 
-- [Build a charm](charmcraft/pack/README.md)
+- [Pack a charm](charmcraft/pack/README.md)
 - [Set up Charmcraft](charmcraft/setup/README.md)
 
 ## Image actions
 
-- [Build an image](imagecraft/pack/README.md)
+- [Pack an image](imagecraft/pack/README.md)
 - [Set up Imagecraft](imagecraft/setup/README.md)
 
-## Using build artifacts in publish workflows
+## Using packed artifacts in publish workflows
 
-The build actions create local artifacts; they do not publish packages to stores or registries. Use a later workflow
-job to publish them, and pass them between jobs with workflow artifacts. For example, after building a snap:
+The pack actions create local artifacts; they do not publish them to stores or registries. Use a later workflow
+job to publish them, and pass them between jobs with workflow artifacts. For example, after packing a snap:
 
 ```yaml
 jobs:
-  build:
+  pack:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -47,7 +47,7 @@ jobs:
           path: dist/*.snap
 
   publish:
-    needs: build
+    needs: pack
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v7
@@ -56,11 +56,11 @@ jobs:
       # Add the appropriate authenticated publishing command for your destination.
 ```
 
-Use the output names documented on each build action when you need to reference its artifact paths in a workflow.
+Use the output names documented on each pack action when you need to reference its artifact paths in a workflow.
 
 ## Deprecated actions
 
-- [Build a rock with the legacy `rockcraft-pack` action](rockcraft-pack/README.md). Use
+- [Pack a rock with the legacy `rockcraft-pack` action](rockcraft-pack/README.md). Use
   [`rockcraft/pack`](rockcraft/pack/README.md) for new workflows.
 
 ## Community and support

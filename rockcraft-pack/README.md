@@ -12,15 +12,15 @@ steps:
 
 ## Inputs
 
-| Input           | Description                                                                                      | Default             |
-| --------------- | ------------------------------------------------------------------------------------------------ | ------------------- |
-| path            | The location of the Rockcraft project.                                                           | `.`                 |
-| verbosity       | Build verbosity: `quiet`, `brief`, `verbose`, `debug`, or `trace`.                                | `verbose`            |
-| rockcraft-channel | The channel to install Rockcraft from.                                                           | `stable`             |
-| revision        | The Rockcraft revision to install. Overrides `rockcraft-channel`.                                | `""`                |
-| test            | Run `rockcraft test` after packing.                                                               | `false`             |
-| pro             | Ubuntu Pro services to enable when packing.                                                      | `""`                |
-| ignore          | Bypass a restriction to use an unsupported feature, such as an unmaintained base.                | `""`                |
+| Input             | Description                                                                                       | Default   |
+| ----------------- | ------------------------------------------------------------------------------------------------- | --------- |
+| path              | The location of the Rockcraft project.                                                            | `.`       |
+| verbosity         | Pack verbosity: `quiet`, `brief`, `verbose`, `debug`, or `trace`.                                  | `verbose` |
+| rockcraft-channel | The channel to install Rockcraft from.                                                            | `stable`  |
+| revision          | The Rockcraft revision to install. Overrides `rockcraft-channel`.                                 | `""`      |
+| test              | Run `rockcraft test` after packing.                                                                | `false`   |
+| pro               | Ubuntu Pro services to enable when packing.                                                       | `""`      |
+| ignore            | Bypass a restriction to use an unsupported feature, such as an unmaintained base.                 | `""`      |
 
 ## Outputs
 

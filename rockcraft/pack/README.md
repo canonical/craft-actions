@@ -24,7 +24,7 @@ The behavior of the `rockcraft/pack` action can be customized with the following
 | Input       | Description                                                                                      | Default                                 |
 | ----------- | ------------------------------------------------------------------------------------------------ | --------------------------------------- |
 | path        | The location of the rock project.                                                                | The root of the repository.             |
-| verbosity   | The build verbosity level, which can be set to "quiet", "brief", "verbose", "debug", or "trace". | `"debug"`                               |
+| verbosity   | The pack verbosity level, which can be set to "quiet", "brief", "verbose", "debug", or "trace". | `"debug"`                               |
 | channel     | The channel to install Rockcraft from.                                                           | The default snap channel for Rockcraft. |
 | revision    | The revision of Rockcraft to install. Overrides the `channel` option.                            | `""`                                    |
 | lxd-channel | The channel to install LXD from.                                                                 | The default snap channel for LXD.       |

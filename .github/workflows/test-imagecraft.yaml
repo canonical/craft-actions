@@ -34,7 +34,7 @@ jobs:
         include:
           - os: ubuntu-24.04
             channel: ""
-            revision: 1219 # 1.1.0, but really here to test the revision field.
+            revision: 1219 #11.1.0, but really here to test the revision field.
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -76,7 +76,7 @@ jobs:
         include:
           - os: ubuntu-24.04
             channel: ""
-            revision: 302 # 0.1.0, but really here to test the revision field.
+            revision: 1219 # 1.1.0, but really here to test the revision field.
             fixture_repo: canonical/imagecraft
             fixture_ref: c0e4b007e7617045842772a91bcd53e015816dbd # main as of 02-9-2026
             fixture_path: tests/spread/pack/grammar

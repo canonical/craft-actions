@@ -5,7 +5,7 @@ on:
     paths:
       - ".github/workflows/*imagecraft*"
       - "imagecraft**"
-      - "common/**"  # A change to a common module could affect this module.
+      - "common/**" # A change to a common module could affect this module.
   push:
     branches:
       - main
@@ -16,7 +16,7 @@ on:
     paths:
       - ".github/workflows/*imagecraft*"
       - "imagecraft**"
-      - "common/**"  # A change to a common module could affect this module.
+      - "common/**" # A change to a common module could affect this module.
 
 jobs:
   setup:
@@ -33,8 +33,8 @@ jobs:
         channel: [latest/stable, latest/edge]
         include:
           - os: ubuntu-24.04
-            channel: ''
-            revision: 302  # 0.1.0, but really here to test the revision field.
+            channel: ""
+            revision: 1219 # 1.1.0, but really here to test the revision field.
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -70,15 +70,15 @@ jobs:
         channel: [latest/stable, latest/edge]
         # The repository to clone for (most) tests
         fixture_repo: [canonical/imagecraft]
-        fixture_ref: [c0e4b007e7617045842772a91bcd53e015816dbd]  # main as of 02-9-2026
+        fixture_ref: [c0e4b007e7617045842772a91bcd53e015816dbd] # main as of 02-9-2026
         # The path to attempt to pack
         fixture_path: [tests/spread/pack/grammar]
         include:
           - os: ubuntu-24.04
-            channel: ''
-            revision: 302  # 0.1.0, but really here to test the revision field.
+            channel: ""
+            revision: 302 # 0.1.0, but really here to test the revision field.
             fixture_repo: canonical/imagecraft
-            fixture_ref: c0e4b007e7617045842772a91bcd53e015816dbd  # main as of 02-9-2026
+            fixture_ref: c0e4b007e7617045842772a91bcd53e015816dbd # main as of 02-9-2026
             fixture_path: tests/spread/pack/grammar
     runs-on: ${{ matrix.os }}
     steps:

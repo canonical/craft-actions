@@ -2,30 +2,60 @@
 
 # Craft Actions
 
-A collection of GitHub actions for testing, packaging, and distributing software with the craft apps.
+A collection of GitHub actions for testing, packing, and distributing software with the craft apps.
 
 To use these actions, pin them to the latest release, `@v1`. The `main` branch is being used for active
 development and may introduce breaking changes at any time.
 
 ## Snap actions
 
-- [Package a snap](snapcraft/pack/README.md)
+- [Pack a snap](snapcraft/pack/README.md)
 - [Set up Snapcraft](snapcraft/setup/README.md)
 
 ## Rock actions
 
-- [Package a rock](rockcraft/pack/README.md)
+- [Pack a rock](rockcraft/pack/README.md)
 - [Set up Rockcraft](rockcraft/setup/README.md)
 
 ## Charm actions
 
-- [Package a charm](charmcraft/pack/README.md)
+- [Pack a charm](charmcraft/pack/README.md)
 - [Set up Charmcraft](charmcraft/setup/README.md)
 
 ## Image actions
 
+- [Pack an image](imagecraft/pack/README.md)
 - [Set up Imagecraft](imagecraft/setup/README.md)
-- [Build an image](imagecraft/pack/README.md)
+
+## Using packed artifacts in publish workflows
+
+The pack actions create local artifacts; they do not publish them to stores or registries. Use a later workflow
+job to publish them, and pass them between jobs with workflow artifacts. For example, after packing a snap:
+
+```yaml
+jobs:
+  pack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: canonical/craft-actions/snapcraft/pack@v1
+        id: pack
+      - uses: actions/upload-artifact@v7
+        with:
+          name: snap
+          path: ${{ steps.pack.outputs.snaps }}
+
+  publish:
+    needs: pack
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v7
+        with:
+          name: snap
+      # Add the appropriate authenticated publishing command for your destination.
+```
+
+Use the outputs documented on each pack action when you need to reference its artifacts in a workflow.
 
 ## Community and support
 

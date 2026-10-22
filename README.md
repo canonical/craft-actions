@@ -25,6 +25,7 @@ development and may introduce breaking changes at any time.
 ## Image actions
 
 - [Set up Imagecraft](imagecraft/setup/README.md)
+- [Build an image](imagecraft/pack/README.md)
 
 ## Community and support
 

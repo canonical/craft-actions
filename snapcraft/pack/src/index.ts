@@ -24,7 +24,7 @@ export class SnapcraftBuilder extends CraftBuilder {
 
   constructor(options: SnapcraftBuilderOptions) {
     super(options);
-    this.buildInfo = options.buildInfo ?? false;
+    this.buildInfo = options.buildInfo ?? true;
   }
 
   protected override buildEnv(): Record<string, string> {
@@ -61,7 +61,7 @@ export class SnapcraftBuilder extends CraftBuilder {
 if (import.meta.url === `file://${process.argv[1]}`) {
   const builder = new SnapcraftBuilder({
     ...readBaseInputs(),
-    buildInfo: core.getInput("build-info").toLowerCase() === "true",
+    buildInfo: core.getInput("build-info").toLowerCase() !== "false",
   });
 
   void runPackAction(builder);

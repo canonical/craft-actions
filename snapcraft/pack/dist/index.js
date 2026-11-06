@@ -20347,7 +20347,7 @@ var SnapcraftBuilder = class extends CraftBuilder {
   buildInfo;
   constructor(options) {
     super(options);
-    this.buildInfo = options.buildInfo ?? false;
+    this.buildInfo = options.buildInfo ?? true;
   }
   buildEnv() {
     return this.buildInfo ? { SNAPCRAFT_BUILD_INFO: "1", SNAPCRAFT_IMAGE_INFO: "1" } : {};
@@ -20373,7 +20373,7 @@ var SnapcraftBuilder = class extends CraftBuilder {
 if (import.meta.url === `file://${process.argv[1]}`) {
   const builder = new SnapcraftBuilder({
     ...readBaseInputs2(),
-    buildInfo: getInput("build-info").toLowerCase() === "true"
+    buildInfo: getInput("build-info").toLowerCase() !== "false"
   });
   void runPackAction(builder);
 }

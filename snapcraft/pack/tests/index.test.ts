@@ -15,6 +15,8 @@ function makeBuilder(
     revision: "",
     verbosity: "",
     runTests: false,
+    // Opt out so tests that don't care about build info keep exact assertions.
+    buildInfo: false,
     ...overrides,
   });
 }
@@ -68,6 +70,30 @@ test("uses snapcraft test without checking the installed version", async () => {
   );
 });
 
+test("enables build info by default", async () => {
+  const runCommand = mockCommandExecution();
+  mockSnapcraftVersion("8.14.2");
+
+  const builder = new SnapcraftBuilder({
+    projectRoot: ".",
+    channel: "stable",
+    revision: "",
+    verbosity: "",
+    runTests: false,
+  });
+  await builder.pack();
+
+  expect(runCommand).toHaveBeenCalledWith(
+    expect.anything(),
+    expect.objectContaining({
+      env: expect.objectContaining({
+        SNAPCRAFT_BUILD_INFO: "1",
+        SNAPCRAFT_IMAGE_INFO: "1",
+      }),
+    }),
+  );
+});
+
 test("sets SNAPCRAFT_BUILD_INFO and SNAPCRAFT_IMAGE_INFO when buildInfo is true", async () => {
   const runCommand = mockCommandExecution();
   mockSnapcraftVersion("8.14.2");
@@ -89,7 +115,7 @@ test("omits env override when buildInfo is false", async () => {
   const runCommand = mockCommandExecution();
   mockSnapcraftVersion("8.14.2");
 
-  await makeBuilder().pack();
+  await makeBuilder({ buildInfo: false }).pack();
 
   expect(runCommand).toHaveBeenCalledWith(
     ["sudo", "--preserve-env", "--user", "ubuntu", "snapcraft", "pack"],

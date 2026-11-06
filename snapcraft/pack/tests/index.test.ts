@@ -1,6 +1,5 @@
 import { afterEach, expect, test, vi } from "vitest";
-import { SnapcraftBuilder } from "../src/index.ts";
-import type { CraftBuilderOptions } from "@craft-actions/common/craft-builder.ts";
+import { SnapcraftBuilder, SnapcraftBuilderOptions } from "../src/index.ts";
 import * as tools from "@craft-actions/common/tools.ts";
 
 afterEach(() => {
@@ -8,7 +7,7 @@ afterEach(() => {
 });
 
 function makeBuilder(
-  overrides: Partial<CraftBuilderOptions> = {},
+  overrides: Partial<SnapcraftBuilderOptions> = {},
 ): SnapcraftBuilder {
   return new SnapcraftBuilder({
     projectRoot: ".",
@@ -65,6 +64,32 @@ test("uses snapcraft test without checking the installed version", async () => {
   expect(fetchSnapd).not.toHaveBeenCalled();
   expect(runCommand).toHaveBeenCalledWith(
     ["sudo", "--preserve-env", "--user", "ubuntu", "snapcraft", "test"],
+    { cwd: "." },
+  );
+});
+
+test("sets SNAPCRAFT_BUILD_INFO when buildInfo is true", async () => {
+  const runCommand = mockCommandExecution();
+  mockSnapcraftVersion("8.14.2");
+
+  await makeBuilder({ buildInfo: true }).pack();
+
+  expect(runCommand).toHaveBeenCalledWith(
+    expect.anything(),
+    expect.objectContaining({
+      env: expect.objectContaining({ SNAPCRAFT_BUILD_INFO: "1" }),
+    }),
+  );
+});
+
+test("omits env override when buildInfo is false", async () => {
+  const runCommand = mockCommandExecution();
+  mockSnapcraftVersion("8.14.2");
+
+  await makeBuilder().pack();
+
+  expect(runCommand).toHaveBeenCalledWith(
+    ["sudo", "--preserve-env", "--user", "ubuntu", "snapcraft", "pack"],
     { cwd: "." },
   );
 });

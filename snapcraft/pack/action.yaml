@@ -40,6 +40,13 @@ inputs:
 
       Defaults to false.
     default: 'false'
+  build-info:
+    description: >
+      Set SNAPCRAFT_BUILD_INFO=1 to embed build provenance information in the
+      packed snap.
+
+      Defaults to false.
+    default: 'false'
 
 outputs:
   snaps:

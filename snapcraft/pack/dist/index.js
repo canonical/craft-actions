@@ -18833,10 +18833,6 @@ var require_undici = __commonJS({
   }
 });
 
-// ../../common/src/craft-builder.ts
-import * as fs4 from "fs";
-import * as path4 from "path";
-
 // ../../node_modules/.pnpm/@actions+core@3.0.1/node_modules/@actions/core/lib/command.js
 import * as os from "os";
 
@@ -20044,6 +20040,10 @@ function endGroup() {
   issue("endgroup");
 }
 
+// ../../common/src/craft-builder.ts
+import * as fs4 from "fs";
+import * as path4 from "path";
+
 // ../../common/src/tools.ts
 import * as fs3 from "fs";
 import * as os6 from "os";
@@ -20233,9 +20233,14 @@ var CraftBuilder = class {
   async buildCommand() {
     return [this.toolName, this.runTests ? "test" : "pack"];
   }
+  // Overridden by subclasses to inject tool-specific environment variables.
+  buildEnv() {
+    return {};
+  }
   async doPack() {
     const command = await this.buildCommand();
     const packArgs = await this.buildPackArgs();
+    const env = this.buildEnv();
     await runCommand(
       [
         "sudo",
@@ -20245,7 +20250,10 @@ var CraftBuilder = class {
         ...command,
         ...packArgs
       ],
-      { cwd: this.projectRoot }
+      {
+        cwd: this.projectRoot,
+        ...Object.keys(env).length > 0 ? { env: { ...process.env, ...env } } : {}
+      }
     );
   }
   async pack() {
@@ -20336,6 +20344,14 @@ var SnapcraftBuilder = class extends CraftBuilder {
   secondaryArtifactOutputs = [
     { artifactType: ".comp", outputName: "components" }
   ];
+  buildInfo;
+  constructor(options) {
+    super(options);
+    this.buildInfo = options.buildInfo ?? false;
+  }
+  buildEnv() {
+    return this.buildInfo ? { SNAPCRAFT_BUILD_INFO: "1" } : {};
+  }
   async buildCommand() {
     if (this.runTests) {
       return super.buildCommand();
@@ -20356,7 +20372,8 @@ var SnapcraftBuilder = class extends CraftBuilder {
 };
 if (import.meta.url === `file://${process.argv[1]}`) {
   const builder = new SnapcraftBuilder({
-    ...readBaseInputs2()
+    ...readBaseInputs2(),
+    buildInfo: getInput("build-info").toLowerCase() === "true"
   });
   void runPackAction(builder);
 }

@@ -1,9 +1,17 @@
-import { CraftBuilder } from "@craft-actions/common/craft-builder.ts";
+import * as core from "@actions/core";
+import {
+  CraftBuilder,
+  CraftBuilderOptions,
+} from "@craft-actions/common/craft-builder.ts";
 import {
   readBaseInputs,
   runPackAction,
 } from "@craft-actions/common/pack-action.ts";
 import * as tools from "@craft-actions/common/tools.ts";
+
+export interface SnapcraftBuilderOptions extends CraftBuilderOptions {
+  buildInfo?: boolean;
+}
 
 export class SnapcraftBuilder extends CraftBuilder {
   toolName = "snapcraft";
@@ -11,6 +19,17 @@ export class SnapcraftBuilder extends CraftBuilder {
   secondaryArtifactOutputs = [
     { artifactType: ".comp", outputName: "components" },
   ];
+
+  buildInfo: boolean;
+
+  constructor(options: SnapcraftBuilderOptions) {
+    super(options);
+    this.buildInfo = options.buildInfo ?? false;
+  }
+
+  protected override buildEnv(): Record<string, string> {
+    return this.buildInfo ? { SNAPCRAFT_BUILD_INFO: "1" } : {};
+  }
 
   protected override async buildCommand(): Promise<string[]> {
     // Don't bother checking if the current version can run tests for now
@@ -40,6 +59,7 @@ export class SnapcraftBuilder extends CraftBuilder {
 if (import.meta.url === `file://${process.argv[1]}`) {
   const builder = new SnapcraftBuilder({
     ...readBaseInputs(),
+    buildInfo: core.getInput("build-info").toLowerCase() === "true",
   });
 
   void runPackAction(builder);

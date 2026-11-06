@@ -40,6 +40,14 @@ inputs:
 
       Defaults to false.
     default: 'false'
+  build-info:
+    description: >
+      Set SNAPCRAFT_BUILD_INFO=1 and populate SNAPCRAFT_IMAGE_INFO with the
+      workflow run URL to embed build provenance information in the packed
+      snap.
+
+      Defaults to true.
+    default: 'true'
 
 outputs:
   snaps:

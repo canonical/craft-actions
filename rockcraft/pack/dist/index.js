@@ -20233,9 +20233,14 @@ var CraftBuilder = class {
   async buildCommand() {
     return [this.toolName, this.runTests ? "test" : "pack"];
   }
+  // Overridden by subclasses to inject tool-specific environment variables.
+  buildEnv() {
+    return {};
+  }
   async doPack() {
     const command = await this.buildCommand();
     const packArgs = await this.buildPackArgs();
+    const env = this.buildEnv();
     await runCommand(
       [
         "sudo",
@@ -20245,7 +20250,10 @@ var CraftBuilder = class {
         ...command,
         ...packArgs
       ],
-      { cwd: this.projectRoot }
+      {
+        cwd: this.projectRoot,
+        ...Object.keys(env).length > 0 ? { env: { ...process.env, ...env } } : {}
+      }
     );
   }
   async pack() {

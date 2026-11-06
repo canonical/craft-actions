@@ -28,9 +28,21 @@ export class SnapcraftBuilder extends CraftBuilder {
   }
 
   protected override buildEnv(): Record<string, string> {
-    return this.buildInfo
-      ? { SNAPCRAFT_BUILD_INFO: "1", SNAPCRAFT_IMAGE_INFO: "1" }
-      : {};
+    if (!this.buildInfo) {
+      return {};
+    }
+
+    // Snapcraft rejects a non-dict SNAPCRAFT_IMAGE_INFO, so serialize an object.
+    const imageInfo: Record<string, string> = {};
+    const { GITHUB_REPOSITORY, GITHUB_RUN_ID } = process.env;
+    if (GITHUB_REPOSITORY && GITHUB_RUN_ID) {
+      imageInfo.build_url = `https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}`;
+    }
+
+    return {
+      SNAPCRAFT_BUILD_INFO: "1",
+      SNAPCRAFT_IMAGE_INFO: JSON.stringify(imageInfo),
+    };
   }
 
   protected override async buildCommand(): Promise<string[]> {

@@ -4,6 +4,7 @@ import * as tools from "@craft-actions/common/tools.ts";
 
 afterEach(() => {
   vi.restoreAllMocks();
+  vi.unstubAllEnvs();
 });
 
 function makeBuilder(
@@ -70,6 +71,11 @@ test("uses snapcraft test without checking the installed version", async () => {
   );
 });
 
+function packEnv(runCommand: ReturnType<typeof mockCommandExecution>) {
+  const [, options] = runCommand.mock.calls[0];
+  return (options as { env: Record<string, string> }).env;
+}
+
 test("enables build info by default", async () => {
   const runCommand = mockCommandExecution();
   mockSnapcraftVersion("8.14.2");
@@ -83,32 +89,38 @@ test("enables build info by default", async () => {
   });
   await builder.pack();
 
-  expect(runCommand).toHaveBeenCalledWith(
-    expect.anything(),
+  expect(packEnv(runCommand)).toEqual(
+    expect.objectContaining({ SNAPCRAFT_BUILD_INFO: "1" }),
+  );
+});
+
+test("sets SNAPCRAFT_BUILD_INFO and image info when buildInfo is true", async () => {
+  const runCommand = mockCommandExecution();
+  mockSnapcraftVersion("8.14.2");
+  vi.stubEnv("GITHUB_REPOSITORY", "canonical/foo");
+  vi.stubEnv("GITHUB_RUN_ID", "123");
+
+  await makeBuilder({ buildInfo: true }).pack();
+
+  expect(packEnv(runCommand)).toEqual(
     expect.objectContaining({
-      env: expect.objectContaining({
-        SNAPCRAFT_BUILD_INFO: "1",
-        SNAPCRAFT_IMAGE_INFO: "1",
+      SNAPCRAFT_BUILD_INFO: "1",
+      SNAPCRAFT_IMAGE_INFO: JSON.stringify({
+        build_url: "https://github.com/canonical/foo/actions/runs/123",
       }),
     }),
   );
 });
 
-test("sets SNAPCRAFT_BUILD_INFO and SNAPCRAFT_IMAGE_INFO when buildInfo is true", async () => {
+test("omits build_url from image info without GitHub run metadata", async () => {
   const runCommand = mockCommandExecution();
   mockSnapcraftVersion("8.14.2");
+  vi.stubEnv("GITHUB_REPOSITORY", "");
+  vi.stubEnv("GITHUB_RUN_ID", "");
 
   await makeBuilder({ buildInfo: true }).pack();
 
-  expect(runCommand).toHaveBeenCalledWith(
-    expect.anything(),
-    expect.objectContaining({
-      env: expect.objectContaining({
-        SNAPCRAFT_BUILD_INFO: "1",
-        SNAPCRAFT_IMAGE_INFO: "1",
-      }),
-    }),
-  );
+  expect(packEnv(runCommand).SNAPCRAFT_IMAGE_INFO).toBe("{}");
 });
 
 test("omits env override when buildInfo is false", async () => {

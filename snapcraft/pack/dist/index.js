@@ -20350,7 +20350,18 @@ var SnapcraftBuilder = class extends CraftBuilder {
     this.buildInfo = options.buildInfo ?? true;
   }
   buildEnv() {
-    return this.buildInfo ? { SNAPCRAFT_BUILD_INFO: "1", SNAPCRAFT_IMAGE_INFO: "1" } : {};
+    if (!this.buildInfo) {
+      return {};
+    }
+    const imageInfo = {};
+    const { GITHUB_REPOSITORY, GITHUB_RUN_ID } = process.env;
+    if (GITHUB_REPOSITORY && GITHUB_RUN_ID) {
+      imageInfo.build_url = `https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}`;
+    }
+    return {
+      SNAPCRAFT_BUILD_INFO: "1",
+      SNAPCRAFT_IMAGE_INFO: JSON.stringify(imageInfo)
+    };
   }
   async buildCommand() {
     if (this.runTests) {

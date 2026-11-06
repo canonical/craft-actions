@@ -28,7 +28,9 @@ export class SnapcraftBuilder extends CraftBuilder {
   }
 
   protected override buildEnv(): Record<string, string> {
-    return this.buildInfo ? { SNAPCRAFT_BUILD_INFO: "1" } : {};
+    return this.buildInfo
+      ? { SNAPCRAFT_BUILD_INFO: "1", SNAPCRAFT_IMAGE_INFO: "1" }
+      : {};
   }
 
   protected override async buildCommand(): Promise<string[]> {

@@ -29,7 +29,7 @@ The behavior of the `snapcraft/pack` action can be customized with the following
 | revision    | The revision of Snapcraft to install. Overrides the `channel` option.                            | `""`                                    |
 | lxd-channel | The channel to install LXD from.                                                                 | The default snap channel for LXD.       |
 | test        | Run `snapcraft test` to execute tests after packing.                                             | `false`                                 |
-| build-info  | Set `SNAPCRAFT_BUILD_INFO=1` to embed build provenance information in the packed snap.           | `false`                                 |
+| build-info  | Set `SNAPCRAFT_BUILD_INFO=1` and `SNAPCRAFT_IMAGE_INFO=1` to embed build provenance information in the packed snap. | `false`                                 |
 
 ## Outputs
 

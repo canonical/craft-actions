@@ -68,7 +68,7 @@ test("uses snapcraft test without checking the installed version", async () => {
   );
 });
 
-test("sets SNAPCRAFT_BUILD_INFO when buildInfo is true", async () => {
+test("sets SNAPCRAFT_BUILD_INFO and SNAPCRAFT_IMAGE_INFO when buildInfo is true", async () => {
   const runCommand = mockCommandExecution();
   mockSnapcraftVersion("8.14.2");
 
@@ -77,7 +77,10 @@ test("sets SNAPCRAFT_BUILD_INFO when buildInfo is true", async () => {
   expect(runCommand).toHaveBeenCalledWith(
     expect.anything(),
     expect.objectContaining({
-      env: expect.objectContaining({ SNAPCRAFT_BUILD_INFO: "1" }),
+      env: expect.objectContaining({
+        SNAPCRAFT_BUILD_INFO: "1",
+        SNAPCRAFT_IMAGE_INFO: "1",
+      }),
     }),
   );
 });

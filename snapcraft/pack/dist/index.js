@@ -20350,7 +20350,7 @@ var SnapcraftBuilder = class extends CraftBuilder {
     this.buildInfo = options.buildInfo ?? false;
   }
   buildEnv() {
-    return this.buildInfo ? { SNAPCRAFT_BUILD_INFO: "1" } : {};
+    return this.buildInfo ? { SNAPCRAFT_BUILD_INFO: "1", SNAPCRAFT_IMAGE_INFO: "1" } : {};
   }
   async buildCommand() {
     if (this.runTests) {

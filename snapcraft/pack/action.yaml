@@ -42,9 +42,12 @@ inputs:
     default: 'false'
   build-info:
     description: >
-      Set SNAPCRAFT_BUILD_INFO=1 and populate SNAPCRAFT_IMAGE_INFO with the
-      workflow run URL to embed build provenance information in the packed
-      snap.
+      Embed build provenance information in the packed snap: a listing of the
+      repositories and packages used to build it, enabling automated
+      vulnerability scans.
+
+      Optionally disable this for proprietary snaps, so that the listing isn't
+      published.
 
       Defaults to true.
     default: 'true'

@@ -20355,6 +20355,9 @@ var SnapcraftBuilder = class extends CraftBuilder {
     }
     const imageInfo = {};
     const { GITHUB_REPOSITORY, GITHUB_RUN_ID } = process.env;
+    if (GITHUB_RUN_ID) {
+      imageInfo["build-request-id"] = `gh-${GITHUB_RUN_ID}`;
+    }
     if (GITHUB_REPOSITORY && GITHUB_RUN_ID) {
       imageInfo.build_url = `https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}`;
     }
@@ -20384,7 +20387,7 @@ var SnapcraftBuilder = class extends CraftBuilder {
 if (import.meta.url === `file://${process.argv[1]}`) {
   const builder = new SnapcraftBuilder({
     ...readBaseInputs2(),
-    buildInfo: getInput("build-info").toLowerCase() !== "false"
+    buildInfo: getInput("build-info").toLowerCase() === "true"
   });
   void runPackAction(builder);
 }

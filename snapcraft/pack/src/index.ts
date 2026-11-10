@@ -33,8 +33,19 @@ export class SnapcraftBuilder extends CraftBuilder {
     }
 
     // Snapcraft rejects a non-dict SNAPCRAFT_IMAGE_INFO, so serialize an object.
-    const imageInfo: Record<string, string> = {};
+    // Keys are the ones Launchpad's snap builder produces:
+    // https://git.launchpad.net/launchpad-buildd/tree/lpbuildd/target/build_snap.py#n232
+    const imageInfo: Partial<
+      Record<
+        "build-request-id" | "build-request-timestamp" | "build_url",
+        string
+      >
+    > = {};
     const { GITHUB_REPOSITORY, GITHUB_RUN_ID } = process.env;
+    if (GITHUB_RUN_ID) {
+      // Groups the snap builds of a single workflow run on the store dashboard.
+      imageInfo["build-request-id"] = `gh-${GITHUB_RUN_ID}`;
+    }
     if (GITHUB_REPOSITORY && GITHUB_RUN_ID) {
       imageInfo.build_url = `https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}`;
     }
@@ -73,7 +84,7 @@ export class SnapcraftBuilder extends CraftBuilder {
 if (import.meta.url === `file://${process.argv[1]}`) {
   const builder = new SnapcraftBuilder({
     ...readBaseInputs(),
-    buildInfo: core.getInput("build-info").toLowerCase() !== "false",
+    buildInfo: core.getInput("build-info").toLowerCase() === "true",
   });
 
   void runPackAction(builder);

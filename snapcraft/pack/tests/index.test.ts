@@ -106,13 +106,27 @@ test("sets SNAPCRAFT_BUILD_INFO and image info when buildInfo is true", async ()
     expect.objectContaining({
       SNAPCRAFT_BUILD_INFO: "1",
       SNAPCRAFT_IMAGE_INFO: JSON.stringify({
+        "build-request-id": "gh-123",
         build_url: "https://github.com/canonical/foo/actions/runs/123",
       }),
     }),
   );
 });
 
-test("omits build_url from image info without GitHub run metadata", async () => {
+test("keeps only the run id in image info without a repository", async () => {
+  const runCommand = mockCommandExecution();
+  mockSnapcraftVersion("8.14.2");
+  vi.stubEnv("GITHUB_REPOSITORY", "");
+  vi.stubEnv("GITHUB_RUN_ID", "123");
+
+  await makeBuilder({ buildInfo: true }).pack();
+
+  expect(packEnv(runCommand).SNAPCRAFT_IMAGE_INFO).toBe(
+    JSON.stringify({ "build-request-id": "gh-123" }),
+  );
+});
+
+test("sends an empty image info without GitHub run metadata", async () => {
   const runCommand = mockCommandExecution();
   mockSnapcraftVersion("8.14.2");
   vi.stubEnv("GITHUB_REPOSITORY", "");

@@ -1,50 +1,261 @@
-# Contributing to Craft Actions
+# Contributing
 
-Craft Actions welcomes fixes, tests, and documentation improvements. This guide covers the pnpm workflow used in this repository.
+Craft Actions welcomes contributions from people around the world.
+
+Contributing offers an opportunity to polish your technical skills, develop as a
+professional, and get involved in the open source community.
+
+All contributors should become familiar with this guide. It outlines the expectations
+and practices for participating in the project.
 
 ## Review the project expectations
 
-Please follow the [Ubuntu Code of Conduct](https://ubuntu.com/community/ethos/code-of-conduct) and review the [Canonical Contributor License Agreement](https://ubuntu.com/legal/contributors) before contributing. Craft Actions is licensed under [GPL-3.0](LICENSE).
+The Starcraft team at Canonical sets the direction and priorities of Craft Actions. They
+take responsibility for its stewardship and health.
 
-Check the [issue tracker](https://github.com/canonical/craft-actions/issues) before starting work. If an issue already covers your change, check its comments and linked pull requests to avoid duplicating someone else's work. For a larger change, discuss the approach with the maintainers first.
+Before you start work on Craft Actions, there are three documents for you to digest.
+
+### Ubuntu Code of Conduct
+
+Projects governed by Canonical expect good conduct and excellence from every member. The
+specific principles are laid out in the [Ubuntu Code of
+Conduct](https://ubuntu.com/community/ethos/code-of-conduct).
+
+### Canonical Contributor License Agreement
+
+As a contributor, you retain your copyright and attribution rights, provided you sign
+the [Canonical Contributor License Agreement](https://ubuntu.com/legal/contributors).
+Before committing any code, review its terms. If you agree and sign it, your code can be
+incorporated into the repository.
+
+### Open source license
+
+Craft Actions is licensed under [GPL-3.0](LICENSE).
+
+## Report an issue or open a request
+
+If you find a bug or feature gap in Craft Actions, look for it in the [project's GitHub
+issues](https://github.com/canonical/craft-actions/issues) first. If you have fresh
+input, add your voice to the issue.
+
+If the bug or feature doesn't have an issue, we invite you to [open
+one](https://github.com/canonical/craft-actions/issues/new/choose).
 
 ## Set up for development
 
-Fork the repository and clone your fork. Add the Canonical repository as `upstream`, then create a branch from the latest `main`:
+Craft Actions uses a forking, feature-based workflow. Most work on Craft Actions occurs
+on people's local systems, and is heavily terminal-dependent. Remote testing and
+building is provided on GitHub for continuous integration and delivery.
 
-```sh
-git clone https://github.com/<your-username>/craft-actions.git
+Start by [creating a personal fork](https://github.com/canonical/craft-actions/fork) of
+the repository on GitHub.
+
+Next, on your host system, clone your fork and sync it with the upstream repository.
+
+If you authenticate your GitHub account with
+[SSH](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account),
+run:
+
+```bash
+git clone git@github.com:<username>/craft-actions
 cd craft-actions
-git remote add upstream https://github.com/canonical/craft-actions.git
+git remote add upstream git@github.com:canonical/craft-actions
 git fetch upstream
-git switch -c issue-<number>-<short-description> upstream/main
 ```
 
-Use Node.js 26, as in the [CI workflow](.github/workflows/test.yaml), and the pnpm version declared in `package.json`. Install the workspace dependencies with:
+If you don't authenticate with SSH, clone with
+[HTTPS](https://docs.github.com/en/get-started/git-basics/about-remote-repositories#cloning-with-https-urls)
+instead:
 
-```sh
+```bash
+git clone https://github.com/<username>/craft-actions
+cd craft-actions
+git remote add upstream https://github.com/canonical/craft-actions
+git fetch upstream
+```
+
+Inside the project directory, install the workspace dependencies and run the local
+checks:
+
+```bash
 pnpm install
-```
-
-The workspace packages live under `common/`, `charmcraft/`, `imagecraft/`, `rockcraft/`, and `snapcraft/`. Each action has its own README. Start with the package relevant to your change.
-
-## Make and check a change
-
-Keep a pull request focused on one issue. Add or update tests for behavior changes, and update an action's README when its inputs, outputs, or usage change.
-
-Run the checks used by CI:
-
-```sh
 pnpm run format-check
 pnpm run lint
 pnpm run test
 pnpm run build
 ```
 
-The build produces checked-in action bundles. If it changes them, review and commit the generated files with your source change. After committing, run `pnpm run build` and `git diff --exit-code` again to confirm the bundles match the source.
+If all linting, testing, and building completes without errors, your local environment
+is ready.
 
-## Open a pull request
+See the `packages` key in `pnpm-workspace.yaml` for a list of workspace packages. Each
+package (except for `common/`) comes with a `README` and accompanying `action.yaml`.
+Focus on the package relevant to your change.
 
-Commit your work on the topic branch and push it to your fork. Link the issue in the pull request, explain the behavior you changed, and include the relevant checks you ran. The `main` branch is for active development, so base your pull request on the current upstream `main`.
+## Contribute a change
 
-Respond to review comments on the same pull request and keep its branch up to date with upstream changes that affect your work.
+With the prerequisites out of the way, let's walk through how to make a contribution to
+Craft Actions.
+
+### Research the topic
+
+All significant work in Craft Actions should be tied to an existing issue or ticket.
+
+Once you find an issue that you'd like to work on, it's best to reach out so that a
+Craft Actions maintainer can assign the ticket to you before starting. This process
+varies depending on the issue's complexity and scope.
+
+#### Minor changes
+
+If you'd like to add a small feature or fix, check the project's GitHub issues to see if
+others have reported it. If they have, look into the current status of the topic. If no
+one else is working on it, add a comment stating that you'd like to take it on, and a
+Craft Actions maintainer will assign it to you.
+
+If you don't find a related issue, [open
+one](https://github.com/canonical/craft-actions/issues/new/choose) and indicate that
+you're interested in taking it on. A Craft Actions maintainer will then review the issue
+and assign it to you.
+
+#### Major changes
+
+If there's a large feature or fix you'd like to work on, contact us and the rest of the
+community in the [Starcraft Development Matrix
+space](https://matrix.to/#/#starcraft-development:ubuntu.com). It's possible that work
+on it has been started, or that it fits into an existing plan. Often, you will save time
+and effort by checking for prior work.
+
+Once you've found or created an issue you'd like to take on, propose your solution in
+the issue's thread. In your proposal, describe a plan for the change, its tests, and its
+documentation. A Craft Actions maintainer will review your proposal and, if everything
+looks complete, assign the issue to you.
+
+### Create a development branch
+
+Once you've settled on a topic to work on, it's time to set up a local branch.
+
+Always start by syncing against the branch and the dependencies you're basing your
+changes on. For changes to the active `main` branch, run:
+
+```bash
+git fetch upstream
+git switch -c <new-branch-name> upstream/main
+pnpm install
+```
+
+The new branch name should be brief, at no more than 80 characters. Format your branch
+name as `<ticket-id>-<description>`. For example, if you're working on GitHub issue
+\#235, and it's about adding a string sanitizer, you'd name your branch
+`issue-235-add-string-sanitizer-method`.
+
+### Commit a change
+
+Once you've made the changes to the code and you're ready to test it, start by
+committing:
+
+```bash
+git add -A
+git commit
+```
+
+Format the commit message according to the [Conventional
+Commits](https://www.conventionalcommits.org/en/v1.0.0/) style. For the sanitizer
+example, an appropriate commit title would be:
+
+```text
+feat: add text sanitizer
+```
+
+If you need help determining the type of conventional commit for your change, look at
+the history of the file in question with `git log --oneline <filename>`. When you're
+done browsing, press `Q` to exit the interactive log.
+
+> **Tip**
+>
+> With complex changes, you might get stuck choosing a conventional commit type.
+>
+> This may signal that a commit is doing more than one thing and should be broken into
+> multiple smaller commits. A commit should not, for example, refactor code and fix a
+> bug. That should be two separate commits.
+>
+> In other scenarios, multiple types could be appropriate because of the nature of the
+> commit. This can happen with `test` and `docs`, which can be used as either types or
+> scopes.
+>
+> Run down the following list and select the highest-ranked type that fits your change:
+>
+> - ci
+> - build
+> - feat
+> - fix
+> - perf
+> - refactor
+> - style
+> - test
+> - docs
+> - chore
+
+### Test the change
+
+All nontrivial code changes should be accompanied by a reasonable set of tests.
+
+Craft Actions has package unit tests and GitHub Actions workflows that test the actions.
+If you're not sure which tests you should add, use your best judgement. Additional tests
+can be added during the review process.
+
+Run the checks used by CI:
+
+```bash
+pnpm run format-check
+pnpm run lint
+pnpm run test
+pnpm run build
+```
+
+The actions require the transpiled action bundles to be committed into the repository.
+If your changes affect the source code, rebuild the bundles with `pnpm run build` and
+commit the changes in each `**/dist` directory.
+
+After committing the bundles, run `pnpm run build` and `git diff --exit-code` again to
+confirm the checked-in output matches the source.
+
+### Document the change
+
+Most small changes call for updates to the existing pages that describe the current
+behavior. Look for action READMEs that mention the affected feature, and make any
+necessary changes.
+
+Major changes require documentation describing the feature's usage and specifications.
+If an action's inputs, outputs, or usage change, update its README alongside the code.
+
+### Push the branch and open a PR
+
+Once your work is committed to your branch, push it to your fork:
+
+```bash
+git push -u origin <branch-name>
+```
+
+On GitHub, [open a PR](https://github.com/canonical/craft-actions/compare) for your
+branch in Craft Actions. Link the relevant issue and explain the change and the checks
+you ran.
+
+Format the PR title as a conventional commit. If your branch has only one commit, GitHub
+handles this automatically. If your branch has multiple commits, copy the title of the
+most important one.
+
+### Follow up for the review
+
+The Craft Actions maintainers try to review every PR in a timely manner. While they
+can't guarantee immediate feedback, they aim to ensure that contributions are reviewed
+thoroughly and thoughtfully.
+
+When a maintainer reviews your PR, they typically leave inline comments and suggestions
+on the code.
+
+If the comment is a request, accommodate it by pushing one or more additional commits
+to the branch. It's simplest to add the commits locally and push, rather than in the
+GitHub interface, as it leads to fewer potential conflicts with syncs.
+
+Don't force-push further changes to the branch after your PR is fully approved. It makes
+it harder for reviewers to see whether any additional changes were made.

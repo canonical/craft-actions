@@ -56,9 +56,15 @@ export abstract class CraftBuilder {
     return [this.toolName, this.runTests ? "test" : "pack"];
   }
 
+  // Overridden by subclasses to inject tool-specific environment variables.
+  protected buildEnv(): Record<string, string> {
+    return {};
+  }
+
   protected async doPack(): Promise<void> {
     const command = await this.buildCommand();
     const packArgs = await this.buildPackArgs();
+    const env = this.buildEnv();
     await tools.runCommand(
       [
         "sudo",
@@ -68,7 +74,12 @@ export abstract class CraftBuilder {
         ...command,
         ...packArgs,
       ],
-      { cwd: this.projectRoot },
+      {
+        cwd: this.projectRoot,
+        ...(Object.keys(env).length > 0
+          ? { env: { ...process.env, ...env } as Record<string, string> }
+          : {}),
+      },
     );
   }
 

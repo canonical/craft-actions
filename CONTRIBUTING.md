@@ -1,9 +1,11 @@
 # Contributing
 
-Craft Actions welcomes contributions from people around the world.
+Craft Actions has a community from all over the world, and the Craft Actions team
+welcomes all contributions.
 
 Contributing offers an opportunity to polish your technical skills, develop as a
-professional, and get involved in the open source community.
+professional, and get involved in the growing open source community. Craft Actions
+contributors are also recognized in any releases that they work on.
 
 All contributors should become familiar with this guide. It outlines the expectations
 and practices for participating in the project.
@@ -135,11 +137,22 @@ looks complete, assign the issue to you.
 Once you've settled on a topic to work on, it's time to set up a local branch.
 
 Always start by syncing against the branch and the dependencies you're basing your
-changes on. For changes to the active `main` branch, run:
+changes on.
+
+If you're making a change to a current release, run:
 
 ```bash
 git fetch upstream
-git switch -c <new-branch-name> upstream/main
+git checkout -b <new-branch-name> upstream/hotfix/<current-release>
+pnpm install
+```
+
+If you're contributing to multiple releases or the next major release, run:
+
+```bash
+git checkout main
+git pull upstream main
+git checkout -b <new-branch-name>
 pnpm install
 ```
 
@@ -195,6 +208,10 @@ done browsing, press `Q` to exit the interactive log.
 > - docs
 > - chore
 
+The actions require the transpiled action bundles to be committed into the repository.
+If your changes affect the source code, rebuild the bundles with `pnpm run build` and
+commit the changes in each `**/dist` directory.
+
 ### Test the change
 
 All nontrivial code changes should be accompanied by a reasonable set of tests.
@@ -211,13 +228,6 @@ pnpm run lint
 pnpm run test
 pnpm run build
 ```
-
-The actions require the transpiled action bundles to be committed into the repository.
-If your changes affect the source code, rebuild the bundles with `pnpm run build` and
-commit the changes in each `**/dist` directory.
-
-After committing the bundles, run `pnpm run build` and `git diff --exit-code` again to
-confirm the checked-in output matches the source.
 
 ### Document the change
 
@@ -243,6 +253,8 @@ you ran.
 Format the PR title as a conventional commit. If your branch has only one commit, GitHub
 handles this automatically. If your branch has multiple commits, copy the title of the
 most important one.
+
+Once open, reviewers are assigned automatically to your work.
 
 ### Follow up for the review
 

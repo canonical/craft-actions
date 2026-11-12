@@ -1,6 +1,6 @@
 # `charmcraft/setup`
 
-Install and configure Charmcraft, with LXD as the build provider. This action is useful in situations where
+Install and configure Charmcraft, with LXD as the provider for packing. This action is useful in situations where
 you need Charmcraft installed, but don't wish to run a full action such as "pack".
 
 ## Usage

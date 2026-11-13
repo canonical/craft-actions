@@ -40,6 +40,17 @@ inputs:
 
       Defaults to false.
     default: 'false'
+  build-info:
+    description: >
+      Embed build provenance information in the packed snap: a listing of the
+      repositories and packages used to build it, enabling automated
+      vulnerability scans.
+
+      Optionally disable this for proprietary snaps, so that the listing isn't
+      published.
+
+      Defaults to true.
+    default: 'true'
 
 outputs:
   snaps:

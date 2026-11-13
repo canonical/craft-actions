@@ -90,10 +90,6 @@ pnpm run build
 If all linting, testing, and building completes without errors, your local environment
 is ready.
 
-See the `packages` key in `pnpm-workspace.yaml` for a list of workspace packages. Each
-package (except for `common/`) comes with a `README` and accompanying `action.yaml`.
-Focus on the package relevant to your change.
-
 ## Contribute a change
 
 With the prerequisites out of the way, let's walk through how to make a contribution to
@@ -160,6 +156,10 @@ The new branch name should be brief, at no more than 80 characters. Format your 
 name as `<ticket-id>-<description>`. For example, if you're working on GitHub issue
 \#235, and it's about adding a string sanitizer, you'd name your branch
 `issue-235-add-string-sanitizer-method`.
+
+Now that your branch is set up, shift your focus to the packages you intend to change.
+The `packages` key in the `pnpm-workspace.yaml` file lists the packages.
+Each package except `common/` contains its own `README` and `action.yaml` files.
 
 ### Commit a change
 

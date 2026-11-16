@@ -1,6 +1,15 @@
-import { afterEach, expect, test, vi } from "vitest";
+import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import { SnapcraftBuilder, SnapcraftBuilderOptions } from "../src/index.ts";
 import * as tools from "@craft-actions/common/tools.ts";
+
+beforeEach(() => {
+  // Craft variables in the developer/CI environment would leak into the argv.
+  for (const key of Object.keys(process.env)) {
+    if (key.includes("CRAFT_")) {
+      vi.stubEnv(key, undefined);
+    }
+  }
+});
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -41,7 +50,7 @@ test("uses bare snapcraft for versions below 8", async () => {
   await makeBuilder().pack();
 
   expect(runCommand).toHaveBeenCalledWith(
-    ["sudo", "--preserve-env", "--user", "ubuntu", "snapcraft"],
+    ["sudo", "--user", "ubuntu", "env", "snapcraft"],
     { cwd: "." },
   );
 });
@@ -53,7 +62,7 @@ test("uses snapcraft pack for version 8 and later", async () => {
   await makeBuilder().pack();
 
   expect(runCommand).toHaveBeenCalledWith(
-    ["sudo", "--preserve-env", "--user", "ubuntu", "snapcraft", "pack"],
+    ["sudo", "--user", "ubuntu", "env", "snapcraft", "pack"],
     { cwd: "." },
   );
 });
@@ -66,14 +75,23 @@ test("uses snapcraft test without checking the installed version", async () => {
 
   expect(fetchSnapd).not.toHaveBeenCalled();
   expect(runCommand).toHaveBeenCalledWith(
-    ["sudo", "--preserve-env", "--user", "ubuntu", "snapcraft", "test"],
+    ["sudo", "--user", "ubuntu", "env", "snapcraft", "test"],
     { cwd: "." },
   );
 });
 
-function packEnv(runCommand: ReturnType<typeof mockCommandExecution>) {
-  const [, options] = runCommand.mock.calls[0];
-  return (options as { env: Record<string, string> }).env;
+function packEnv(
+  runCommand: ReturnType<typeof mockCommandExecution>,
+): Record<string, string> {
+  const [command] = runCommand.mock.calls[0];
+  const env: Record<string, string> = {};
+  for (const arg of command) {
+    const separator = arg.indexOf("=");
+    if (separator > 0) {
+      env[arg.slice(0, separator)] = arg.slice(separator + 1);
+    }
+  }
+  return env;
 }
 
 test("enables build info by default", async () => {
@@ -144,7 +162,8 @@ test("omits env override when buildInfo is false", async () => {
   await makeBuilder({ buildInfo: false }).pack();
 
   expect(runCommand).toHaveBeenCalledWith(
-    ["sudo", "--preserve-env", "--user", "ubuntu", "snapcraft", "pack"],
+    ["sudo", "--user", "ubuntu", "env", "snapcraft", "pack"],
     { cwd: "." },
   );
+  expect(runCommand.mock.calls[0][0]).not.toContain("SNAPCRAFT_BUILD_INFO=1");
 });

@@ -20237,23 +20237,33 @@ var CraftBuilder = class {
   buildEnv() {
     return {};
   }
+  // sudo-rs (Ubuntu 26.04+) ignores --preserve-env, so the craft variables have
+  // to be passed to the tool explicitly. Every craft prefixes its variables
+  // with CRAFT_ (SNAPCRAFT_, ROCKCRAFT_, ...).
+  craftEnv() {
+    const env = {};
+    for (const [key, value] of Object.entries(process.env)) {
+      if (value !== void 0 && key.includes("CRAFT_")) {
+        env[key] = value;
+      }
+    }
+    return { ...env, ...this.buildEnv() };
+  }
   async doPack() {
     const command = await this.buildCommand();
     const packArgs = await this.buildPackArgs();
-    const env = this.buildEnv();
+    const env = this.craftEnv();
     await runCommand(
       [
         "sudo",
-        "--preserve-env",
         "--user",
         shellUser(),
+        "env",
+        ...Object.entries(env).map(([key, value]) => `${key}=${value}`),
         ...command,
         ...packArgs
       ],
-      {
-        cwd: this.projectRoot,
-        ...Object.keys(env).length > 0 ? { env: { ...process.env, ...env } } : {}
-      }
+      { cwd: this.projectRoot }
     );
   }
   async pack() {

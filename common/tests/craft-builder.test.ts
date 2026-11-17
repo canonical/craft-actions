@@ -114,9 +114,9 @@ test("CraftBuilder.pack executes test subcommand when runTests is true", async (
   );
 });
 
-test("CraftBuilder.pack passes craft environment variables explicitly", async () => {
+test("CraftBuilder.pack passes CRAFT_ and tool-prefixed variables", async () => {
   vi.stubEnv("CRAFT_VERBOSITY_LEVEL", "debug");
-  vi.stubEnv("SNAPCRAFT_BUILD_ENVIRONMENT", "lxd");
+  vi.stubEnv("TEST-TOOL_BUILD_ENVIRONMENT", "lxd");
   const { execMock } = mockSetup();
 
   await makeBuilder().pack();
@@ -128,10 +128,25 @@ test("CraftBuilder.pack passes craft environment variables explicitly", async ()
       "ubuntu",
       "env",
       "CRAFT_VERBOSITY_LEVEL=debug",
-      "SNAPCRAFT_BUILD_ENVIRONMENT=lxd",
+      "TEST-TOOL_BUILD_ENVIRONMENT=lxd",
       "test-tool",
       "pack",
     ],
+    { cwd: "." },
+  );
+});
+
+test("CraftBuilder.pack only matches variables by prefix", async () => {
+  // Contains CRAFT_ but neither starts with CRAFT_ nor with the tool prefix.
+  vi.stubEnv("MYCRAFT_SECRET", "leak");
+  // Tool prefix of another craft.
+  vi.stubEnv("SNAPCRAFT_BUILD_ENVIRONMENT", "lxd");
+  const { execMock } = mockSetup();
+
+  await makeBuilder().pack();
+
+  expect(execMock).toHaveBeenCalledWith(
+    ["sudo", "--user", "ubuntu", "env", "test-tool", "pack"],
     { cwd: "." },
   );
 });

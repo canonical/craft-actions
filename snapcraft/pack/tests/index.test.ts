@@ -94,6 +94,28 @@ function packEnv(
   return env;
 }
 
+test("passes snapcraft-prefixed environment variables", async () => {
+  const runCommand = mockCommandExecution();
+  mockSnapcraftVersion("8.14.2");
+  vi.stubEnv("SNAPCRAFT_BUILD_ENVIRONMENT", "lxd");
+  vi.stubEnv("FOOCRAFT_SECRET", "leak");
+
+  await makeBuilder({ buildInfo: false }).pack();
+
+  expect(runCommand).toHaveBeenCalledWith(
+    [
+      "sudo",
+      "--user",
+      "ubuntu",
+      "env",
+      "SNAPCRAFT_BUILD_ENVIRONMENT=lxd",
+      "snapcraft",
+      "pack",
+    ],
+    { cwd: "." },
+  );
+});
+
 test("enables build info by default", async () => {
   const runCommand = mockCommandExecution();
   mockSnapcraftVersion("8.14.2");

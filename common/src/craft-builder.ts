@@ -62,12 +62,16 @@ export abstract class CraftBuilder {
   }
 
   // sudo-rs (Ubuntu 26.04+) ignores --preserve-env, so the craft variables have
-  // to be passed to the tool explicitly. Every craft prefixes its variables
-  // with CRAFT_ (SNAPCRAFT_, ROCKCRAFT_, ...).
+  // to be passed to the tool explicitly. Match the generic CRAFT_ prefix and
+  // the tool's own prefix (SNAPCRAFT_, ROCKCRAFT_, ...).
   protected craftEnv(): Record<string, string> {
+    const toolPrefix = `${this.toolName.toUpperCase()}_`;
     const env: Record<string, string> = {};
     for (const [key, value] of Object.entries(process.env)) {
-      if (value !== undefined && key.includes("CRAFT_")) {
+      if (
+        value !== undefined &&
+        (key.startsWith("CRAFT_") || key.startsWith(toolPrefix))
+      ) {
         env[key] = value;
       }
     }

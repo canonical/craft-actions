@@ -61,25 +61,38 @@ export abstract class CraftBuilder {
     return {};
   }
 
+  // sudo-rs (Ubuntu 26.04+) ignores --preserve-env, so the craft variables have
+  // to be passed to the tool explicitly. Match the generic CRAFT_ prefix and
+  // the tool's own prefix (SNAPCRAFT_, ROCKCRAFT_, ...).
+  protected craftEnv(): Record<string, string> {
+    const toolPrefix = `${this.toolName.toUpperCase()}_`;
+    const env: Record<string, string> = {};
+    for (const [key, value] of Object.entries(process.env)) {
+      if (
+        value !== undefined &&
+        (key.startsWith("CRAFT_") || key.startsWith(toolPrefix))
+      ) {
+        env[key] = value;
+      }
+    }
+    return { ...env, ...this.buildEnv() };
+  }
+
   protected async doPack(): Promise<void> {
     const command = await this.buildCommand();
     const packArgs = await this.buildPackArgs();
-    const env = this.buildEnv();
+    const env = this.craftEnv();
     await tools.runCommand(
       [
         "sudo",
-        "--preserve-env",
         "--user",
         tools.shellUser(),
+        "env",
+        ...Object.entries(env).map(([key, value]) => `${key}=${value}`),
         ...command,
         ...packArgs,
       ],
-      {
-        cwd: this.projectRoot,
-        ...(Object.keys(env).length > 0
-          ? { env: { ...process.env, ...env } as Record<string, string> }
-          : {}),
-      },
+      { cwd: this.projectRoot },
     );
   }
 

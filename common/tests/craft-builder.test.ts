@@ -1,4 +1,4 @@
-import { vi, afterEach, test, expect } from "vitest";
+import { vi, afterEach, beforeEach, test, expect } from "vitest";
 import * as os from "os";
 import * as path from "path";
 import * as fs from "fs";
@@ -47,8 +47,18 @@ function createTempProject(files: string[]): string {
   return dir;
 }
 
+beforeEach(() => {
+  // Craft variables in the developer/CI environment would leak into the argv.
+  for (const key of Object.keys(process.env)) {
+    if (key.includes("CRAFT_")) {
+      vi.stubEnv(key, undefined);
+    }
+  }
+});
+
 afterEach(() => {
   vi.restoreAllMocks();
+  vi.unstubAllEnvs();
   for (const dir of tempDirs) {
     fs.rmSync(dir, { recursive: true, force: true });
   }
@@ -88,7 +98,7 @@ test("CraftBuilder.pack executes the correct base command", async () => {
   await makeBuilder({ projectRoot: "my-dir" }).pack();
 
   expect(execMock).toHaveBeenCalledWith(
-    ["sudo", "--preserve-env", "--user", "ubuntu", "test-tool", "pack"],
+    ["sudo", "--user", "ubuntu", "env", "test-tool", "pack"],
     { cwd: "my-dir" },
   );
 });
@@ -99,8 +109,45 @@ test("CraftBuilder.pack executes test subcommand when runTests is true", async (
   await makeBuilder({ projectRoot: "my-dir", runTests: true }).pack();
 
   expect(execMock).toHaveBeenCalledWith(
-    ["sudo", "--preserve-env", "--user", "ubuntu", "test-tool", "test"],
+    ["sudo", "--user", "ubuntu", "env", "test-tool", "test"],
     { cwd: "my-dir" },
+  );
+});
+
+test("CraftBuilder.pack passes CRAFT_ and tool-prefixed variables", async () => {
+  vi.stubEnv("CRAFT_VERBOSITY_LEVEL", "debug");
+  vi.stubEnv("TEST-TOOL_BUILD_ENVIRONMENT", "lxd");
+  const { execMock } = mockSetup();
+
+  await makeBuilder().pack();
+
+  expect(execMock).toHaveBeenCalledWith(
+    [
+      "sudo",
+      "--user",
+      "ubuntu",
+      "env",
+      "CRAFT_VERBOSITY_LEVEL=debug",
+      "TEST-TOOL_BUILD_ENVIRONMENT=lxd",
+      "test-tool",
+      "pack",
+    ],
+    { cwd: "." },
+  );
+});
+
+test("CraftBuilder.pack only matches variables by prefix", async () => {
+  // Contains CRAFT_ but neither starts with CRAFT_ nor with the tool prefix.
+  vi.stubEnv("MYCRAFT_SECRET", "leak");
+  // Tool prefix of another craft.
+  vi.stubEnv("SNAPCRAFT_BUILD_ENVIRONMENT", "lxd");
+  const { execMock } = mockSetup();
+
+  await makeBuilder().pack();
+
+  expect(execMock).toHaveBeenCalledWith(
+    ["sudo", "--user", "ubuntu", "env", "test-tool", "pack"],
+    { cwd: "." },
   );
 });
 

@@ -1,9 +1,19 @@
-import { vi, afterEach, test, expect } from "vitest";
+import { vi, afterEach, beforeEach, test, expect } from "vitest";
 import * as build from "../src/index.ts";
 import * as tools from "@craft-actions/common/tools.ts";
 
+beforeEach(() => {
+  // Craft variables in the developer/CI environment would leak into the argv.
+  for (const key of Object.keys(process.env)) {
+    if (key.includes("CRAFT_")) {
+      vi.stubEnv(key, undefined);
+    }
+  }
+});
+
 afterEach(() => {
   vi.restoreAllMocks();
+  vi.unstubAllEnvs();
 });
 
 function mockSetup(user = "ubuntu") {
@@ -40,9 +50,9 @@ test("RockcraftBuilder.build can ignore unmaintained", async () => {
   expect(execMock).toHaveBeenCalledWith(
     [
       "sudo",
-      "--preserve-env",
       "--user",
       "ubuntu",
+      "env",
       "rockcraft",
       "pack",
       "--verbosity",

@@ -19,4 +19,6 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ github.ref_name }}
-        run: gh release create "$TAG" --generate-notes --verify-tag
+        run: |
+          gh release create "$TAG" --generate-notes --verify-tag --notes \
+            "View the changes in the [changelog](CHANGELOG.md) or in the full list of commits below."

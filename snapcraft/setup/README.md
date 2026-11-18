@@ -1,6 +1,6 @@
 # `snapcraft/setup`
 
-Install and configure Snapcraft, with LXD as the build provider. This action is useful in situations where
+Install and configure Snapcraft, with LXD as the provider for packing. This action is useful in situations where
 you need Snapcraft installed, but don't wish to run a full action such as "pack".
 
 ## Usage

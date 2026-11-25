@@ -20361,8 +20361,9 @@ var SnapcraftBuilder = class extends CraftBuilder {
     this.buildInfo = options.buildInfo ?? true;
   }
   buildEnv() {
+    const env = { SNAPCRAFT_BUILD_ENVIRONMENT: "lxd" };
     if (!this.buildInfo) {
-      return {};
+      return env;
     }
     const imageInfo = {};
     const { GITHUB_REPOSITORY, GITHUB_RUN_ID } = process.env;
@@ -20373,6 +20374,7 @@ var SnapcraftBuilder = class extends CraftBuilder {
       imageInfo.build_url = `https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}`;
     }
     return {
+      ...env,
       SNAPCRAFT_BUILD_INFO: "1",
       SNAPCRAFT_IMAGE_INFO: JSON.stringify(imageInfo)
     };

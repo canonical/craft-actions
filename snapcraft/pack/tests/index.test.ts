@@ -50,7 +50,14 @@ test("uses bare snapcraft for versions below 8", async () => {
   await makeBuilder().pack();
 
   expect(runCommand).toHaveBeenCalledWith(
-    ["sudo", "--user", "ubuntu", "env", "snapcraft"],
+    [
+      "sudo",
+      "--user",
+      "ubuntu",
+      "env",
+      "SNAPCRAFT_BUILD_ENVIRONMENT=lxd",
+      "snapcraft",
+    ],
     { cwd: "." },
   );
 });
@@ -62,7 +69,15 @@ test("uses snapcraft pack for version 8 and later", async () => {
   await makeBuilder().pack();
 
   expect(runCommand).toHaveBeenCalledWith(
-    ["sudo", "--user", "ubuntu", "env", "snapcraft", "pack"],
+    [
+      "sudo",
+      "--user",
+      "ubuntu",
+      "env",
+      "SNAPCRAFT_BUILD_ENVIRONMENT=lxd",
+      "snapcraft",
+      "pack",
+    ],
     { cwd: "." },
   );
 });
@@ -75,7 +90,15 @@ test("uses snapcraft test without checking the installed version", async () => {
 
   expect(fetchSnapd).not.toHaveBeenCalled();
   expect(runCommand).toHaveBeenCalledWith(
-    ["sudo", "--user", "ubuntu", "env", "snapcraft", "test"],
+    [
+      "sudo",
+      "--user",
+      "ubuntu",
+      "env",
+      "SNAPCRAFT_BUILD_ENVIRONMENT=lxd",
+      "snapcraft",
+      "test",
+    ],
     { cwd: "." },
   );
 });
@@ -97,7 +120,8 @@ function packEnv(
 test("passes snapcraft-prefixed environment variables", async () => {
   const runCommand = mockCommandExecution();
   mockSnapcraftVersion("8.14.2");
-  vi.stubEnv("SNAPCRAFT_BUILD_ENVIRONMENT", "lxd");
+  vi.stubEnv("SNAPCRAFT_BUILD_ENVIRONMENT", "multipass");
+  vi.stubEnv("SNAPCRAFT_EXAMPLE", "value");
   vi.stubEnv("FOOCRAFT_SECRET", "leak");
 
   await makeBuilder({ buildInfo: false }).pack();
@@ -109,6 +133,7 @@ test("passes snapcraft-prefixed environment variables", async () => {
       "ubuntu",
       "env",
       "SNAPCRAFT_BUILD_ENVIRONMENT=lxd",
+      "SNAPCRAFT_EXAMPLE=value",
       "snapcraft",
       "pack",
     ],
@@ -177,14 +202,22 @@ test("sends an empty image info without GitHub run metadata", async () => {
   expect(packEnv(runCommand).SNAPCRAFT_IMAGE_INFO).toBe("{}");
 });
 
-test("omits env override when buildInfo is false", async () => {
+test("omits build info when buildInfo is false", async () => {
   const runCommand = mockCommandExecution();
   mockSnapcraftVersion("8.14.2");
 
   await makeBuilder({ buildInfo: false }).pack();
 
   expect(runCommand).toHaveBeenCalledWith(
-    ["sudo", "--user", "ubuntu", "env", "snapcraft", "pack"],
+    [
+      "sudo",
+      "--user",
+      "ubuntu",
+      "env",
+      "SNAPCRAFT_BUILD_ENVIRONMENT=lxd",
+      "snapcraft",
+      "pack",
+    ],
     { cwd: "." },
   );
   expect(runCommand.mock.calls[0][0]).not.toContain("SNAPCRAFT_BUILD_INFO=1");

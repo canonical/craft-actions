@@ -169,6 +169,7 @@ test("sets SNAPCRAFT_BUILD_INFO and image info when buildInfo is true", async ()
 
   expect(packEnv(runCommand)).toEqual(
     expect.objectContaining({
+      SNAPCRAFT_BUILD_ENVIRONMENT: "lxd",
       SNAPCRAFT_BUILD_INFO: "1",
       SNAPCRAFT_IMAGE_INFO: JSON.stringify({
         "build-request-id": "gh-123",

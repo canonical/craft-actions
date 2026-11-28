@@ -28,8 +28,10 @@ export class SnapcraftBuilder extends CraftBuilder {
   }
 
   protected override buildEnv(): Record<string, string> {
+    // Legacy Snapcraft defaults to Multipass unless explicitly told to use LXD.
+    const env: Record<string, string> = { SNAPCRAFT_BUILD_ENVIRONMENT: "lxd" };
     if (!this.buildInfo) {
-      return {};
+      return env;
     }
 
     // Snapcraft rejects a non-dict SNAPCRAFT_IMAGE_INFO, so serialize an object.
@@ -51,6 +53,7 @@ export class SnapcraftBuilder extends CraftBuilder {
     }
 
     return {
+      ...env,
       SNAPCRAFT_BUILD_INFO: "1",
       SNAPCRAFT_IMAGE_INFO: JSON.stringify(imageInfo),
     };
